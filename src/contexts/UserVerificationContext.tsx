@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { createDocument } from '../services/firestore.js';
+import { createDocument, getDocuments, updateDocument } from '../services/firestore.js';
+import { where } from 'firebase/firestore';
 
 interface UserInfo {
   name: string;
@@ -19,7 +20,7 @@ interface UserVerificationContextType {
   userInfo: UserInfo | null;
   openVerificationModal: () => void;
   closeVerificationModal: () => void;
-  verifyUser: (userInfo: Omit<UserInfo, 'createdAt'>) => Promise<void>;
+  verifyUser: (userInfo: Omit<UserInfo, 'createdAt'>) => Promise<{ isReturningUser: boolean }>;
   checkVerificationStatus: () => boolean;
 }
 
@@ -57,14 +58,54 @@ export function UserVerificationProvider({ children }: { children: ReactNode }) 
         createdAt: new Date(),
       };
 
-      // Save user info to Firebase
-      await createDocument('firstTimeUsers', {
-        name: completeUserInfo.name,
-        phone: completeUserInfo.phone,
-        location: completeUserInfo.location,
-        timestamp: completeUserInfo.createdAt,
-        verified: true,
+      // Check if user already exists with same name, phone, and location
+      // First query by name and phone (indexed fields for better performance)
+      const existingUsers = await getDocuments('firstTimeUsers', [
+        where('name', '==', completeUserInfo.name.trim()),
+        where('phone', '==', completeUserInfo.phone.trim()),
+      ]);
+
+      // Further filter by location in memory (since Firestore has limited compound query support)
+      const duplicateUser = existingUsers.find(user => {
+        // If no location data available for current user, consider it a potential duplicate
+        // based on name and phone alone (more conservative approach)
+        if (!completeUserInfo.location) {
+          return true; 
+        }
+        
+        // If existing user has no location data, skip location comparison
+        if (!user.location) {
+          return true; // Consider as duplicate based on name and phone
+        }
+        
+        // Compare all location fields for exact match
+        return (
+          user.location.country === completeUserInfo.location.country &&
+          user.location.region === completeUserInfo.location.region &&
+          user.location.city === completeUserInfo.location.city
+        );
       });
+
+      let userDocument;
+
+      if (duplicateUser) {
+        // User already exists, just update verification status if needed
+        console.log(`Existing user found (ID: ${duplicateUser.id}), updating verification status`);
+        userDocument = await updateDocument('firstTimeUsers', duplicateUser.id, {
+          verified: true,
+          lastLoginAt: completeUserInfo.createdAt,
+        });
+      } else {
+        // New user, create a new entry
+        console.log('New user detected, creating new entry in database');
+        userDocument = await createDocument('firstTimeUsers', {
+          name: completeUserInfo.name.trim(),
+          phone: completeUserInfo.phone.trim(),
+          location: completeUserInfo.location,
+          timestamp: completeUserInfo.createdAt,
+          verified: true,
+        });
+      }
 
       // Set verification in localStorage
       localStorage.setItem('verified_user', 'true');
@@ -74,7 +115,10 @@ export function UserVerificationProvider({ children }: { children: ReactNode }) 
       setUserInfo(completeUserInfo);
       setIsModalOpen(false);
 
-      console.log('User verified and data saved successfully');
+      console.log(`User verified successfully - ${duplicateUser ? 'Returning user' : 'New user'}`);
+      
+      // Return information about whether this was a returning user
+      return { isReturningUser: !!duplicateUser };
     } catch (error) {
       console.error('Error verifying user:', error);
       throw error;

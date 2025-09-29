@@ -62,15 +62,17 @@ export function UserVerificationModal({ onSuccess }: UserVerificationModalProps)
       setIsGettingLocation(false);
       
       // Verify user with collected data
-      await verifyUser({
+      const { isReturningUser } = await verifyUser({
         name: formData.name.trim(),
         phone: formData.phone.trim(),
         location,
       });
 
       toast({
-        title: 'Welcome! 🎉',
-        description: 'Your information has been saved. You can now use our calculator!',
+        title: isReturningUser ? 'Welcome back! 👋' : 'Welcome! 🎉',
+        description: isReturningUser 
+          ? 'Good to see you again! You can now use our calculator.' 
+          : 'Your information has been saved. You can now use our calculator!',
       });
 
       // Reset form

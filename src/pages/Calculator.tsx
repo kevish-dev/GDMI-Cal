@@ -181,7 +181,7 @@ export default function Calculator() {
       });
 
       // Add calculation to analytics
-      addCalculation({
+      await addCalculation({
         type: jewelryType as "gold" | "diamond",
         totalValue: finalPrice,
         goldWeight:
@@ -249,14 +249,6 @@ export default function Calculator() {
       <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 lg:py-8">
         <div className="max-w-6xl mx-auto">
           {/* Header - Mobile optimized */}
-          <div className="text-center mb-6 sm:mb-8">
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2 sm:mb-4 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              Jewelry Calculator
-            </h1>
-            <p className="text-muted-foreground text-sm sm:text-base lg:text-lg px-2">
-              Get accurate pricing for gold and diamond jewelry
-            </p>
-          </div>
 
           <div className="grid lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
             {/* Input Panel */}

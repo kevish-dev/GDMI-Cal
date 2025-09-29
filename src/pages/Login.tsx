@@ -134,14 +134,14 @@ export default function Login() {
                   </div>
                 </div>
 
-                <div className="flex items-center justify-center text-sm">
+                {/* <div className="flex items-center justify-center text-sm">
                   <Link
                     to="/forgot-password"
                     className="text-primary hover:underline transition-smooth"
                   >
                     Forgot password?
                   </Link>
-                </div>
+                </div> */}
 
                 <Button
                   type="submit"

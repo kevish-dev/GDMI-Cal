@@ -18,7 +18,8 @@ import {
   Diamond,
   Calendar,
   DollarSign,
-  LogOut
+  Activity,
+  BarChart3
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
@@ -36,7 +37,7 @@ export default function Admin() {
   });
   const { toast } = useToast();
   const { user, logout } = useAuth();
-  const { goldRates, updateGoldRates, diamondRates, updateDiamondRates, makingCharges, updateMakingCharges, getAnalytics, loading } = useRates();
+  const { goldRates, updateGoldRates, diamondRates, updateDiamondRates, makingCharges, updateMakingCharges, getAnalytics, systemAnalytics, recentActivities, loading } = useRates();
   const navigate = useNavigate();
 
   const analytics = getAnalytics();
@@ -218,214 +219,210 @@ export default function Admin() {
     <Layout>
       <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 lg:py-8">
         <div className="max-w-7xl mx-auto">
-          {/* Header - Mobile optimized */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8 space-y-4 sm:space-y-0">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-8">
             <div>
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2 bg-gradient-to-r from-accent to-primary bg-clip-text text-transparent">
+              <h1 className="text-3xl font-semibold text-foreground mb-1">
                 Admin Dashboard
               </h1>
-              <p className="text-muted-foreground text-sm sm:text-base lg:text-lg">
-                Manage jewelry rates and monitor system performance
+              <p className="text-muted-foreground">
+                Manage rates and monitor system activity
               </p>
             </div>
-            <div className="flex items-center justify-between space-x-3">
-              <Badge variant="outline" className="px-3 py-2 text-xs sm:text-sm">
-                <Settings className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
-                <span className="hidden sm:inline">{user?.username} - </span>Administrator
-              </Badge>
-              {/* <Button 
-                onClick={handleLogout}
-                variant="ghost" 
-                size="sm"
-                className="text-muted-foreground hover:text-destructive h-8 w-8 sm:h-auto sm:w-auto p-1 sm:p-2"
-              >
-                <LogOut className="h-4 w-4 sm:mr-2" />
-                <span className="hidden sm:inline">Logout</span>
-              </Button> */}
-            </div>
+            <Badge variant="secondary" className="px-3 py-1.5">
+              <Activity className="h-4 w-4 mr-2" />
+              {user?.username}
+            </Badge>
           </div>
 
-          {/* Statistics Cards - Mobile responsive grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
-            <Card className="shadow-card">
-              <CardContent className="p-4 sm:p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs sm:text-sm text-muted-foreground">Total Calculations</p>
-                    <p className="text-xl sm:text-2xl font-bold">{analytics.totalCalculations.toLocaleString()}</p>
+          {/* Key Metrics */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-primary/10 rounded-lg">
+                    <Calculator className="h-5 w-5 text-primary" />
                   </div>
-                  <Calculator className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
-                </div>
-                <div className="mt-3 sm:mt-4">
-                  <Progress value={analytics.totalCalculations > 0 ? 75 : 0} className="h-1.5 sm:h-2" />
-                  <p className="text-xs text-muted-foreground mt-2">Real-time data</p>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Total Calculations</p>
+                    <p className="text-2xl font-semibold">{analytics.totalCalculations.toLocaleString()}</p>
+                  </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="shadow-card">
-              <CardContent className="p-4 sm:p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs sm:text-sm text-muted-foreground">Active Users</p>
-                    <p className="text-xl sm:text-2xl font-bold">{analytics.todayCalculations}</p>
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
+                    <Users className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                   </div>
-                  <Users className="h-6 w-6 sm:h-8 sm:w-8 text-secondary" />
-                </div>
-                <div className="mt-3 sm:mt-4">
-                  <Progress value={analytics.todayCalculations > 0 ? 60 : 0} className="h-1.5 sm:h-2" />
-                  <p className="text-xs text-muted-foreground mt-2">Today's activity</p>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Gold Calculations</p>
+                    <p className="text-2xl font-semibold">{analytics.goldCalculations}</p>
+                  </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="shadow-card">
-              <CardContent className="p-4 sm:p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs sm:text-sm text-muted-foreground">Avg. Calculation Value</p>
-                    <p className="text-xl sm:text-2xl font-bold">₹{(analytics.avgValue / 1000).toFixed(0)}K</p>
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-green-100 dark:bg-green-900/20 rounded-lg">
+                    <Diamond className="h-5 w-5 text-green-600 dark:text-green-400" />
                   </div>
-                  <DollarSign className="h-6 w-6 sm:h-8 sm:w-8 text-accent" />
-                </div>
-                <div className="mt-3 sm:mt-4">
-                  <Progress value={analytics.avgValue > 0 ? 85 : 0} className="h-1.5 sm:h-2" />
-                  <p className="text-xs text-muted-foreground mt-2">Average calculation</p>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Diamond Calculations</p>
+                    <p className="text-2xl font-semibold">{analytics.diamondCalculations}</p>
+                  </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="shadow-card">
-              <CardContent className="p-4 sm:p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs sm:text-sm text-muted-foreground">Total Value</p>
-                    <p className="text-xl sm:text-2xl font-bold">₹{(analytics.totalValue / 100000).toFixed(1)}L</p>
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-orange-100 dark:bg-orange-900/20 rounded-lg">
+                    <DollarSign className="h-5 w-5 text-orange-600 dark:text-orange-400" />
                   </div>
-                  <TrendingUp className="h-6 w-6 sm:h-8 sm:w-8 text-green-500" />
-                </div>
-                <div className="mt-3 sm:mt-4">
-                  <Progress value={analytics.totalValue > 0 ? Math.min((analytics.totalValue / 1000000) * 100, 100) : 0} className="h-1.5 sm:h-2" />
-                  <p className="text-xs text-muted-foreground mt-2">Total portfolio value</p>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Avg. Value</p>
+                    <p className="text-2xl font-semibold">₹{(analytics.avgValue / 1000).toFixed(0)}K</p>
+                  </div>
                 </div>
               </CardContent>
             </Card>
           </div>
 
-          {/* Main Content Tabs - Mobile responsive */}
-          <Tabs defaultValue="rates" className="space-y-4 sm:space-y-6">
-            <TabsList className="grid w-full grid-cols-4 h-auto p-1">
-              <TabsTrigger value="rates" className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm py-2">
-                <Crown className="h-3 w-3 sm:h-4 sm:w-4" />
-                <span>Gold Rates</span>
+          {/* Main Content Tabs */}
+          <Tabs defaultValue="rates" className="space-y-6">
+            <TabsList className="grid w-full grid-cols-4 h-12 bg-muted/50">
+              <TabsTrigger value="rates" className="flex items-center space-x-2 data-[state=active]:bg-background">
+                <Crown className="h-4 w-4" />
+                <span className="hidden sm:inline">Gold Rates</span>
+                <span className="sm:hidden">Gold</span>
               </TabsTrigger>
-              <TabsTrigger value="diamonds" className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm py-2">
-                <Diamond className="h-3 w-3 sm:h-4 sm:w-4" />
-                <span>Diamond Rates</span>
+              <TabsTrigger value="diamonds" className="flex items-center space-x-2 data-[state=active]:bg-background">
+                <Diamond className="h-4 w-4" />
+                <span className="hidden sm:inline">Diamond Rates</span>
+                <span className="sm:hidden">Diamond</span>
               </TabsTrigger>
-              <TabsTrigger value="making" className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm py-2">
-                <Settings className="h-3 w-3 sm:h-4 sm:w-4" />
-                <span>Making Charges</span>
+              <TabsTrigger value="making" className="flex items-center space-x-2 data-[state=active]:bg-background">
+                <Settings className="h-4 w-4" />
+                <span className="hidden sm:inline">Making Charges</span>
+                <span className="sm:hidden">Making</span>
               </TabsTrigger>
-              <TabsTrigger value="analytics" className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm py-2">
-                <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4" />
-                <span>Analytics</span>
+              <TabsTrigger value="analytics" className="flex items-center space-x-2 data-[state=active]:bg-background">
+                <BarChart3 className="h-4 w-4" />
+                <span className="hidden sm:inline">Analytics</span>
+                <span className="sm:hidden">Stats</span>
               </TabsTrigger>
             </TabsList>
 
-            {/* Gold Rates Tab - Mobile optimized */}
-            <TabsContent value="rates" className="space-y-4 sm:space-y-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+            {/* Gold Rates Tab */}
+            <TabsContent value="rates" className="space-y-6">
+              <div className="grid lg:grid-cols-3 gap-6">
                 {/* Current Rates */}
-                <Card className="shadow-card">
-                  <CardHeader className="pb-4">
-                    <CardTitle className="flex items-center space-x-2 text-lg sm:text-xl">
-                      <Crown className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-                      <span>Current Gold Rates</span>
-                    </CardTitle>
-                    <CardDescription className="text-sm">
-                      Real-time gold rates per gram by carat
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3 sm:space-y-4">
-                      {goldRates.map((rate, index) => (
-                        <div key={index} className="flex items-center justify-between p-3 sm:p-4 rounded-lg bg-muted/30">
-                          <div>
-                            <p className="font-semibold text-sm sm:text-base">{rate.carat} Gold</p>
-                            <p className="text-xs sm:text-sm text-muted-foreground">
-                              Updated: {rate.lastUpdated}
-                            </p>
+                <div className="lg:col-span-2">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center space-x-2">
+                        <Crown className="h-5 w-5 text-amber-500" />
+                        <span>Current Gold Rates</span>
+                      </CardTitle>
+                      <CardDescription>
+                        Live gold rates per gram by carat
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        {goldRates.map((rate, index) => (
+                          <div key={index} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors">
+                            <div>
+                              <p className="font-medium">{rate.carat} Gold</p>
+                              <p className="text-sm text-muted-foreground">
+                                Updated: {rate.lastUpdated}
+                              </p>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-lg font-semibold">₹{rate.rate.toLocaleString()}</p>
+                              <p className="text-sm text-muted-foreground">per gram</p>
+                            </div>
                           </div>
-                          <Badge className="text-sm sm:text-lg px-2 sm:px-3 py-1 gradient-gold font-semibold">
-                            ₹{rate.rate.toLocaleString()}/g
-                          </Badge>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
 
                 {/* Update Rates */}
-                <Card className="shadow-card">
-                  <CardHeader className="pb-4">
-                    <CardTitle className="flex items-center space-x-2 text-lg sm:text-xl">
-                      <Upload className="h-4 w-4 sm:h-5 sm:w-5" />
-                      <span>Update Gold Rates</span>
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <Upload className="h-5 w-5" />
+                      <span>Update Rates</span>
                     </CardTitle>
-                    <CardDescription className="text-sm">
-                      Enter 24K gold rate - all other carat rates will be calculated automatically
+                    <CardDescription>
+                      Enter 24K rate to update all carat rates
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="rate24k" className="text-sm font-medium">24K Gold Rate per gram (₹)</Label>
+                      <Label htmlFor="rate24k">24K Gold Rate (₹/g)</Label>
                       <Input
                         id="rate24k"
                         type="number"
-                        placeholder="Enter 24K gold rate"
+                        placeholder="Enter rate"
                         value={newGoldRate24K}
                         onChange={(e) => setNewGoldRate24K(e.target.value)}
-                        className="h-11 text-base"
+                        className="h-10"
                       />
-                      <p className="text-xs sm:text-sm text-muted-foreground p-2 bg-muted/30 rounded">
-                        Other rates will be calculated automatically:
-                        <br />22K = 93% | 18K = 76% | 14K = 60% | 9K = 39%
+                    </div>
+                    
+                    <div className="p-3 bg-muted/30 rounded-lg">
+                      <p className="text-sm text-muted-foreground">
+                        Auto-calculated rates:
                       </p>
+                      <div className="text-xs text-muted-foreground mt-1 space-y-1">
+                        <div>22K = 93%</div>
+                        <div>18K = 76%</div>
+                        <div>14K = 60%</div>
+                        <div>9K = 39%</div>
+                      </div>
                     </div>
 
                     <Button
                       onClick={handleGoldRateUpdate}
                       disabled={isUploading}
-                      className="w-full gradient-gold hover-glow h-11 sm:h-12 font-semibold"
+                      className="w-full"
                     >
-                      {isUploading ? "Updating..." : "Update All Gold Rates"}
+                      {isUploading ? "Updating..." : "Update Rates"}
                     </Button>
                   </CardContent>
                 </Card>
               </div>
             </TabsContent>
 
-            {/* Diamond Rates Tab - Mobile optimized */}
-            <TabsContent value="diamonds" className="space-y-4 sm:space-y-6">
-              <Card className="shadow-card">
-                <CardHeader className="pb-4">
-                  <CardTitle className="flex items-center space-x-2 text-lg sm:text-xl">
-                    <FileSpreadsheet className="h-4 w-4 sm:h-5 sm:w-5 text-secondary" />
-                    <span>Diamond Rate Management</span>
-                  </CardTitle>
-                  <CardDescription className="text-sm">
-                    Upload CSV files with diamond rates based on color, clarity, and certification
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="border-2 border-dashed border-muted rounded-lg p-4 sm:p-8 text-center">
-                    <Diamond className="h-8 w-8 sm:h-12 sm:w-12 text-secondary mx-auto mb-3 sm:mb-4" />
-                    <h3 className="text-base sm:text-lg font-semibold mb-2">Upload Diamond Rates CSV</h3>
-                    <p className="text-sm text-muted-foreground mb-4 px-2">
-                      Upload a CSV file with columns: Color, Clarity, Certification, Rate
-                    </p>
-                    <div className="flex items-center justify-center">
+            {/* Diamond Rates Tab */}
+            <TabsContent value="diamonds" className="space-y-6">
+              <div className="grid lg:grid-cols-2 gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <Diamond className="h-5 w-5 text-blue-500" />
+                      <span>Upload Diamond Rates</span>
+                    </CardTitle>
+                    <CardDescription>
+                      Import diamond rates via CSV file
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="border-2 border-dashed border-muted rounded-lg p-6 text-center">
+                      <FileSpreadsheet className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
+                      <h3 className="font-medium mb-2">Upload CSV File</h3>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        Select a CSV file containing diamond rates
+                      </p>
                       <input
                         type="file"
                         accept=".csv"
@@ -437,141 +434,191 @@ export default function Admin() {
                       <Button
                         onClick={() => document.getElementById('csv-upload')?.click()}
                         disabled={isUploading}
-                        className="gradient-diamond hover-glow"
+                        variant="outline"
                       >
-                        {isUploading ? "Processing..." : "Choose CSV File"}
+                        {isUploading ? "Processing..." : "Select File"}
                       </Button>
                     </div>
-                  </div>
+                  </CardContent>
+                </Card>
 
-                  <div className="text-sm text-muted-foreground">
-                    <h4 className="font-semibold mb-2">CSV Format Requirements:</h4>
-                    <ul className="space-y-1 list-disc list-inside">
-                      <li>Color: KL, JK, IJ, HI, GH</li>
-                      <li>Clarity: I1-I3, SI1, SI2, VS1, VS2, VVS1, VVS2</li>
-                      <li>Certification: IGI, Self, None</li>
-                      <li>Rate: Price per carat in ₹</li>
-                    </ul>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>CSV Format</CardTitle>
+                    <CardDescription>Required columns and values</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div>
+                        <p className="font-medium text-sm">Color Options</p>
+                        <p className="text-sm text-muted-foreground">KL, JK, IJ, HI, GH</p>
+                      </div>
+                      <div>
+                        <p className="font-medium text-sm">Clarity Grades</p>
+                        <p className="text-sm text-muted-foreground">I1-I3, SI1, SI2, VS1, VS2, VVS1, VVS2</p>
+                      </div>
+                      <div>
+                        <p className="font-medium text-sm">Certification</p>
+                        <p className="text-sm text-muted-foreground">IGI, Self, None</p>
+                      </div>
+                      <div>
+                        <p className="font-medium text-sm">Rate</p>
+                        <p className="text-sm text-muted-foreground">Price per carat in ₹</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Current Diamond Rates */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Current Diamond Rates</CardTitle>
+                  <CardDescription>All active diamond rates in the system ({diamondRates.length} rates)</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-96 overflow-y-auto">
+                    {diamondRates.map((rate, index) => (
+                      <div key={index} className="p-3 border rounded-lg hover:bg-muted/50 transition-colors">
+                        <div className="flex justify-between items-start mb-2">
+                          <div>
+                            <p className="font-medium text-sm">{rate.color} - {rate.clarity}</p>
+                            <p className="text-xs text-muted-foreground">{rate.certification}</p>
+                          </div>
+                          <Badge variant="secondary" className="text-xs">
+                            ₹{rate.rate.toLocaleString()}
+                          </Badge>
+                        </div>
+                      </div>
+                    ))}
                   </div>
+                  {diamondRates.length === 0 && (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <Diamond className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                      <p className="text-sm">No diamond rates available. Upload a CSV file to add rates.</p>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
 
             {/* Making Charges Tab */}
-            <TabsContent value="making" className="space-y-4 sm:space-y-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+            <TabsContent value="making" className="space-y-6">
+              <div className="grid lg:grid-cols-3 gap-6">
                 {/* Current Making Charges */}
-                <Card className="shadow-card">
-                  <CardHeader className="pb-4">
-                    <CardTitle className="flex items-center space-x-2 text-lg sm:text-xl">
-                      <Settings className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-                      <span>Current Making Charges</span>
-                    </CardTitle>
-                    <CardDescription className="text-sm">
-                      Current making charges by jewelry type (% of gold value)
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3 sm:space-y-4">
-                      <div className="flex items-center justify-between p-3 sm:p-4 rounded-lg bg-muted/30">
-                        <div>
-                          <p className="font-semibold text-sm sm:text-base">Chains</p>
-                          <p className="text-xs sm:text-sm text-muted-foreground">Basic chain jewelry</p>
+                <div className="lg:col-span-2">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center space-x-2">
+                        <Settings className="h-5 w-5 text-slate-500" />
+                        <span>Current Making Charges</span>
+                      </CardTitle>
+                      <CardDescription>
+                        Making charges by jewelry type (% of gold value)
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Chains</p>
+                            <p className="text-sm text-muted-foreground">Basic chain jewelry</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-lg font-semibold">{makingCharges.chains}%</p>
+                          </div>
                         </div>
-                        <Badge className="text-sm sm:text-lg px-2 sm:px-3 py-1 gradient-gold font-semibold">
-                          {makingCharges.chains}%
-                        </Badge>
-                      </div>
-                      <div className="flex items-center justify-between p-3 sm:p-4 rounded-lg bg-muted/30">
-                        <div>
-                          <p className="font-semibold text-sm sm:text-base">Plain Jewelry</p>
-                          <p className="text-xs sm:text-sm text-muted-foreground">Simple designs</p>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Plain Jewelry</p>
+                            <p className="text-sm text-muted-foreground">Simple designs</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-lg font-semibold">{makingCharges.plain}%</p>
+                          </div>
                         </div>
-                        <Badge className="text-sm sm:text-lg px-2 sm:px-3 py-1 gradient-gold font-semibold">
-                          {makingCharges.plain}%
-                        </Badge>
-                      </div>
-                      <div className="flex items-center justify-between p-3 sm:p-4 rounded-lg bg-muted/30">
-                        <div>
-                          <p className="font-semibold text-sm sm:text-base">Temple Jewelry</p>
-                          <p className="text-xs sm:text-sm text-muted-foreground">Traditional designs</p>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Temple Jewelry</p>
+                            <p className="text-sm text-muted-foreground">Traditional designs</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-lg font-semibold">{makingCharges.temple}%</p>
+                          </div>
                         </div>
-                        <Badge className="text-sm sm:text-lg px-2 sm:px-3 py-1 gradient-gold font-semibold">
-                          {makingCharges.temple}%
-                        </Badge>
-                      </div>
-                      <div className="flex items-center justify-between p-3 sm:p-4 rounded-lg bg-muted/30">
-                        <div>
-                          <p className="font-semibold text-sm sm:text-base">Italian Gold</p>
-                          <p className="text-xs sm:text-sm text-muted-foreground">Premium craftsmanship</p>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Italian Gold</p>
+                            <p className="text-sm text-muted-foreground">Premium craftsmanship</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-lg font-semibold">{makingCharges.italianGold}%</p>
+                          </div>
                         </div>
-                        <Badge className="text-sm sm:text-lg px-2 sm:px-3 py-1 gradient-gold font-semibold">
-                          {makingCharges.italianGold}%
-                        </Badge>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                    </CardContent>
+                  </Card>
+                </div>
 
                 {/* Update Making Charges */}
-                <Card className="shadow-card">
-                  <CardHeader className="pb-4">
-                    <CardTitle className="flex items-center space-x-2 text-lg sm:text-xl">
-                      <Upload className="h-4 w-4 sm:h-5 sm:w-5" />
-                      <span>Update Making Charges</span>
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <Upload className="h-5 w-5" />
+                      <span>Update Charges</span>
                     </CardTitle>
-                    <CardDescription className="text-sm">
-                      Update making charges percentage for different jewelry types
+                    <CardDescription>
+                      Update making charge percentages
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-3">
                       <div className="space-y-2">
-                        <Label htmlFor="chains" className="text-sm font-medium">Chains (%)</Label>
+                        <Label htmlFor="chains">Chains (%)</Label>
                         <Input
                           id="chains"
                           type="number"
                           step="0.1"
-                          placeholder="Chains percentage"
+                          placeholder="0.0"
                           value={makingChargesForm.chains}
                           onChange={(e) => setMakingChargesForm(prev => ({ ...prev, chains: e.target.value }))}
-                          className="h-11 text-base"
+                          className="h-10"
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="plain" className="text-sm font-medium">Plain (%)</Label>
+                        <Label htmlFor="plain">Plain (%)</Label>
                         <Input
                           id="plain"
                           type="number"
                           step="0.1"
-                          placeholder="Plain jewelry percentage"
+                          placeholder="0.0"
                           value={makingChargesForm.plain}
                           onChange={(e) => setMakingChargesForm(prev => ({ ...prev, plain: e.target.value }))}
-                          className="h-11 text-base"
+                          className="h-10"
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="temple" className="text-sm font-medium">Temple (%)</Label>
+                        <Label htmlFor="temple">Temple (%)</Label>
                         <Input
                           id="temple"
                           type="number"
                           step="0.1"
-                          placeholder="Temple jewelry percentage"
+                          placeholder="0.0"
                           value={makingChargesForm.temple}
                           onChange={(e) => setMakingChargesForm(prev => ({ ...prev, temple: e.target.value }))}
-                          className="h-11 text-base"
+                          className="h-10"
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="italianGold" className="text-sm font-medium">Italian Gold (%)</Label>
+                        <Label htmlFor="italianGold">Italian Gold (%)</Label>
                         <Input
                           id="italianGold"
                           type="number"
                           step="0.1"
-                          placeholder="Italian gold percentage"
+                          placeholder="0.0"
                           value={makingChargesForm.italianGold}
                           onChange={(e) => setMakingChargesForm(prev => ({ ...prev, italianGold: e.target.value }))}
-                          className="h-11 text-base"
+                          className="h-10"
                         />
                       </div>
                     </div>
@@ -579,9 +626,9 @@ export default function Admin() {
                     <Button
                       onClick={handleMakingChargesUpdate}
                       disabled={isUploading}
-                      className="w-full gradient-gold hover-glow h-11 sm:h-12 font-semibold"
+                      className="w-full"
                     >
-                      {isUploading ? "Updating..." : "Update Making Charges"}
+                      {isUploading ? "Updating..." : "Update Charges"}
                     </Button>
                   </CardContent>
                 </Card>
@@ -590,83 +637,248 @@ export default function Admin() {
 
             {/* Analytics Tab */}
             <TabsContent value="analytics" className="space-y-6">
-              <div className="grid lg:grid-cols-2 gap-6">
-                <Card className="shadow-card">
+              <div className="grid lg:grid-cols-3 gap-6">
+                {/* Rate Management Summary */}
+                <Card>
                   <CardHeader>
-                    <CardTitle>Calculation Distribution</CardTitle>
-                    <CardDescription>
-                      Breakdown of jewelry calculations by type
-                    </CardDescription>
+                    <CardTitle className="flex items-center space-x-2">
+                      <TrendingUp className="h-5 w-5 text-blue-500" />
+                      <span>Rate Management</span>
+                    </CardTitle>
                   </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2">
-                          <Crown className="h-4 w-4 text-primary" />
-                          <span>Gold Jewelry</span>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-semibold">{analytics.goldCalculations}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {analytics.totalCalculations > 0 ? ((analytics.goldCalculations / analytics.totalCalculations) * 100).toFixed(1) : 0}%
-                          </p>
-                        </div>
+                  <CardContent className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-muted-foreground">Gold Rates</span>
+                      <div className="text-right">
+                        <span className="text-sm font-medium">{goldRates.length} types</span>
+                        <p className="text-xs text-muted-foreground">
+                          Last: {goldRates[0]?.lastUpdated || 'Not set'}
+                        </p>
                       </div>
-                      <Progress value={analytics.totalCalculations > 0 ? (analytics.goldCalculations / analytics.totalCalculations) * 100 : 0} />
-
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2">
-                          <Diamond className="h-4 w-4 text-secondary" />
-                          <span>Diamond Jewelry</span>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-semibold">{analytics.diamondCalculations}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {analytics.totalCalculations > 0 ? ((analytics.diamondCalculations / analytics.totalCalculations) * 100).toFixed(1) : 0}%
-                          </p>
-                        </div>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-muted-foreground">Diamond Rates</span>
+                      <div className="text-right">
+                        <span className="text-sm font-medium">{diamondRates.length} rates</span>
+                        <p className="text-xs text-muted-foreground">Active rates</p>
                       </div>
-                      <Progress value={analytics.totalCalculations > 0 ? (analytics.diamondCalculations / analytics.totalCalculations) * 100 : 0} />
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-muted-foreground">Making Charges</span>
+                      <div className="text-right">
+                        <span className="text-sm font-medium">4 types</span>
+                        <p className="text-xs text-muted-foreground">
+                          {makingCharges.chains}% - {makingCharges.italianGold}%
+                        </p>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
 
-                <Card className="shadow-card">
+                {/* Calculation Distribution */}
+                <Card>
                   <CardHeader>
-                    <CardTitle>Recent Activity</CardTitle>
-                    <CardDescription>
-                      Latest system activities and updates
-                    </CardDescription>
+                    <CardTitle className="flex items-center space-x-2">
+                      <BarChart3 className="h-5 w-5 text-blue-500" />
+                      <span>Usage Distribution</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-3">
+                      <div>
+                        <div className="flex justify-between items-center mb-1">
+                          <div className="flex items-center space-x-2">
+                            <Crown className="h-4 w-4 text-amber-500" />
+                            <span className="text-sm">Gold Jewelry</span>
+                          </div>
+                          <span className="text-sm font-medium">{analytics.goldCalculations}</span>
+                        </div>
+                        <div className="w-full bg-muted rounded-full h-2">
+                          <div 
+                            className="bg-amber-500 h-2 rounded-full" 
+                            style={{ width: `${analytics.totalCalculations > 0 ? (analytics.goldCalculations / analytics.totalCalculations) * 100 : 0}%` }}
+                          ></div>
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <div className="flex justify-between items-center mb-1">
+                          <div className="flex items-center space-x-2">
+                            <Diamond className="h-4 w-4 text-blue-500" />
+                            <span className="text-sm">Diamond Jewelry</span>
+                          </div>
+                          <span className="text-sm font-medium">{analytics.diamondCalculations}</span>
+                        </div>
+                        <div className="w-full bg-muted rounded-full h-2">
+                          <div 
+                            className="bg-blue-500 h-2 rounded-full" 
+                            style={{ width: `${analytics.totalCalculations > 0 ? (analytics.diamondCalculations / analytics.totalCalculations) * 100 : 0}%` }}
+                          ></div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Recent Activity */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <Calendar className="h-5 w-5 text-slate-500" />
+                      <span>Recent Activity</span>
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-4">
-                      <div className="flex items-start space-x-3">
-                        <Calendar className="h-4 w-4 text-muted-foreground mt-1" />
-                        <div>
-                          <p className="text-sm font-medium">Gold rates updated</p>
-                          <p className="text-xs text-muted-foreground">22K, 18K rates updated - 2 hours ago</p>
+                    <div className="space-y-3 max-h-64 overflow-y-auto">
+                      {recentActivities.length > 0 ? (
+                        recentActivities.map((activity, index) => (
+                          <div key={activity.id || index} className="flex items-center space-x-3 p-2 rounded-lg bg-muted/30">
+                            <div className={`w-2 h-2 rounded-full ${
+                              activity.type === 'rates' ? 'bg-blue-500' :
+                              activity.type === 'system' ? 'bg-green-500' :
+                              'bg-purple-500'
+                            }`}></div>
+                            <div className="flex-1">
+                              <p className="text-sm font-medium">{activity.action}</p>
+                              <p className="text-xs text-muted-foreground">
+                                {activity.description}
+                              </p>
+                              <p className="text-xs text-muted-foreground mt-1">
+                                {activity.timestamp && activity.timestamp.toDate ? 
+                                  new Date(activity.timestamp.toDate()).toLocaleString() :
+                                  'Just now'
+                                }
+                              </p>
+                            </div>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="text-center py-4 text-muted-foreground">
+                          <Activity className="h-6 w-6 mx-auto mb-2 opacity-50" />
+                          <p className="text-sm">No recent activities</p>
                         </div>
-                      </div>
-                      
-                      <div className="flex items-start space-x-3">
-                        <Upload className="h-4 w-4 text-muted-foreground mt-1" />
-                        <div>
-                          <p className="text-sm font-medium">Diamond CSV uploaded</p>
-                          <p className="text-xs text-muted-foreground">145 diamond rates processed - 1 day ago</p>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-start space-x-3">
-                        <Users className="h-4 w-4 text-muted-foreground mt-1" />
-                        <div>
-                          <p className="text-sm font-medium">New user registrations</p>
-                          <p className="text-xs text-muted-foreground">12 new users joined - 2 days ago</p>
-                        </div>
-                      </div>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
               </div>
+
+              {/* Enhanced Rates Summary */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Current Rates Summary</CardTitle>
+                  <CardDescription>Comprehensive overview of all active rates and pricing</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid lg:grid-cols-3 gap-6">
+                    {/* Gold Rates Summary */}
+                    <div className="space-y-4">
+                      <h4 className="font-semibold flex items-center space-x-2 text-base">
+                        <Crown className="h-5 w-5 text-amber-500" />
+                        <span>Gold Rates</span>
+                      </h4>
+                      <div className="space-y-3">
+                        {goldRates.map((rate, index) => (
+                          <div key={index} className="flex justify-between items-center p-2 border rounded-lg bg-amber-50/50 dark:bg-amber-900/10">
+                            <div>
+                              <span className="font-medium text-sm">{rate.carat}</span>
+                              <p className="text-xs text-muted-foreground">Gold</p>
+                            </div>
+                            <div className="text-right">
+                              <span className="font-semibold text-sm">₹{rate.rate.toLocaleString()}</span>
+                              <p className="text-xs text-muted-foreground">per gram</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="pt-2 border-t">
+                        <div className="flex justify-between text-xs text-muted-foreground">
+                          <span>Range:</span>
+                          <span>₹{Math.min(...goldRates.map(r => r.rate)).toLocaleString()} - ₹{Math.max(...goldRates.map(r => r.rate)).toLocaleString()}</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Making Charges Summary */}
+                    <div className="space-y-4">
+                      <h4 className="font-semibold flex items-center space-x-2 text-base">
+                        <Settings className="h-5 w-5 text-slate-500" />
+                        <span>Making Charges</span>
+                      </h4>
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-center p-2 border rounded-lg bg-slate-50/50 dark:bg-slate-900/10">
+                          <div>
+                            <span className="font-medium text-sm">Chains</span>
+                            <p className="text-xs text-muted-foreground">Basic chain work</p>
+                          </div>
+                          <span className="font-semibold text-sm">{makingCharges.chains}%</span>
+                        </div>
+                        <div className="flex justify-between items-center p-2 border rounded-lg bg-slate-50/50 dark:bg-slate-900/10">
+                          <div>
+                            <span className="font-medium text-sm">Plain</span>
+                            <p className="text-xs text-muted-foreground">Simple designs</p>
+                          </div>
+                          <span className="font-semibold text-sm">{makingCharges.plain}%</span>
+                        </div>
+                        <div className="flex justify-between items-center p-2 border rounded-lg bg-slate-50/50 dark:bg-slate-900/10">
+                          <div>
+                            <span className="font-medium text-sm">Temple</span>
+                            <p className="text-xs text-muted-foreground">Traditional work</p>
+                          </div>
+                          <span className="font-semibold text-sm">{makingCharges.temple}%</span>
+                        </div>
+                        <div className="flex justify-between items-center p-2 border rounded-lg bg-slate-50/50 dark:bg-slate-900/10">
+                          <div>
+                            <span className="font-medium text-sm">Italian Gold</span>
+                            <p className="text-xs text-muted-foreground">Premium craft</p>
+                          </div>
+                          <span className="font-semibold text-sm">{makingCharges.italianGold}%</span>
+                        </div>
+                      </div>
+                      <div className="pt-2 border-t">
+                        <div className="flex justify-between text-xs text-muted-foreground">
+                          <span>Range:</span>
+                          <span>{Math.min(makingCharges.chains, makingCharges.plain, makingCharges.temple, makingCharges.italianGold)}% - {Math.max(makingCharges.chains, makingCharges.plain, makingCharges.temple, makingCharges.italianGold)}%</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Diamond Rates Preview */}
+                    <div className="space-y-4">
+                      <h4 className="font-semibold flex items-center space-x-2 text-base">
+                        <Diamond className="h-5 w-5 text-blue-500" />
+                        <span>Diamond Rates</span>
+                      </h4>
+                      <div className="space-y-3">
+                        {diamondRates.slice(0, 4).map((rate, index) => (
+                          <div key={index} className="flex justify-between items-center p-2 border rounded-lg bg-blue-50/50 dark:bg-blue-900/10">
+                            <div>
+                              <span className="font-medium text-sm">{rate.color}-{rate.clarity}</span>
+                              <p className="text-xs text-muted-foreground">{rate.certification}</p>
+                            </div>
+                            <div className="text-right">
+                              <span className="font-semibold text-sm">₹{(rate.rate / 1000).toFixed(0)}K</span>
+                              <p className="text-xs text-muted-foreground">per carat</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="pt-2 border-t">
+                        <div className="flex justify-between text-xs text-muted-foreground">
+                          <span>Total rates:</span>
+                          <span>{diamondRates.length} combinations</span>
+                        </div>
+                        {diamondRates.length > 0 && (
+                          <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                            <span>Price range:</span>
+                            <span>₹{(Math.min(...diamondRates.map(r => r.rate)) / 1000).toFixed(0)}K - ₹{(Math.max(...diamondRates.map(r => r.rate)) / 1000).toFixed(0)}K</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </TabsContent>
           </Tabs>
         </div>

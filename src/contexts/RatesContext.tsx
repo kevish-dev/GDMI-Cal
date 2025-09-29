@@ -9,7 +9,14 @@ import {
   subscribeToGoldRates,
   subscribeToDiamondRates,
   subscribeToMakingCharges,
-  initializeDummyRates 
+  initializeDummyRates,
+  getSystemAnalytics,
+  subscribeToSystemAnalytics,
+  getRecentActivities,
+  subscribeToRecentActivities,
+  saveCalculationToFirebase,
+  logActivity,
+  initializeSystemData
 } from '@/services/firestore.js';
 
 export interface GoldRate {
@@ -39,8 +46,26 @@ interface CalculationRecord {
   totalValue: number;
   goldWeight?: number;
   diamondWeight?: number;
-    carat?: string;
+  carat?: string;
   jewelryType?: string;
+}
+
+interface SystemAnalytics {
+  totalCalculations: number;
+  goldCalculations: number;
+  diamondCalculations: number;
+  totalValue: number;
+  avgValue: number;
+  lastUpdated?: any;
+}
+
+interface ActivityLog {
+  id: string;
+  type: 'system' | 'rates' | 'calculation';
+  action: string;
+  description: string;
+  icon?: string;
+  timestamp: any;
 }
 
 interface RatesContextType {
@@ -48,19 +73,14 @@ interface RatesContextType {
   diamondRates: DiamondRate[];
   makingCharges: MakingCharges;
   calculations: CalculationRecord[];
+  systemAnalytics: SystemAnalytics;
+  recentActivities: ActivityLog[];
   loading: boolean;
   updateGoldRates: (rates: GoldRate[]) => Promise<void>;
   updateDiamondRates: (rates: DiamondRate[]) => Promise<void>;
   updateMakingCharges: (charges: MakingCharges) => Promise<void>;
-  addCalculation: (calculation: Omit<CalculationRecord, 'id' | 'timestamp'>) => void;
-  getAnalytics: () => {
-    totalCalculations: number;
-    goldCalculations: number;
-    diamondCalculations: number;
-    totalValue: number;
-    avgValue: number;
-    todayCalculations: number;
-  };
+  addCalculation: (calculation: Omit<CalculationRecord, 'id' | 'timestamp'>) => Promise<void>;
+  getAnalytics: () => SystemAnalytics;
 }
 
 const RatesContext = createContext<RatesContextType | undefined>(undefined);
@@ -75,25 +95,40 @@ export function RatesProvider({ children }: { children: ReactNode }) {
     italianGold: 18
   });
   const [calculations, setCalculations] = useState<CalculationRecord[]>([]);
+  const [systemAnalytics, setSystemAnalytics] = useState<SystemAnalytics>({
+    totalCalculations: 0,
+    goldCalculations: 0,
+    diamondCalculations: 0,
+    totalValue: 0,
+    avgValue: 0
+  });
+  const [recentActivities, setRecentActivities] = useState<ActivityLog[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Initialize rates from Firebase or create dummy data
+  // Initialize rates and system data from Firebase
   useEffect(() => {
     let goldUnsubscribe: (() => void) | null = null;
     let diamondUnsubscribe: (() => void) | null = null;
     let makingChargesUnsubscribe: (() => void) | null = null;
+    let analyticsUnsubscribe: (() => void) | null = null;
+    let activitiesUnsubscribe: (() => void) | null = null;
 
-    const initializeRates = async () => {
+    const initializeData = async () => {
       try {
         setLoading(true);
         
         // Initialize dummy rates if they don't exist
         const initializedRates = await initializeDummyRates();
         
+        // Initialize system data (analytics and activities)
+        const systemData = await initializeSystemData();
+        
         // Set initial data
         setGoldRates(initializedRates.goldRates);
         setDiamondRates(initializedRates.diamondRates);
         setMakingCharges(initializedRates.makingCharges);
+        setSystemAnalytics(systemData.analytics);
+        setRecentActivities(systemData.activities);
 
         // Set up real-time listeners
         goldUnsubscribe = subscribeToGoldRates((rates) => {
@@ -109,6 +144,14 @@ export function RatesProvider({ children }: { children: ReactNode }) {
             setMakingCharges(charges);
           }
         });
+
+        analyticsUnsubscribe = subscribeToSystemAnalytics((analytics) => {
+          setSystemAnalytics(analytics);
+        });
+
+        activitiesUnsubscribe = subscribeToRecentActivities((activities) => {
+          setRecentActivities(activities);
+        }, 10);
 
       } catch (error) {
         console.error('Error initializing rates:', error);
@@ -141,7 +184,7 @@ export function RatesProvider({ children }: { children: ReactNode }) {
       }
     };
 
-    initializeRates();
+    initializeData();
 
     // Load calculations from localStorage (keeping this local for now)
     const savedCalculations = localStorage.getItem('jewelry_calculations');
@@ -154,12 +197,23 @@ export function RatesProvider({ children }: { children: ReactNode }) {
       if (goldUnsubscribe) goldUnsubscribe();
       if (diamondUnsubscribe) diamondUnsubscribe();
       if (makingChargesUnsubscribe) makingChargesUnsubscribe();
+      if (analyticsUnsubscribe) analyticsUnsubscribe();
+      if (activitiesUnsubscribe) activitiesUnsubscribe();
     };
   }, []);
 
   const updateGoldRates = async (rates: GoldRate[]) => {
     try {
       await createGoldRates(rates);
+      
+      // Log activity
+      await logActivity({
+        type: 'rates',
+        action: 'Gold rates updated',
+        description: `Updated rates for ${rates.length} gold types`,
+        icon: 'Crown'
+      });
+      
       // The real-time listener will update the local state
     } catch (error) {
       console.error('Error updating gold rates:', error);
@@ -170,6 +224,15 @@ export function RatesProvider({ children }: { children: ReactNode }) {
   const updateDiamondRates = async (rates: DiamondRate[]) => {
     try {
       await createDiamondRates(rates);
+      
+      // Log activity
+      await logActivity({
+        type: 'rates',
+        action: 'Diamond rates updated',
+        description: `Processed ${rates.length} diamond rate entries`,
+        icon: 'Diamond'
+      });
+      
       // The real-time listener will update the local state
     } catch (error) {
       console.error('Error updating diamond rates:', error);
@@ -180,6 +243,15 @@ export function RatesProvider({ children }: { children: ReactNode }) {
   const updateMakingCharges = async (charges: MakingCharges) => {
     try {
       await createMakingCharges(charges);
+      
+      // Log activity
+      await logActivity({
+        type: 'rates',
+        action: 'Making charges updated',
+        description: 'Updated making charges for all jewelry types',
+        icon: 'Settings'
+      });
+      
       // The real-time listener will update the local state
     } catch (error) {
       console.error('Error updating making charges:', error);
@@ -187,38 +259,39 @@ export function RatesProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const addCalculation = (calculation: Omit<CalculationRecord, 'id' | 'timestamp'>) => {
-    const newCalculation: CalculationRecord = {
-      ...calculation,
-      id: Date.now().toString(),
-      timestamp: new Date().toISOString()
-    };
-    
-    const updatedCalculations = [...calculations, newCalculation];
-    setCalculations(updatedCalculations);
-    localStorage.setItem('jewelry_calculations', JSON.stringify(updatedCalculations));
+  const addCalculation = async (calculation: Omit<CalculationRecord, 'id' | 'timestamp'>) => {
+    try {
+      // Save to Firebase and update analytics automatically
+      await saveCalculationToFirebase(calculation);
+      
+      // Also save to local state for immediate feedback
+      const newCalculation: CalculationRecord = {
+        ...calculation,
+        id: Date.now().toString(),
+        timestamp: new Date().toISOString()
+      };
+      
+      const updatedCalculations = [...calculations, newCalculation];
+      setCalculations(updatedCalculations);
+      localStorage.setItem('jewelry_calculations', JSON.stringify(updatedCalculations));
+    } catch (error) {
+      console.error('Error adding calculation:', error);
+      // Fallback to local storage only
+      const newCalculation: CalculationRecord = {
+        ...calculation,
+        id: Date.now().toString(),
+        timestamp: new Date().toISOString()
+      };
+      
+      const updatedCalculations = [...calculations, newCalculation];
+      setCalculations(updatedCalculations);
+      localStorage.setItem('jewelry_calculations', JSON.stringify(updatedCalculations));
+    }
   };
 
-  const getAnalytics = () => {
-    const totalCalculations = calculations.length;
-    const goldCalculations = calculations.filter(c => c.type === 'gold').length;
-    const diamondCalculations = calculations.filter(c => c.type === 'diamond').length;
-    const totalValue = calculations.reduce((sum, calc) => sum + calc.totalValue, 0);
-    const avgValue = totalCalculations > 0 ? totalValue / totalCalculations : 0;
-    
-    const today = new Date().toDateString();
-    const todayCalculations = calculations.filter(c => 
-      new Date(c.timestamp).toDateString() === today
-    ).length;
-
-    return {
-      totalCalculations,
-      goldCalculations,
-      diamondCalculations,
-      totalValue,
-      avgValue,
-      todayCalculations
-    };
+  const getAnalytics = (): SystemAnalytics => {
+    // Return real-time Firebase analytics instead of local calculations
+    return systemAnalytics;
   };
 
   return (
@@ -227,6 +300,8 @@ export function RatesProvider({ children }: { children: ReactNode }) {
       diamondRates,
       makingCharges,
       calculations,
+      systemAnalytics,
+      recentActivities,
       loading,
       updateGoldRates,
       updateDiamondRates,

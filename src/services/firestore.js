@@ -368,5 +368,204 @@ export const initializeDummyRates = async () => {
   }
 };
 
+// Analytics and Activity Functions
+
+// System Analytics Functions
+export const getSystemAnalytics = async () => {
+  try {
+    const docRef = doc(db, "systemData", "analytics");
+    const docSnap = await getDoc(docRef);
+    
+    if (docSnap.exists()) {
+      return docSnap.data();
+    } else {
+      // Initialize with default analytics
+      const defaultAnalytics = {
+        totalCalculations: 0,
+        goldCalculations: 0,
+        diamondCalculations: 0,
+        totalValue: 0,
+        avgValue: 0,
+        lastUpdated: serverTimestamp()
+      };
+      await setDoc(docRef, defaultAnalytics);
+      return defaultAnalytics;
+    }
+  } catch (error) {
+    console.error("Error getting system analytics:", error);
+    throw error;
+  }
+};
+
+export const updateSystemAnalytics = async (analytics) => {
+  try {
+    const docRef = doc(db, "systemData", "analytics");
+    await setDoc(docRef, {
+      ...analytics,
+      lastUpdated: serverTimestamp()
+    }, { merge: true });
+    return analytics;
+  } catch (error) {
+    console.error("Error updating system analytics:", error);
+    throw error;
+  }
+};
+
+export const subscribeToSystemAnalytics = (callback) => {
+  const docRef = doc(db, "systemData", "analytics");
+  return onSnapshot(docRef, (doc) => {
+    if (doc.exists()) {
+      callback(doc.data());
+    } else {
+      callback({
+        totalCalculations: 0,
+        goldCalculations: 0,
+        diamondCalculations: 0,
+        totalValue: 0,
+        avgValue: 0
+      });
+    }
+  });
+};
+
+// Activity Log Functions
+export const logActivity = async (activityData) => {
+  try {
+    const activityLog = {
+      ...activityData,
+      timestamp: serverTimestamp(),
+      createdAt: serverTimestamp()
+    };
+    const docRef = await addDoc(collection(db, "activityLogs"), activityLog);
+    return { id: docRef.id, ...activityLog };
+  } catch (error) {
+    console.error("Error logging activity:", error);
+    throw error;
+  }
+};
+
+export const getRecentActivities = async (limitCount = 10) => {
+  try {
+    const activities = await getDocuments("activityLogs", [
+      orderBy("timestamp", "desc"),
+      limit(limitCount)
+    ]);
+    return activities;
+  } catch (error) {
+    console.error("Error getting recent activities:", error);
+    throw error;
+  }
+};
+
+export const subscribeToRecentActivities = (callback, limitCount = 10) => {
+  const collectionRef = collection(db, "activityLogs");
+  const q = query(collectionRef, orderBy("timestamp", "desc"), limit(limitCount));
+  
+  return onSnapshot(q, (querySnapshot) => {
+    const activities = querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+    callback(activities);
+  });
+};
+
+// Calculation Functions for better analytics
+export const saveCalculationToFirebase = async (calculationData) => {
+  try {
+    // Clean the data by removing undefined values (Firebase doesn't support undefined)
+    const cleanedData = {};
+    Object.keys(calculationData).forEach(key => {
+      if (calculationData[key] !== undefined) {
+        cleanedData[key] = calculationData[key];
+      }
+    });
+    
+    const calculation = {
+      ...cleanedData,
+      timestamp: serverTimestamp(),
+      createdAt: serverTimestamp()
+    };
+    
+    const docRef = await addDoc(collection(db, "calculations"), calculation);
+    
+    // Update system analytics
+    const currentAnalytics = await getSystemAnalytics();
+    const updatedAnalytics = {
+      totalCalculations: currentAnalytics.totalCalculations + 1,
+      goldCalculations: calculationData.type === 'gold' 
+        ? currentAnalytics.goldCalculations + 1 
+        : currentAnalytics.goldCalculations,
+      diamondCalculations: calculationData.type === 'diamond' 
+        ? currentAnalytics.diamondCalculations + 1 
+        : currentAnalytics.diamondCalculations,
+      totalValue: currentAnalytics.totalValue + calculationData.totalValue,
+      avgValue: (currentAnalytics.totalValue + calculationData.totalValue) / (currentAnalytics.totalCalculations + 1)
+    };
+    
+    await updateSystemAnalytics(updatedAnalytics);
+    
+    return { id: docRef.id, ...calculation };
+  } catch (error) {
+    console.error("Error saving calculation:", error);
+    throw error;
+  }
+};
+
+export const getCalculationsStats = async () => {
+  try {
+    const calculations = await getDocuments("calculations", [
+      orderBy("timestamp", "desc")
+    ]);
+    
+    const totalCalculations = calculations.length;
+    const goldCalculations = calculations.filter(c => c.type === 'gold').length;
+    const diamondCalculations = calculations.filter(c => c.type === 'diamond').length;
+    const totalValue = calculations.reduce((sum, calc) => sum + (calc.totalValue || 0), 0);
+    const avgValue = totalCalculations > 0 ? totalValue / totalCalculations : 0;
+    
+    return {
+      totalCalculations,
+      goldCalculations,
+      diamondCalculations,
+      totalValue,
+      avgValue,
+      calculations: calculations.slice(0, 100) // Return last 100 calculations for performance
+    };
+  } catch (error) {
+    console.error("Error getting calculations stats:", error);
+    throw error;
+  }
+};
+
+// Initialize system data if it doesn't exist
+export const initializeSystemData = async () => {
+  try {
+    const results = {};
+    
+    // Initialize analytics
+    const existingAnalytics = await getSystemAnalytics();
+    results.analytics = existingAnalytics;
+    
+    // Initialize activity log with system start activity
+    const recentActivities = await getRecentActivities(1);
+    if (recentActivities.length === 0) {
+      await logActivity({
+        type: 'system',
+        action: 'System initialized',
+        description: 'Admin dashboard system started',
+        icon: 'Activity'
+      });
+    }
+    
+    results.activities = await getRecentActivities(10);
+    
+    return results;
+  } catch (error) {
+    console.error("Error initializing system data:", error);
+    throw error;
+  }
+};
+
 // Export query helpers for advanced queries
 export { where, orderBy, limit, serverTimestamp };
