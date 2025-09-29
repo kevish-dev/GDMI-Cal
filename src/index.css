@@ -1,0 +1,206 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Jewellery Price Calculator Design System 
+Elegant luxury design with sophisticated color palette and modern aesthetics
+*/
+
+@layer base {
+  :root {
+    /* Base Colors - Elegant neutrals */
+    --background: 0 0% 98%;
+    --foreground: 222 15% 15%;
+
+    /* Card system - Soft luxury */
+    --card: 0 0% 100%;
+    --card-foreground: 222 15% 15%;
+
+    /* Interactive elements */
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 15% 15%;
+
+    /* Primary - Elegant Gold */
+    --primary: 43 74% 49%;
+    --primary-foreground: 0 0% 98%;
+    --primary-glow: 43 74% 65%;
+
+    /* Secondary - Diamond Blue */
+    --secondary: 238 83% 67%;
+    --secondary-foreground: 0 0% 98%;
+    --secondary-glow: 238 83% 85%;
+
+    /* Muted elements */
+    --muted: 220 13% 95%;
+    --muted-foreground: 220 9% 46%;
+
+    /* Accent - Rose Gold */
+    --accent: 330 81% 60%;
+    --accent-foreground: 0 0% 98%;
+
+    /* System colors */
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 98%;
+
+    /* Border and input styling */
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+
+    --ring: 43 74% 49%;
+
+    /* Custom Design System Additions */
+    
+    /* Gradients */
+    --gradient-gold: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary-glow)) 100%);
+    --gradient-diamond: linear-gradient(135deg, hsl(var(--secondary)) 0%, hsl(var(--secondary-glow)) 100%);
+    --gradient-elegant: linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--muted)) 100%);
+    
+    /* Shadows */
+    --shadow-elegant: 0 4px 20px -4px hsl(var(--foreground) / 0.1);
+    --shadow-card: 0 2px 10px -2px hsl(var(--foreground) / 0.05);
+    --shadow-glow: 0 0 30px hsl(var(--primary) / 0.2);
+    
+    /* Animation Variables */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    
+    /* Layout */
+    --radius: 0.75rem;
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    /* Base Colors - Dark luxury */
+    --background: 222 15% 8%;
+    --foreground: 220 13% 91%;
+
+    /* Card system - Dark elegance */
+    --card: 222 15% 12%;
+    --card-foreground: 220 13% 91%;
+
+    /* Interactive elements */
+    --popover: 222 15% 12%;
+    --popover-foreground: 220 13% 91%;
+
+    /* Primary - Elegant Gold (slightly muted for dark) */
+    --primary: 43 74% 55%;
+    --primary-foreground: 222 15% 8%;
+    --primary-glow: 43 74% 70%;
+
+    /* Secondary - Diamond Blue (adapted for dark) */
+    --secondary: 238 83% 72%;
+    --secondary-foreground: 222 15% 8%;
+    --secondary-glow: 238 83% 88%;
+
+    /* Muted elements */
+    --muted: 222 15% 15%;
+    --muted-foreground: 220 9% 65%;
+
+    /* Accent - Rose Gold */
+    --accent: 330 81% 65%;
+    --accent-foreground: 222 15% 8%;
+
+    /* System colors */
+    --destructive: 0 72% 60%;
+    --destructive-foreground: 220 13% 91%;
+
+    /* Border and input styling */
+    --border: 222 15% 20%;
+    --input: 222 15% 20%;
+    --ring: 43 74% 55%;
+
+    /* Custom gradients for dark mode */
+    --gradient-gold: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary-glow)) 100%);
+    --gradient-diamond: linear-gradient(135deg, hsl(var(--secondary)) 0%, hsl(var(--secondary-glow)) 100%);
+    --gradient-elegant: linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--muted)) 100%);
+    
+    /* Shadows for dark mode */
+    --shadow-elegant: 0 4px 20px -4px hsl(0 0% 0% / 0.3);
+    --shadow-card: 0 2px 10px -2px hsl(0 0% 0% / 0.2);
+    --shadow-glow: 0 0 30px hsl(var(--primary) / 0.3);
+
+    /* Sidebar variables for dark mode */
+    --sidebar-background: 222 15% 10%;
+    --sidebar-foreground: 220 13% 91%;
+    --sidebar-primary: 43 74% 55%;
+    --sidebar-primary-foreground: 222 15% 8%;
+    --sidebar-accent: 222 15% 18%;
+    --sidebar-accent-foreground: 220 13% 91%;
+    --sidebar-border: 222 15% 20%;
+    --sidebar-ring: 43 74% 55%;
+  }
+}
+
+@layer components {
+  /* Custom component classes using design system */
+  .gradient-gold {
+    background: var(--gradient-gold);
+  }
+  
+  .gradient-diamond {
+    background: var(--gradient-diamond);
+  }
+  
+  .gradient-elegant {
+    background: var(--gradient-elegant);
+  }
+  
+  .shadow-elegant {
+    box-shadow: var(--shadow-elegant);
+  }
+  
+  .shadow-card {
+    box-shadow: var(--shadow-card);
+  }
+  
+  .shadow-glow {
+    box-shadow: var(--shadow-glow);
+  }
+  
+  .transition-smooth {
+    transition: var(--transition-smooth);
+  }
+  
+  .transition-bounce {
+    transition: var(--transition-bounce);
+  }
+
+  /* Jewelry type specific styles */
+  .jewelry-gold {
+    @apply border-primary/20 bg-gradient-to-br from-primary/5 to-primary-glow/5;
+  }
+  
+  .jewelry-diamond {
+    @apply border-secondary/20 bg-gradient-to-br from-secondary/5 to-secondary-glow/5;
+  }
+
+  /* Interactive hover effects */
+  .hover-glow {
+    @apply transition-smooth hover:shadow-glow;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
