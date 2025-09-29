@@ -61,7 +61,7 @@ interface PriceBreakdown {
 }
 
 export default function Calculator() {
-  const [jewelryType, setJewelryType] = useState<JewelryType>("gold");
+  const [jewelryType, setJewelryType] = useState<JewelryType>(null);
   const [goldForm, setGoldForm] = useState<GoldFormData>({
     weight: "",
     carat: "",
@@ -194,6 +194,8 @@ export default function Calculator() {
             : undefined,
         carat: jewelryType === "gold" ? goldForm.carat : diamondForm.carat,
         jewelryType: jewelryType === "gold" ? goldForm.type : "diamond",
+        jewellerQuote: jewellerQuoteValue > 0 ? jewellerQuoteValue : undefined,
+        priceDifference: priceDifference,
       });
 
       toast({
@@ -353,7 +355,7 @@ export default function Calculator() {
                             />
                           </div>
                           <div className="space-y-2">
-                            <Label htmlFor="carat" className="text-sm font-medium">carat</Label>
+                            <Label htmlFor="carat" className="text-sm font-medium">Purity</Label>
                             <Select
                               value={goldForm.carat}
                               onValueChange={(value) =>
@@ -364,7 +366,7 @@ export default function Calculator() {
                               }
                             >
                               <SelectTrigger className="h-11 text-base">
-                                <SelectValue placeholder="Select carat" />
+                                <SelectValue placeholder="22K / 18K / 14K"/>
                               </SelectTrigger>
                               <SelectContent>
                                 <SelectItem value="24k">24K</SelectItem>
@@ -377,7 +379,7 @@ export default function Calculator() {
                           </div>
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor="type" className="text-sm font-medium">Gold Type</Label>
+                          <Label htmlFor="type" className="text-sm font-medium">Jewellery Type</Label>
                           <Select
                             value={goldForm.type}
                             onValueChange={(value) =>
@@ -388,14 +390,14 @@ export default function Calculator() {
                             }
                           >
                             <SelectTrigger className="h-11 text-base">
-                              <SelectValue placeholder="Select gold type" />
+                              <SelectValue placeholder="Chains / Plain / Temple / Italian" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="chains">Chains</SelectItem>
-                              <SelectItem value="plain">Plain</SelectItem>
-                              <SelectItem value="temple">Temple</SelectItem>
+                              <SelectItem value="chains">Chains {"(2% making charges)"}</SelectItem>
+                              <SelectItem value="plain">Plain {"(3.5% making charges)"}</SelectItem>
+                              <SelectItem value="temple">Temple {"(7% making charges)"}</SelectItem>
                               <SelectItem value="italian">
-                                Italian Gold
+                                Italian Gold {"(18% making charges)"}
                               </SelectItem>
                             </SelectContent>
                           </Select>
@@ -440,7 +442,7 @@ export default function Calculator() {
                             />
                           </div>
                           <div className="space-y-2">
-                            <Label htmlFor="diamondcarat" className="text-sm font-medium">carat</Label>
+                            <Label htmlFor="diamondcarat" className="text-sm font-medium">Purity</Label>
                             <Select
                               value={diamondForm.carat}
                               onValueChange={(value) =>
@@ -451,7 +453,7 @@ export default function Calculator() {
                               }
                             >
                               <SelectTrigger className="h-11 text-base">
-                                <SelectValue placeholder="Select carat" />
+                                <SelectValue placeholder="22K / 18K / 14K" />
                               </SelectTrigger>
                               <SelectContent>
                                 <SelectItem value="24k">24K</SelectItem>
@@ -485,25 +487,22 @@ export default function Calculator() {
                             />
                           </div>
                           <div className="space-y-2">
-                            <Label htmlFor="color" className="text-sm font-medium">Diamond Color</Label>
+                            <Label htmlFor="certification" className="text-sm font-medium">Certification</Label>
                             <Select
-                              value={diamondForm.color}
+                              value={diamondForm.certification}
                               onValueChange={(value) =>
                                 setDiamondForm({
                                   ...diamondForm,
-                                  color: value as DiamondColor,
+                                  certification: value as Certification,
                                 })
                               }
                             >
                               <SelectTrigger className="h-11 text-base">
-                                <SelectValue placeholder="Select color" />
+                                <SelectValue placeholder="Select certification" />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="KL">KL</SelectItem>
-                                <SelectItem value="JK">JK</SelectItem>
-                                <SelectItem value="IJ">IJ</SelectItem>
-                                <SelectItem value="HI">HI</SelectItem>
-                                <SelectItem value="GH">GH</SelectItem>
+                                <SelectItem value="None">None / Other non-IGI certified</SelectItem>
+                                <SelectItem value="IGI">IGI certified</SelectItem>
                               </SelectContent>
                             </Select>
                           </div>
@@ -511,7 +510,7 @@ export default function Calculator() {
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div className="space-y-2">
-                            <Label htmlFor="clarity" className="text-sm font-medium">Diamond Clarity</Label>
+                            <Label htmlFor="clarity" className="text-sm font-medium">Diamond Clarity (optional)</Label>
                             <Select
                               value={diamondForm.clarity}
                               onValueChange={(value) =>
@@ -536,23 +535,25 @@ export default function Calculator() {
                             </Select>
                           </div>
                           <div className="space-y-2">
-                            <Label htmlFor="certification" className="text-sm font-medium">Certification</Label>
+                            <Label htmlFor="color" className="text-sm font-medium">Diamond Color (optional)</Label>
                             <Select
-                              value={diamondForm.certification}
+                              value={diamondForm.color}
                               onValueChange={(value) =>
                                 setDiamondForm({
                                   ...diamondForm,
-                                  certification: value as Certification,
+                                  color: value as DiamondColor,
                                 })
                               }
                             >
                               <SelectTrigger className="h-11 text-base">
-                                <SelectValue placeholder="Select certification" />
+                                <SelectValue placeholder="Select color" />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="None">None</SelectItem>
-                                <SelectItem value="Self">Self</SelectItem>
-                                <SelectItem value="IGI">IGI</SelectItem>
+                                <SelectItem value="KL">KL</SelectItem>
+                                <SelectItem value="JK">JK</SelectItem>
+                                <SelectItem value="IJ">IJ</SelectItem>
+                                <SelectItem value="HI">HI</SelectItem>
+                                <SelectItem value="GH">GH</SelectItem>
                               </SelectContent>
                             </Select>
                           </div>

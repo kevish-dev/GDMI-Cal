@@ -48,6 +48,8 @@ interface CalculationRecord {
   diamondWeight?: number;
   carat?: string;
   jewelryType?: string;
+  jewellerQuote?: number;
+  priceDifference?: number;
 }
 
 interface SystemAnalytics {

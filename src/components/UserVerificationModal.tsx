@@ -106,22 +106,17 @@ export function UserVerificationModal({ onSuccess }: UserVerificationModalProps)
 
   return (
     <Dialog open={isModalOpen} onOpenChange={() => !isLoading && closeVerificationModal()}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="w-[calc(100vw-2rem)] max-w-md mx-4 sm:mx-auto sm:w-full">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <User className="h-5 w-5" />
-            Welcome to GDMI Calculator!
+          <DialogTitle className="flex items-center gap-2 text-lg sm:text-xl">
+            Enter details and get the actual price
           </DialogTitle>
-          <DialogDescription>
-            To provide you with the best experience, we need some basic information. 
-            This is a one-time setup and helps us serve you better.
-          </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="name" className="flex items-center gap-2">
-              <User className="h-4 w-4" />
+        <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-4">
+          <div className="space-y-3 sm:space-y-2">
+            <Label htmlFor="name" className="flex items-center gap-2 text-sm sm:text-base font-medium">
+              <User className="h-4 w-4 sm:h-5 sm:w-5" />
               Full Name *
             </Label>
             <Input
@@ -132,12 +127,13 @@ export function UserVerificationModal({ onSuccess }: UserVerificationModalProps)
               onChange={handleInputChange('name')}
               disabled={isLoading}
               required
+              className="h-12 sm:h-10 text-base sm:text-sm px-4"
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="phone" className="flex items-center gap-2">
-              <Phone className="h-4 w-4" />
+          <div className="space-y-3 sm:space-y-2">
+            <Label htmlFor="phone" className="flex items-center gap-2 text-sm sm:text-base font-medium">
+              <Phone className="h-4 w-4 sm:h-5 sm:w-5" />
               Phone Number *
             </Label>
             <Input
@@ -148,35 +144,38 @@ export function UserVerificationModal({ onSuccess }: UserVerificationModalProps)
               onChange={handleInputChange('phone')}
               disabled={isLoading}
               required
+              className="h-12 sm:h-10 text-base sm:text-sm px-4"
             />
           </div>
 
           {isGettingLocation && (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <MapPin className="h-4 w-4" />
-              <span>Getting your location for better service...</span>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground p-3 bg-muted/50 rounded-md">
+              <MapPin className="h-4 w-4 sm:h-5 sm:w-5 animate-pulse" />
+              <span className="text-sm sm:text-base">Getting your location for better service...</span>
             </div>
           )}
 
-          <div className="flex gap-3 pt-4">
+          <div className="flex flex-col sm:flex-row gap-3 pt-6 sm:pt-4">
             <Button
               type="button"
               variant="outline"
               onClick={closeVerificationModal}
               disabled={isLoading}
-              className="flex-1"
+              className="flex-1 h-12 sm:h-10 text-base sm:text-sm font-medium order-2 sm:order-1"
             >
               Cancel
             </Button>
             <Button 
               type="submit" 
               disabled={isLoading || !formData.name.trim() || !formData.phone.trim()}
-              className="flex-1"
+              className="flex-1 h-12 sm:h-10 text-base sm:text-sm font-medium order-1 sm:order-2"
             >
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {isGettingLocation ? 'Getting Location...' : 'Saving...'}
+                  <span className="truncate">
+                    {isGettingLocation ? 'Getting Location...' : 'Saving...'}
+                  </span>
                 </>
               ) : (
                 'Get Started'
@@ -185,7 +184,7 @@ export function UserVerificationModal({ onSuccess }: UserVerificationModalProps)
           </div>
         </form>
 
-        <div className="text-xs text-muted-foreground text-center mt-4">
+        <div className="text-xs sm:text-sm text-muted-foreground text-center mt-6 sm:mt-4 px-2">
           Your information is securely stored and will only be used to improve our services.
         </div>
       </DialogContent>

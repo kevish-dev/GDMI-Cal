@@ -7,7 +7,7 @@ interface LayoutProps {
 
 export function Layout({ children }: LayoutProps) {
   return (
-    <div className="min-h-screen gradient-elegant">
+    <div className="min-h-screen gradient-elegant flex flex-col justify-center">
       <Navbar />
       <main className="flex-1 pb-safe">
         {children}
