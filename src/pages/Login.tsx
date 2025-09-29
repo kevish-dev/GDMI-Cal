@@ -60,29 +60,29 @@ export default function Login() {
 
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-12">
+      <div className="container mx-auto px-3 sm:px-4 py-6 sm:py-8 lg:py-12">
         <div className="max-w-md mx-auto">
-          {/* Header */}
-          <div className="text-center mb-8">
-            <div className="mx-auto mb-4 p-3 gradient-gold rounded-xl shadow-card w-fit">
-              <Gem className="h-8 w-8 text-primary-foreground" />
+          {/* Header - Mobile optimized */}
+          <div className="text-center mb-6 sm:mb-8">
+            <div className="mx-auto mb-3 sm:mb-4 p-2 sm:p-3 gradient-gold rounded-xl shadow-card w-fit">
+              <Gem className="h-6 w-6 sm:h-8 sm:w-8 text-primary-foreground" />
             </div>
-            <h1 className="text-3xl font-bold mb-2">Welcome Back</h1>
-            <p className="text-muted-foreground">
+            <h1 className="text-2xl sm:text-3xl font-bold mb-2">Welcome Back</h1>
+            <p className="text-muted-foreground text-sm sm:text-base px-2">
               Sign in to access your jewelry calculator
             </p>
           </div>
 
-          {/* Login Form */}
+          {/* Login Form - Mobile optimized */}
           <Card className="shadow-elegant">
-            <CardHeader className="space-y-1">
-              <CardTitle className="text-2xl text-center">Sign In</CardTitle>
-              <CardDescription className="text-center">
+            <CardHeader className="space-y-1 pb-4">
+              <CardTitle className="text-xl sm:text-2xl text-center">Sign In</CardTitle>
+              <CardDescription className="text-center text-sm">
                 Enter your email and password to continue
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
                  <div className="space-y-2">
                    <Label htmlFor="username" className="text-sm font-medium">
                      Username
@@ -97,7 +97,7 @@ export default function Login() {
                        value={formData.username}
                        onChange={handleChange}
                        required
-                       className="pl-10 transition-smooth focus:ring-2 focus:ring-primary/20"
+                       className="pl-10 h-11 text-base transition-smooth focus:ring-2 focus:ring-primary/20"
                      />
                    </div>
                  </div>
@@ -116,13 +116,13 @@ export default function Login() {
                       value={formData.password}
                       onChange={handleChange}
                       required
-                      className="pl-10 pr-10 transition-smooth focus:ring-2 focus:ring-primary/20"
+                      className="pl-10 pr-10 h-11 text-base transition-smooth focus:ring-2 focus:ring-primary/20"
                     />
                     <Button
                       type="button"
                       variant="ghost"
                       size="sm"
-                      className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0"
+                      className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 hover:bg-muted/50"
                       onClick={() => setShowPassword(!showPassword)}
                     >
                       {showPassword ? (
@@ -134,7 +134,7 @@ export default function Login() {
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between text-sm">
+                <div className="flex items-center justify-center text-sm">
                   <Link
                     to="/forgot-password"
                     className="text-primary hover:underline transition-smooth"
@@ -145,14 +145,14 @@ export default function Login() {
 
                 <Button
                   type="submit"
-                  className="w-full gradient-gold hover-glow text-base py-6"
+                  className="w-full gradient-gold hover-glow text-base h-12 sm:h-14 font-semibold"
                   disabled={isLoading}
                 >
                   {isLoading ? "Signing In..." : "Sign In"}
                 </Button>
               </form>
 
-              <div className="mt-6 pt-6 border-t text-center">
+              <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t text-center">
                 <p className="text-sm text-muted-foreground">
                   Don't have an account?{" "}
                   <Link
@@ -166,12 +166,12 @@ export default function Login() {
             </CardContent>
           </Card>
 
-          {/* Demo Credentials */}
-          <Card className="mt-6 border-muted/50">
-            <CardContent className="pt-6">
+          {/* Demo Credentials - Mobile optimized */}
+          <Card className="mt-4 sm:mt-6 border-muted/50">
+            <CardContent className="pt-4 sm:pt-6">
               <div className="text-center text-sm text-muted-foreground">
                  <p className="font-medium mb-2">Admin Credentials:</p>
-                 <div className="space-y-1">
+                 <div className="space-y-1 text-xs sm:text-sm">
                    <p><strong>Username:</strong> admin</p>
                    <p><strong>Password:</strong> admin123</p>
                  </div>

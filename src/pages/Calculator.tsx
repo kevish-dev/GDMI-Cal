@@ -220,45 +220,44 @@ export default function Calculator() {
 
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 lg:py-8">
         <div className="max-w-6xl mx-auto">
-          {/* Header */}
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              Jewelry Price Calculator
+          {/* Header - Mobile optimized */}
+          <div className="text-center mb-6 sm:mb-8">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2 sm:mb-4 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              Jewelry Calculator
             </h1>
-            <p className="text-muted-foreground text-lg">
-              Get accurate pricing for gold and diamond jewelry with detailed
-              breakdowns
+            <p className="text-muted-foreground text-sm sm:text-base lg:text-lg px-2">
+              Get accurate pricing for gold and diamond jewelry
             </p>
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-8">
+          <div className="grid lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
             {/* Input Panel */}
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               {/* Jewelry Type Selection */}
               <Card className="shadow-card">
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <Gem className="h-5 w-5" />
+                <CardHeader className="pb-4">
+                  <CardTitle className="flex items-center space-x-2 text-lg sm:text-xl">
+                    <Gem className="h-4 w-4 sm:h-5 sm:w-5" />
                     <span>Select Jewelry Type</span>
                   </CardTitle>
-                  <CardDescription>
-                    Choose the type of jewelry you want to calculate
+                  <CardDescription className="text-sm">
+                    Choose the type of jewelry to calculate
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     <Button
                       variant={jewelryType === "gold" ? "default" : "outline"}
                       className={cn(
-                        "h-20 flex-col space-y-2 text-left transition-smooth",
+                        "h-16 sm:h-20 flex-col space-y-2 text-left transition-smooth",
                         jewelryType === "gold" && "gradient-gold shadow-glow"
                       )}
                       onClick={() => handleJewelryTypeSelect("gold")}
                     >
-                      <Crown className="h-8 w-8" />
-                      <span className="font-medium">Gold Jewelry</span>
+                      <Crown className="h-6 w-6 sm:h-8 sm:w-8" />
+                      <span className="font-medium text-sm sm:text-base">Gold Jewelry</span>
                     </Button>
 
                     <Button
@@ -266,20 +265,20 @@ export default function Calculator() {
                         jewelryType === "diamond" ? "default" : "outline"
                       }
                       className={cn(
-                        "h-20 flex-col space-y-2 text-left transition-smooth",
+                        "h-16 sm:h-20 flex-col space-y-2 text-left transition-smooth",
                         jewelryType === "diamond" &&
                           "gradient-diamond shadow-glow"
                       )}
                       onClick={() => handleJewelryTypeSelect("diamond")}
                     >
-                      <Diamond className="h-8 w-8" />
-                      <span className="font-medium">Diamond Jewelry</span>
+                      <Diamond className="h-6 w-6 sm:h-8 sm:w-8" />
+                      <span className="font-medium text-sm sm:text-base">Diamond Jewelry</span>
                     </Button>
                   </div>
                 </CardContent>
               </Card>
 
-              {/* Dynamic Form */}
+              {/* Dynamic Form - Mobile optimized */}
               {jewelryType && (
                 <Card
                   className={cn(
@@ -287,30 +286,30 @@ export default function Calculator() {
                     jewelryType === "gold" ? "jewelry-gold" : "jewelry-diamond"
                   )}
                 >
-                  <CardHeader>
-                    <CardTitle className="flex items-center space-x-2">
+                  <CardHeader className="pb-4">
+                    <CardTitle className="flex items-center space-x-2 text-lg sm:text-xl">
                       {jewelryType === "gold" ? (
                         <>
-                          <Crown className="h-5 w-5 text-primary" />
+                          <Crown className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                           <span>Gold Jewelry Details</span>
                         </>
                       ) : (
                         <>
-                          <Diamond className="h-5 w-5 text-secondary" />
+                          <Diamond className="h-4 w-4 sm:h-5 sm:w-5 text-secondary" />
                           <span>Diamond Jewelry Details</span>
                         </>
                       )}
                     </CardTitle>
-                    <CardDescription>
+                    <CardDescription className="text-sm">
                       Enter the specifications for accurate pricing
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     {jewelryType === "gold" ? (
                       <>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div className="space-y-2">
-                            <Label htmlFor="weight">Gold Weight (g)</Label>
+                            <Label htmlFor="weight" className="text-sm font-medium">Gold Weight (g)</Label>
                             <Input
                               id="weight"
                               type="number"
@@ -322,10 +321,11 @@ export default function Calculator() {
                                   weight: e.target.value,
                                 })
                               }
+                              className="h-11 text-base"
                             />
                           </div>
                           <div className="space-y-2">
-                            <Label htmlFor="carat">carat</Label>
+                            <Label htmlFor="carat" className="text-sm font-medium">carat</Label>
                             <Select
                               value={goldForm.carat}
                               onValueChange={(value) =>
@@ -335,7 +335,7 @@ export default function Calculator() {
                                 })
                               }
                             >
-                              <SelectTrigger>
+                              <SelectTrigger className="h-11 text-base">
                                 <SelectValue placeholder="Select carat" />
                               </SelectTrigger>
                               <SelectContent>
@@ -349,7 +349,7 @@ export default function Calculator() {
                           </div>
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor="type">Gold Type</Label>
+                          <Label htmlFor="type" className="text-sm font-medium">Gold Type</Label>
                           <Select
                             value={goldForm.type}
                             onValueChange={(value) =>
@@ -359,7 +359,7 @@ export default function Calculator() {
                               })
                             }
                           >
-                            <SelectTrigger>
+                            <SelectTrigger className="h-11 text-base">
                               <SelectValue placeholder="Select gold type" />
                             </SelectTrigger>
                             <SelectContent>
@@ -374,7 +374,7 @@ export default function Calculator() {
                         </div>
                         
                         <div className="space-y-2">
-                          <Label htmlFor="goldJewellerQuote">
+                          <Label htmlFor="goldJewellerQuote" className="text-sm font-medium">
                             Price Quoted by Your Jeweller (Optional)
                           </Label>
                           <Input
@@ -388,14 +388,15 @@ export default function Calculator() {
                                 jewellerQuote: e.target.value,
                               })
                             }
+                            className="h-11 text-base"
                           />
                         </div>
                       </>
                     ) : (
                       <>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div className="space-y-2">
-                            <Label htmlFor="goldWeight">Gold Weight (g)</Label>
+                            <Label htmlFor="goldWeight" className="text-sm font-medium">Gold Weight (g)</Label>
                             <Input
                               id="goldWeight"
                               type="number"
@@ -407,10 +408,11 @@ export default function Calculator() {
                                   goldWeight: e.target.value,
                                 })
                               }
+                              className="h-11 text-base"
                             />
                           </div>
                           <div className="space-y-2">
-                            <Label htmlFor="diamondcarat">carat</Label>
+                            <Label htmlFor="diamondcarat" className="text-sm font-medium">carat</Label>
                             <Select
                               value={diamondForm.carat}
                               onValueChange={(value) =>
@@ -420,7 +422,7 @@ export default function Calculator() {
                                 })
                               }
                             >
-                              <SelectTrigger>
+                              <SelectTrigger className="h-11 text-base">
                                 <SelectValue placeholder="Select carat" />
                               </SelectTrigger>
                               <SelectContent>
@@ -434,9 +436,9 @@ export default function Calculator() {
                           </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div className="space-y-2">
-                            <Label htmlFor="diamondWeight">
+                            <Label htmlFor="diamondWeight" className="text-sm font-medium">
                               Diamond Weight (ct)
                             </Label>
                             <Input
@@ -451,10 +453,11 @@ export default function Calculator() {
                                   diamondWeight: e.target.value,
                                 })
                               }
+                              className="h-11 text-base"
                             />
                           </div>
                           <div className="space-y-2">
-                            <Label htmlFor="color">Diamond Color</Label>
+                            <Label htmlFor="color" className="text-sm font-medium">Diamond Color</Label>
                             <Select
                               value={diamondForm.color}
                               onValueChange={(value) =>
@@ -464,7 +467,7 @@ export default function Calculator() {
                                 })
                               }
                             >
-                              <SelectTrigger>
+                              <SelectTrigger className="h-11 text-base">
                                 <SelectValue placeholder="Select color" />
                               </SelectTrigger>
                               <SelectContent>
@@ -478,9 +481,9 @@ export default function Calculator() {
                           </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div className="space-y-2">
-                            <Label htmlFor="clarity">Diamond Clarity</Label>
+                            <Label htmlFor="clarity" className="text-sm font-medium">Diamond Clarity</Label>
                             <Select
                               value={diamondForm.clarity}
                               onValueChange={(value) =>
@@ -490,7 +493,7 @@ export default function Calculator() {
                                 })
                               }
                             >
-                              <SelectTrigger>
+                              <SelectTrigger className="h-11 text-base">
                                 <SelectValue placeholder="Select clarity" />
                               </SelectTrigger>
                               <SelectContent>
@@ -505,7 +508,7 @@ export default function Calculator() {
                             </Select>
                           </div>
                           <div className="space-y-2">
-                            <Label htmlFor="certification">Certification</Label>
+                            <Label htmlFor="certification" className="text-sm font-medium">Certification</Label>
                             <Select
                               value={diamondForm.certification}
                               onValueChange={(value) =>
@@ -515,7 +518,7 @@ export default function Calculator() {
                                 })
                               }
                             >
-                              <SelectTrigger>
+                              <SelectTrigger className="h-11 text-base">
                                 <SelectValue placeholder="Select certification" />
                               </SelectTrigger>
                               <SelectContent>
@@ -528,7 +531,7 @@ export default function Calculator() {
                         </div>
 
                         <div className="space-y-2">
-                          <Label htmlFor="stoneWeight">
+                          <Label htmlFor="stoneWeight" className="text-sm font-medium">
                             Optional Stone Weight (g)
                           </Label>
                           <Input
@@ -542,11 +545,12 @@ export default function Calculator() {
                                 stoneWeight: e.target.value,
                               })
                             }
+                            className="h-11 text-base"
                           />
                         </div>
                         
                         <div className="space-y-2">
-                          <Label htmlFor="diamondJewellerQuote">
+                          <Label htmlFor="diamondJewellerQuote" className="text-sm font-medium">
                             Price Quoted by Your Jeweller (Optional)
                           </Label>
                           <Input
@@ -560,6 +564,7 @@ export default function Calculator() {
                                 jewellerQuote: e.target.value,
                               })
                             }
+                            className="h-11 text-base"
                           />
                         </div>
                       </>
@@ -568,7 +573,7 @@ export default function Calculator() {
                     <Button
                       onClick={calculatePrice}
                       disabled={!isFormValid() || isCalculating}
-                      className="w-full gradient-gold hover-glow text-base py-6 mt-6"
+                      className="w-full gradient-gold hover-glow text-base h-12 sm:h-14 mt-6 font-semibold"
                     >
                       {isCalculating ? "Calculating..." : "Calculate Price"}
                     </Button>
@@ -577,41 +582,41 @@ export default function Calculator() {
               )}
             </div>
 
-            {/* Results Panel */}
-            <div className="space-y-6">
+            {/* Results Panel - Mobile optimized */}
+            <div className="space-y-4 sm:space-y-6">
               {priceBreakdown ? (
                 <Card className="shadow-elegant animate-fade-in">
-                  <CardHeader>
-                    <CardTitle className="flex items-center space-x-2">
-                      <IndianRupee className="h-5 w-5" />
+                  <CardHeader className="pb-4">
+                    <CardTitle className="flex items-center space-x-2 text-lg sm:text-xl">
+                      <IndianRupee className="h-4 w-4 sm:h-5 sm:w-5" />
                       <span>Price Breakdown</span>
                     </CardTitle>
-                    <CardDescription>
+                    <CardDescription className="text-sm">
                       Detailed calculation of your jewelry price
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="space-y-3">
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-muted-foreground">
+                      <div className="flex justify-between items-center py-2 border-b border-border/50">
+                        <span className="text-sm sm:text-base text-muted-foreground">
                           Gold Value:
                         </span>
                         <Badge
                           variant="outline"
-                          className="text-base px-3 py-1"
+                          className="text-sm sm:text-base px-2 sm:px-3 py-1 font-semibold"
                         >
                           ₹{priceBreakdown.goldValue.toLocaleString("en-IN")}
                         </Badge>
                       </div>
 
                       {priceBreakdown.diamondValue > 0 && (
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm text-muted-foreground">
+                        <div className="flex justify-between items-center py-2 border-b border-border/50">
+                          <span className="text-sm sm:text-base text-muted-foreground">
                             Diamond Value:
                           </span>
                           <Badge
                             variant="outline"
-                            className="text-base px-3 py-1"
+                            className="text-sm sm:text-base px-2 sm:px-3 py-1 font-semibold"
                           >
                             ₹
                             {priceBreakdown.diamondValue.toLocaleString(
@@ -621,53 +626,53 @@ export default function Calculator() {
                         </div>
                       )}
 
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-muted-foreground">
+                      <div className="flex justify-between items-center py-2 border-b border-border/50">
+                        <span className="text-sm sm:text-base text-muted-foreground">
                           Making Charges:
                         </span>
                         <Badge
                           variant="outline"
-                          className="text-base px-3 py-1"
+                          className="text-sm sm:text-base px-2 sm:px-3 py-1 font-semibold"
                         >
                           ₹
                           {priceBreakdown.makingCharges.toLocaleString("en-IN")}
                         </Badge>
                       </div>
 
-                      <Separator />
+                      <Separator className="my-4" />
 
-                      <div className="flex justify-between items-center">
-                        <span className="text-lg font-semibold">
+                      <div className="flex justify-between items-center py-3 bg-muted/30 rounded-lg px-3">
+                        <span className="text-base sm:text-lg font-bold">
                           Final Price:
                         </span>
-                        <Badge className="text-xl px-4 py-2 gradient-gold">
+                        <Badge className="text-lg sm:text-xl px-3 sm:px-4 py-2 gradient-gold font-bold">
                           ₹{priceBreakdown.finalPrice.toLocaleString("en-IN")}
                         </Badge>
                       </div>
 
-                      {/* Jeweller Quote Comparison */}
+                      {/* Jeweller Quote Comparison - Mobile optimized */}
                       {priceBreakdown.jewellerQuote && (
                         <>
-                          <Separator />
-                          <div className="space-y-3 bg-muted/50 p-4 rounded-lg">
-                            <h4 className="font-medium text-center">Price Comparison</h4>
+                          <Separator className="my-4" />
+                          <div className="space-y-3 bg-muted/50 p-3 sm:p-4 rounded-lg">
+                            <h4 className="font-medium text-center text-sm sm:text-base">Price Comparison</h4>
                             
-                            <div className="flex justify-between items-center">
-                              <span className="text-sm text-muted-foreground">
+                            <div className="flex justify-between items-center py-2">
+                              <span className="text-xs sm:text-sm text-muted-foreground">
                                 Your Jeweller's Quote:
                               </span>
-                              <Badge variant="outline" className="text-base px-3 py-1">
+                              <Badge variant="outline" className="text-sm px-2 py-1 font-semibold">
                                 ₹{priceBreakdown.jewellerQuote.toLocaleString("en-IN")}
                               </Badge>
                             </div>
                             
-                            <div className="flex justify-between items-center">
-                              <span className="text-sm text-muted-foreground">
-                                Market Price Difference:
+                            <div className="flex justify-between items-center py-2">
+                              <span className="text-xs sm:text-sm text-muted-foreground">
+                                Price Difference:
                               </span>
                               <Badge 
                                 variant={priceBreakdown.priceDifference! > 0 ? "destructive" : "default"}
-                                className="text-base px-3 py-1"
+                                className="text-sm px-2 py-1 font-semibold"
                               >
                                 {priceBreakdown.priceDifference! > 0 ? "+" : ""}
                                 ₹{Math.abs(priceBreakdown.priceDifference!).toLocaleString("en-IN")}
@@ -675,7 +680,7 @@ export default function Calculator() {
                               </Badge>
                             </div>
                             
-                            <div className="text-center text-sm text-muted-foreground mt-2">
+                            <div className="text-center text-xs sm:text-sm text-muted-foreground mt-2 p-2 bg-background/50 rounded">
                               {priceBreakdown.priceDifference! > 0 
                                 ? "Market price is higher than jeweller's quote" 
                                 : "Market price is lower than jeweller's quote"}
@@ -685,8 +690,8 @@ export default function Calculator() {
                       )}
                     </div>
 
-                    <div className="pt-4 border-t text-center">
-                      <p className="text-sm text-muted-foreground">
+                    <div className="pt-3 sm:pt-4 border-t text-center">
+                      <p className="text-xs sm:text-sm text-muted-foreground">
                         Price calculated based on current market rates
                       </p>
                     </div>
@@ -694,12 +699,12 @@ export default function Calculator() {
                 </Card>
               ) : (
                 <Card className="shadow-card border-dashed">
-                  <CardContent className="flex flex-col items-center justify-center py-16 text-center">
-                    <Gem className="h-12 w-12 text-muted-foreground mb-4" />
-                    <h3 className="text-lg font-semibold mb-2">
+                  <CardContent className="flex flex-col items-center justify-center py-12 sm:py-16 text-center px-4">
+                    <Gem className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground mb-3 sm:mb-4" />
+                    <h3 className="text-base sm:text-lg font-semibold mb-2">
                       No calculation yet
                     </h3>
-                    <p className="text-muted-foreground">
+                    <p className="text-sm text-muted-foreground">
                       Select jewelry type and enter details to calculate pricing
                     </p>
                   </CardContent>

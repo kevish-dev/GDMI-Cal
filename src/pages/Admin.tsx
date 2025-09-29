@@ -143,144 +143,144 @@ export default function Admin() {
 
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 lg:py-8">
         <div className="max-w-7xl mx-auto">
-          {/* Header */}
-          <div className="flex items-center justify-between mb-8">
+          {/* Header - Mobile optimized */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8 space-y-4 sm:space-y-0">
             <div>
-              <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-accent to-primary bg-clip-text text-transparent">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2 bg-gradient-to-r from-accent to-primary bg-clip-text text-transparent">
                 Admin Dashboard
               </h1>
-              <p className="text-muted-foreground text-lg">
+              <p className="text-muted-foreground text-sm sm:text-base lg:text-lg">
                 Manage jewelry rates and monitor system performance
               </p>
             </div>
-            <div className="flex items-center justify-between">
-              <Badge variant="outline" className="px-4 py-2 text-sm">
-                <Settings className="h-4 w-4 mr-2" />
-                {user?.username} - Administrator
+            <div className="flex items-center justify-between space-x-3">
+              <Badge variant="outline" className="px-3 py-2 text-xs sm:text-sm">
+                <Settings className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
+                <span className="hidden sm:inline">{user?.username} - </span>Administrator
               </Badge>
               <Button 
                 onClick={handleLogout}
                 variant="ghost" 
                 size="sm"
-                className="text-muted-foreground hover:text-destructive"
+                className="text-muted-foreground hover:text-destructive h-8 w-8 sm:h-auto sm:w-auto p-1 sm:p-2"
               >
-                <LogOut className="h-4 w-4 mr-2" />
-                Logout
+                <LogOut className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Logout</span>
               </Button>
             </div>
           </div>
 
-          {/* Statistics Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {/* Statistics Cards - Mobile responsive grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
             <Card className="shadow-card">
-              <CardContent className="p-6">
+              <CardContent className="p-4 sm:p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-muted-foreground">Total Calculations</p>
-                    <p className="text-2xl font-bold">{analytics.totalCalculations.toLocaleString()}</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground">Total Calculations</p>
+                    <p className="text-xl sm:text-2xl font-bold">{analytics.totalCalculations.toLocaleString()}</p>
                   </div>
-                  <Calculator className="h-8 w-8 text-primary" />
+                  <Calculator className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
                 </div>
-                <div className="mt-4">
-                  <Progress value={analytics.totalCalculations > 0 ? 75 : 0} className="h-2" />
+                <div className="mt-3 sm:mt-4">
+                  <Progress value={analytics.totalCalculations > 0 ? 75 : 0} className="h-1.5 sm:h-2" />
                   <p className="text-xs text-muted-foreground mt-2">Real-time data</p>
                 </div>
               </CardContent>
             </Card>
 
             <Card className="shadow-card">
-              <CardContent className="p-6">
+              <CardContent className="p-4 sm:p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-muted-foreground">Active Users</p>
-                    <p className="text-2xl font-bold">{analytics.todayCalculations}</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground">Active Users</p>
+                    <p className="text-xl sm:text-2xl font-bold">{analytics.todayCalculations}</p>
                   </div>
-                  <Users className="h-8 w-8 text-secondary" />
+                  <Users className="h-6 w-6 sm:h-8 sm:w-8 text-secondary" />
                 </div>
-                <div className="mt-4">
-                  <Progress value={analytics.todayCalculations > 0 ? 60 : 0} className="h-2" />
+                <div className="mt-3 sm:mt-4">
+                  <Progress value={analytics.todayCalculations > 0 ? 60 : 0} className="h-1.5 sm:h-2" />
                   <p className="text-xs text-muted-foreground mt-2">Today's activity</p>
                 </div>
               </CardContent>
             </Card>
 
             <Card className="shadow-card">
-              <CardContent className="p-6">
+              <CardContent className="p-4 sm:p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-muted-foreground">Avg. Calculation Value</p>
-                    <p className="text-2xl font-bold">₹{(analytics.avgValue / 1000).toFixed(0)}K</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground">Avg. Calculation Value</p>
+                    <p className="text-xl sm:text-2xl font-bold">₹{(analytics.avgValue / 1000).toFixed(0)}K</p>
                   </div>
-                  <DollarSign className="h-8 w-8 text-accent" />
+                  <DollarSign className="h-6 w-6 sm:h-8 sm:w-8 text-accent" />
                 </div>
-                <div className="mt-4">
-                  <Progress value={analytics.avgValue > 0 ? 85 : 0} className="h-2" />
+                <div className="mt-3 sm:mt-4">
+                  <Progress value={analytics.avgValue > 0 ? 85 : 0} className="h-1.5 sm:h-2" />
                   <p className="text-xs text-muted-foreground mt-2">Average calculation</p>
                 </div>
               </CardContent>
             </Card>
 
             <Card className="shadow-card">
-              <CardContent className="p-6">
+              <CardContent className="p-4 sm:p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-muted-foreground">Total Value</p>
-                    <p className="text-2xl font-bold">₹{(analytics.totalValue / 100000).toFixed(1)}L</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground">Total Value</p>
+                    <p className="text-xl sm:text-2xl font-bold">₹{(analytics.totalValue / 100000).toFixed(1)}L</p>
                   </div>
-                  <TrendingUp className="h-8 w-8 text-green-500" />
+                  <TrendingUp className="h-6 w-6 sm:h-8 sm:w-8 text-green-500" />
                 </div>
-                <div className="mt-4">
-                  <Progress value={analytics.totalValue > 0 ? Math.min((analytics.totalValue / 1000000) * 100, 100) : 0} className="h-2" />
+                <div className="mt-3 sm:mt-4">
+                  <Progress value={analytics.totalValue > 0 ? Math.min((analytics.totalValue / 1000000) * 100, 100) : 0} className="h-1.5 sm:h-2" />
                   <p className="text-xs text-muted-foreground mt-2">Total portfolio value</p>
                 </div>
               </CardContent>
             </Card>
           </div>
 
-          {/* Main Content Tabs */}
-          <Tabs defaultValue="rates" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="rates" className="flex items-center space-x-2">
-                <Crown className="h-4 w-4" />
+          {/* Main Content Tabs - Mobile responsive */}
+          <Tabs defaultValue="rates" className="space-y-4 sm:space-y-6">
+            <TabsList className="grid w-full grid-cols-3 h-auto p-1">
+              <TabsTrigger value="rates" className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm py-2">
+                <Crown className="h-3 w-3 sm:h-4 sm:w-4" />
                 <span>Gold Rates</span>
               </TabsTrigger>
-              <TabsTrigger value="diamonds" className="flex items-center space-x-2">
-                <Diamond className="h-4 w-4" />
+              <TabsTrigger value="diamonds" className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm py-2">
+                <Diamond className="h-3 w-3 sm:h-4 sm:w-4" />
                 <span>Diamond Rates</span>
               </TabsTrigger>
-              <TabsTrigger value="analytics" className="flex items-center space-x-2">
-                <TrendingUp className="h-4 w-4" />
+              <TabsTrigger value="analytics" className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm py-2">
+                <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4" />
                 <span>Analytics</span>
               </TabsTrigger>
             </TabsList>
 
-            {/* Gold Rates Tab */}
-            <TabsContent value="rates" className="space-y-6">
-              <div className="grid lg:grid-cols-2 gap-6">
+            {/* Gold Rates Tab - Mobile optimized */}
+            <TabsContent value="rates" className="space-y-4 sm:space-y-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                 {/* Current Rates */}
                 <Card className="shadow-card">
-                  <CardHeader>
-                    <CardTitle className="flex items-center space-x-2">
-                      <Crown className="h-5 w-5 text-primary" />
+                  <CardHeader className="pb-4">
+                    <CardTitle className="flex items-center space-x-2 text-lg sm:text-xl">
+                      <Crown className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                       <span>Current Gold Rates</span>
                     </CardTitle>
-                    <CardDescription>
+                    <CardDescription className="text-sm">
                       Real-time gold rates per gram by carat
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-4">
+                    <div className="space-y-3 sm:space-y-4">
                       {goldRates.map((rate, index) => (
-                        <div key={index} className="flex items-center justify-between p-4 rounded-lg bg-muted/30">
+                        <div key={index} className="flex items-center justify-between p-3 sm:p-4 rounded-lg bg-muted/30">
                           <div>
-                            <p className="font-semibold">{rate.carat} Gold</p>
-                            <p className="text-sm text-muted-foreground">
+                            <p className="font-semibold text-sm sm:text-base">{rate.carat} Gold</p>
+                            <p className="text-xs sm:text-sm text-muted-foreground">
                               Updated: {rate.lastUpdated}
                             </p>
                           </div>
-                          <Badge className="text-lg px-3 py-1 gradient-gold">
+                          <Badge className="text-sm sm:text-lg px-2 sm:px-3 py-1 gradient-gold font-semibold">
                             ₹{rate.rate.toLocaleString()}/g
                           </Badge>
                         </div>
@@ -291,26 +291,27 @@ export default function Admin() {
 
                 {/* Update Rates */}
                 <Card className="shadow-card">
-                  <CardHeader>
-                    <CardTitle className="flex items-center space-x-2">
-                      <Upload className="h-5 w-5" />
+                  <CardHeader className="pb-4">
+                    <CardTitle className="flex items-center space-x-2 text-lg sm:text-xl">
+                      <Upload className="h-4 w-4 sm:h-5 sm:w-5" />
                       <span>Update Gold Rates</span>
                     </CardTitle>
-                    <CardDescription>
+                    <CardDescription className="text-sm">
                       Enter 24K gold rate - all other carat rates will be calculated automatically
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="rate24k">24K Gold Rate per gram (₹)</Label>
+                      <Label htmlFor="rate24k" className="text-sm font-medium">24K Gold Rate per gram (₹)</Label>
                       <Input
                         id="rate24k"
                         type="number"
                         placeholder="Enter 24K gold rate"
                         value={newGoldRate24K}
                         onChange={(e) => setNewGoldRate24K(e.target.value)}
+                        className="h-11 text-base"
                       />
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-xs sm:text-sm text-muted-foreground p-2 bg-muted/30 rounded">
                         Other rates will be calculated automatically:
                         <br />22K = 93% | 18K = 76% | 14K = 60% | 9K = 39%
                       </p>
@@ -319,7 +320,7 @@ export default function Admin() {
                     <Button
                       onClick={handleGoldRateUpdate}
                       disabled={isUploading}
-                      className="w-full gradient-gold hover-glow"
+                      className="w-full gradient-gold hover-glow h-11 sm:h-12 font-semibold"
                     >
                       {isUploading ? "Updating..." : "Update All Gold Rates"}
                     </Button>
@@ -328,23 +329,23 @@ export default function Admin() {
               </div>
             </TabsContent>
 
-            {/* Diamond Rates Tab */}
-            <TabsContent value="diamonds" className="space-y-6">
+            {/* Diamond Rates Tab - Mobile optimized */}
+            <TabsContent value="diamonds" className="space-y-4 sm:space-y-6">
               <Card className="shadow-card">
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <FileSpreadsheet className="h-5 w-5 text-secondary" />
+                <CardHeader className="pb-4">
+                  <CardTitle className="flex items-center space-x-2 text-lg sm:text-xl">
+                    <FileSpreadsheet className="h-4 w-4 sm:h-5 sm:w-5 text-secondary" />
                     <span>Diamond Rate Management</span>
                   </CardTitle>
-                  <CardDescription>
+                  <CardDescription className="text-sm">
                     Upload CSV files with diamond rates based on color, clarity, and certification
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  <div className="border-2 border-dashed border-muted rounded-lg p-8 text-center">
-                    <Diamond className="h-12 w-12 text-secondary mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold mb-2">Upload Diamond Rates CSV</h3>
-                    <p className="text-muted-foreground mb-4">
+                  <div className="border-2 border-dashed border-muted rounded-lg p-4 sm:p-8 text-center">
+                    <Diamond className="h-8 w-8 sm:h-12 sm:w-12 text-secondary mx-auto mb-3 sm:mb-4" />
+                    <h3 className="text-base sm:text-lg font-semibold mb-2">Upload Diamond Rates CSV</h3>
+                    <p className="text-sm text-muted-foreground mb-4 px-2">
                       Upload a CSV file with columns: Color, Clarity, Certification, Rate
                     </p>
                     <div className="flex items-center justify-center">

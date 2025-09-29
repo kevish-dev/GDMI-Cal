@@ -81,29 +81,29 @@ export default function Register() {
 
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-12">
+      <div className="container mx-auto px-3 sm:px-4 py-6 sm:py-8 lg:py-12">
         <div className="max-w-md mx-auto">
-          {/* Header */}
-          <div className="text-center mb-8">
-            <div className="mx-auto mb-4 p-3 gradient-gold rounded-xl shadow-card w-fit">
-              <Gem className="h-8 w-8 text-primary-foreground" />
+          {/* Header - Mobile optimized */}
+          <div className="text-center mb-6 sm:mb-8">
+            <div className="mx-auto mb-3 sm:mb-4 p-2 sm:p-3 gradient-gold rounded-xl shadow-card w-fit">
+              <Gem className="h-6 w-6 sm:h-8 sm:w-8 text-primary-foreground" />
             </div>
-            <h1 className="text-3xl font-bold mb-2">Create Account</h1>
-            <p className="text-muted-foreground">
+            <h1 className="text-2xl sm:text-3xl font-bold mb-2">Create Account</h1>
+            <p className="text-muted-foreground text-sm sm:text-base px-2">
               Join JewelCalc for professional jewelry pricing
             </p>
           </div>
 
-          {/* Registration Form */}
+          {/* Registration Form - Mobile optimized */}
           <Card className="shadow-elegant">
-            <CardHeader className="space-y-1">
-              <CardTitle className="text-2xl text-center">Sign Up</CardTitle>
-              <CardDescription className="text-center">
+            <CardHeader className="space-y-1 pb-4">
+              <CardTitle className="text-xl sm:text-2xl text-center">Sign Up</CardTitle>
+              <CardDescription className="text-center text-sm">
                 Choose a username and password to create your account
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
                 <div className="space-y-2">
                   <Label htmlFor="username" className="text-sm font-medium">
                     Username
@@ -118,7 +118,7 @@ export default function Register() {
                       value={formData.username}
                       onChange={handleChange}
                       required
-                      className="pl-10 transition-smooth focus:ring-2 focus:ring-primary/20"
+                      className="pl-10 h-11 text-base transition-smooth focus:ring-2 focus:ring-primary/20"
                     />
                   </div>
                 </div>

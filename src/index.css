@@ -193,6 +193,31 @@ Elegant luxury design with sophisticated color palette and modern aesthetics
   .hover-glow {
     @apply transition-smooth hover:shadow-glow;
   }
+  
+  /* Mobile-specific utilities */
+  .mobile-padding {
+    @apply px-3 sm:px-4 lg:px-6;
+  }
+  
+  .mobile-text {
+    @apply text-sm sm:text-base;
+  }
+  
+  .mobile-heading {
+    @apply text-lg sm:text-xl lg:text-2xl;
+  }
+  
+  .mobile-container {
+    @apply container mx-auto px-3 sm:px-4 lg:px-6;
+  }
+  
+  .mobile-card-padding {
+    @apply p-4 sm:p-6;
+  }
+  
+  .mobile-button-height {
+    @apply h-11 sm:h-12;
+  }
 }
 
 @layer base {
@@ -202,5 +227,51 @@ Elegant luxury design with sophisticated color palette and modern aesthetics
 
   body {
     @apply bg-background text-foreground;
+  }
+
+  /* Mobile-first responsive improvements */
+  
+  /* Ensure safe areas for mobile devices */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  /* Improve touch targets for mobile */
+  @media (max-width: 768px) {
+    button, [role="button"], input, select, textarea {
+      min-height: 44px; /* iOS recommended minimum touch target */
+    }
+    
+    /* Improve tap target spacing */
+    .space-y-2 > * + * {
+      margin-top: 0.75rem;
+    }
+    
+    .space-y-3 > * + * {
+      margin-top: 1rem;
+    }
+  }
+  
+  /* Better font scaling on mobile */
+  @media (max-width: 640px) {
+    html {
+      font-size: 14px;
+    }
+  }
+  
+  /* Smooth animations for mobile */
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 }
