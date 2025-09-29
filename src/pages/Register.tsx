@@ -5,13 +5,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Layout } from "@/components/Layout/Layout";
-import { Gem, Eye, EyeOff, Mail, Lock, User } from "lucide-react";
+import { Gem, Eye, EyeOff, Lock, User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function Register() {
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
+    username: "",
     password: "",
     confirmPassword: ""
   });
@@ -20,6 +20,7 @@ export default function Register() {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { register } = useAuth();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -40,22 +41,37 @@ export default function Register() {
       return;
     }
 
+    if (formData.password.length < 6) {
+      toast({
+        title: "Password too short",
+        description: "Password must be at least 6 characters long.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      // Mock registration - replace with actual auth logic
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      const success = await register(formData.username, formData.password);
       
-      toast({
-        title: "Account created successfully!",
-        description: "Welcome to JewelCalc. You can now start calculating."
-      });
-
-      navigate("/calculator");
+      if (success) {
+        toast({
+          title: "Account created successfully!",
+          description: "Welcome to GDMI Calculator!"
+        });
+        navigate("/calculator");
+      } else {
+        toast({
+          title: "Registration failed",
+          description: "Username already exists or registration failed. Please try again.",
+          variant: "destructive"
+        });
+      }
     } catch (error) {
       toast({
         title: "Registration failed",
-        description: "Something went wrong. Please try again.",
+        description: error instanceof Error ? error.message : "An error occurred during registration",
         variant: "destructive"
       });
     } finally {
@@ -83,42 +99,23 @@ export default function Register() {
             <CardHeader className="space-y-1">
               <CardTitle className="text-2xl text-center">Sign Up</CardTitle>
               <CardDescription className="text-center">
-                Enter your details to create your account
+                Choose a username and password to create your account
               </CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="name" className="text-sm font-medium">
-                    Full Name
+                  <Label htmlFor="username" className="text-sm font-medium">
+                    Username
                   </Label>
                   <div className="relative">
                     <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
-                      id="name"
-                      name="name"
+                      id="username"
+                      name="username"
                       type="text"
-                      placeholder="Enter your full name"
-                      value={formData.name}
-                      onChange={handleChange}
-                      required
-                      className="pl-10 transition-smooth focus:ring-2 focus:ring-primary/20"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="email" className="text-sm font-medium">
-                    Email Address
-                  </Label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="email"
-                      name="email"
-                      type="email"
-                      placeholder="Enter your email"
-                      value={formData.email}
+                      placeholder="Choose a username"
+                      value={formData.username}
                       onChange={handleChange}
                       required
                       className="pl-10 transition-smooth focus:ring-2 focus:ring-primary/20"
