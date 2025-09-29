@@ -74,10 +74,10 @@ export function RatesProvider({ children }: { children: ReactNode }) {
   ]);
 
   const [makingCharges, setMakingCharges] = useState<MakingCharges>({
-    chains: 800,
-    plain: 600,
-    temple: 1000,
-    italianGold: 1200
+    chains: 2.5,
+    plain: 3.5,
+    temple: 7,
+    italianGold: 18
   });
 
   const [calculations, setCalculations] = useState<CalculationRecord[]>([]);

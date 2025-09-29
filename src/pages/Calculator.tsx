@@ -35,6 +35,7 @@ interface GoldFormData {
   weight: string;
   carat: Carat | "";
   type: GoldType | "";
+  jewellerQuote: string;
 }
 
 interface DiamondFormData {
@@ -45,6 +46,7 @@ interface DiamondFormData {
   clarity: DiamondClarity | "";
   certification: Certification | "";
   stoneWeight: string;
+  jewellerQuote: string;
 }
 
 interface PriceBreakdown {
@@ -52,6 +54,8 @@ interface PriceBreakdown {
   diamondValue: number;
   makingCharges: number;
   finalPrice: number;
+  jewellerQuote?: number;
+  priceDifference?: number;
 }
 
 export default function Calculator() {
@@ -60,6 +64,7 @@ export default function Calculator() {
     weight: "",
     carat: "",
     type: "",
+    jewellerQuote: "",
   });
   const [diamondForm, setDiamondForm] = useState<DiamondFormData>({
     goldWeight: "",
@@ -69,6 +74,7 @@ export default function Calculator() {
     clarity: "",
     certification: "",
     stoneWeight: "",
+    jewellerQuote: "",
   });
   const [priceBreakdown, setPriceBreakdown] = useState<PriceBreakdown | null>(
     null
@@ -83,7 +89,7 @@ export default function Calculator() {
     setPriceBreakdown(null);
     // Reset forms when switching types
     if (type !== jewelryType) {
-      setGoldForm({ weight: "", carat: "", type: "" });
+      setGoldForm({ weight: "", carat: "", type: "", jewellerQuote: "" });
       setDiamondForm({
         goldWeight: "",
         carat: "",
@@ -92,6 +98,7 @@ export default function Calculator() {
         clarity: "",
         certification: "",
         stoneWeight: "",
+        jewellerQuote: "",
       });
     }
   };
@@ -114,12 +121,13 @@ export default function Calculator() {
         const goldRate =
           goldRates.find((rate) => rate.carat === caratKey)?.rate || 0;
 
-        // Get making charges from admin-managed rates
-        const makingChargeRate =
-          makingCharges[goldForm.type as keyof typeof makingCharges] || 0;
+        // Get making charges from admin-managed rates (now as percentages)
+        const typeKey = goldForm.type === "italian" ? "italianGold" : goldForm.type;
+        const makingChargePercentage =
+          makingCharges[typeKey as keyof typeof makingCharges] || 0;
 
         goldValue = weight * goldRate;
-        calculatedMakingCharges = makingChargeRate * weight; // Making charges per gram
+        calculatedMakingCharges = (goldValue * makingChargePercentage) / 100; // Percentage of gold value
       } else if (jewelryType === "diamond") {
         const goldWeight = parseFloat(diamondForm.goldWeight);
         const diamondWeight = parseFloat(diamondForm.diamondWeight);
@@ -141,16 +149,26 @@ export default function Calculator() {
           )?.rate || 50000; // Fallback rate
 
         diamondValue = diamondWeight * diamondRate;
-        calculatedMakingCharges = (goldValue + diamondValue) * 0.12; // 12% making charges for diamond jewelry
+        calculatedMakingCharges = 800 * goldWeight; // ₹800 per gram of gold weight
       }
 
       const finalPrice = goldValue + diamondValue + calculatedMakingCharges;
+
+      // Get jeweller quote if provided
+      const jewellerQuoteValue = 
+        jewelryType === "gold" 
+          ? parseFloat(goldForm.jewellerQuote) || 0
+          : parseFloat(diamondForm.jewellerQuote) || 0;
+
+      const priceDifference = jewellerQuoteValue > 0 ? finalPrice - jewellerQuoteValue : undefined;
 
       setPriceBreakdown({
         goldValue,
         diamondValue,
         makingCharges: calculatedMakingCharges,
         finalPrice,
+        jewellerQuote: jewellerQuoteValue > 0 ? jewellerQuoteValue : undefined,
+        priceDifference,
       });
 
       // Add calculation to analytics
@@ -354,6 +372,24 @@ export default function Calculator() {
                             </SelectContent>
                           </Select>
                         </div>
+                        
+                        <div className="space-y-2">
+                          <Label htmlFor="goldJewellerQuote">
+                            Price Quoted by Your Jeweller (Optional)
+                          </Label>
+                          <Input
+                            id="goldJewellerQuote"
+                            type="number"
+                            placeholder="₹ 0"
+                            value={goldForm.jewellerQuote}
+                            onChange={(e) =>
+                              setGoldForm({
+                                ...goldForm,
+                                jewellerQuote: e.target.value,
+                              })
+                            }
+                          />
+                        </div>
                       </>
                     ) : (
                       <>
@@ -508,6 +544,24 @@ export default function Calculator() {
                             }
                           />
                         </div>
+                        
+                        <div className="space-y-2">
+                          <Label htmlFor="diamondJewellerQuote">
+                            Price Quoted by Your Jeweller (Optional)
+                          </Label>
+                          <Input
+                            id="diamondJewellerQuote"
+                            type="number"
+                            placeholder="₹ 0"
+                            value={diamondForm.jewellerQuote}
+                            onChange={(e) =>
+                              setDiamondForm({
+                                ...diamondForm,
+                                jewellerQuote: e.target.value,
+                              })
+                            }
+                          />
+                        </div>
                       </>
                     )}
 
@@ -590,6 +644,45 @@ export default function Calculator() {
                           ₹{priceBreakdown.finalPrice.toLocaleString("en-IN")}
                         </Badge>
                       </div>
+
+                      {/* Jeweller Quote Comparison */}
+                      {priceBreakdown.jewellerQuote && (
+                        <>
+                          <Separator />
+                          <div className="space-y-3 bg-muted/50 p-4 rounded-lg">
+                            <h4 className="font-medium text-center">Price Comparison</h4>
+                            
+                            <div className="flex justify-between items-center">
+                              <span className="text-sm text-muted-foreground">
+                                Your Jeweller's Quote:
+                              </span>
+                              <Badge variant="outline" className="text-base px-3 py-1">
+                                ₹{priceBreakdown.jewellerQuote.toLocaleString("en-IN")}
+                              </Badge>
+                            </div>
+                            
+                            <div className="flex justify-between items-center">
+                              <span className="text-sm text-muted-foreground">
+                                Market Price Difference:
+                              </span>
+                              <Badge 
+                                variant={priceBreakdown.priceDifference! > 0 ? "destructive" : "default"}
+                                className="text-base px-3 py-1"
+                              >
+                                {priceBreakdown.priceDifference! > 0 ? "+" : ""}
+                                ₹{Math.abs(priceBreakdown.priceDifference!).toLocaleString("en-IN")}
+                                {priceBreakdown.priceDifference! > 0 ? " Higher" : " Lower"}
+                              </Badge>
+                            </div>
+                            
+                            <div className="text-center text-sm text-muted-foreground mt-2">
+                              {priceBreakdown.priceDifference! > 0 
+                                ? "Market price is higher than jeweller's quote" 
+                                : "Market price is lower than jeweller's quote"}
+                            </div>
+                          </div>
+                        </>
+                      )}
                     </div>
 
                     <div className="pt-4 border-t text-center">
