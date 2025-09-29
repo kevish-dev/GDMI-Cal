@@ -38,7 +38,7 @@ export function Navbar() {
             <img 
               src="./GDMI.png" 
               alt="GDMI Logo" 
-              className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20" 
+              className="h-14 w-auto object-contain"
             />
           </Link>
 

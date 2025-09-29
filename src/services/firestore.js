@@ -7,6 +7,7 @@ import {
   addDoc,
   updateDoc,
   deleteDoc,
+  setDoc,
   query,
   where,
   orderBy,
@@ -160,12 +161,212 @@ export const getUserCalculations = (userId) => getDocuments("calculations", [
   orderBy("createdAt", "desc")
 ]);
 
-// Rates data functions (example for your rates context)
-export const saveRates = (ratesData) => createDocument("rates", ratesData);
-export const getCurrentRates = () => getDocuments("rates", [
-  orderBy("createdAt", "desc"),
-  limit(1)
-]);
+// Rates data functions (comprehensive for jewelry calculator)
+
+// Gold Rates Functions
+export const createGoldRates = async (goldRates) => {
+  try {
+    // Use a fixed document ID for gold rates to maintain single source of truth
+    const docRef = doc(db, "goldRates", "current");
+    await setDoc(docRef, {
+      rates: goldRates,
+      lastUpdated: serverTimestamp(),
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    }, { merge: true });
+    return goldRates;
+  } catch (error) {
+    console.error("Error creating/updating gold rates:", error);
+    throw error;
+  }
+};
+
+export const getGoldRates = async () => {
+  try {
+    const docRef = doc(db, "goldRates", "current");
+    const docSnap = await getDoc(docRef);
+    
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      return data.rates || [];
+    } else {
+      return null; // No rates exist yet
+    }
+  } catch (error) {
+    console.error("Error getting gold rates:", error);
+    throw error;
+  }
+};
+
+export const subscribeToGoldRates = (callback) => {
+  const docRef = doc(db, "goldRates", "current");
+  return onSnapshot(docRef, (doc) => {
+    if (doc.exists()) {
+      const data = doc.data();
+      callback(data.rates || []);
+    } else {
+      callback([]);
+    }
+  });
+};
+
+// Diamond Rates Functions
+export const createDiamondRates = async (diamondRates) => {
+  try {
+    const docRef = doc(db, "diamondRates", "current");
+    await setDoc(docRef, {
+      rates: diamondRates,
+      lastUpdated: serverTimestamp(),
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    }, { merge: true });
+    return diamondRates;
+  } catch (error) {
+    console.error("Error creating/updating diamond rates:", error);
+    throw error;
+  }
+};
+
+export const getDiamondRates = async () => {
+  try {
+    const docRef = doc(db, "diamondRates", "current");
+    const docSnap = await getDoc(docRef);
+    
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      return data.rates || [];
+    } else {
+      return null;
+    }
+  } catch (error) {
+    console.error("Error getting diamond rates:", error);
+    throw error;
+  }
+};
+
+export const subscribeToDiamondRates = (callback) => {
+  const docRef = doc(db, "diamondRates", "current");
+  return onSnapshot(docRef, (doc) => {
+    if (doc.exists()) {
+      const data = doc.data();
+      callback(data.rates || []);
+    } else {
+      callback([]);
+    }
+  });
+};
+
+// Making Charges Functions
+export const createMakingCharges = async (makingCharges) => {
+  try {
+    const docRef = doc(db, "makingCharges", "current");
+    await setDoc(docRef, {
+      charges: makingCharges,
+      lastUpdated: serverTimestamp(),
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    }, { merge: true });
+    return makingCharges;
+  } catch (error) {
+    console.error("Error creating/updating making charges:", error);
+    throw error;
+  }
+};
+
+export const getMakingCharges = async () => {
+  try {
+    const docRef = doc(db, "makingCharges", "current");
+    const docSnap = await getDoc(docRef);
+    
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      return data.charges || null;
+    } else {
+      return null;
+    }
+  } catch (error) {
+    console.error("Error getting making charges:", error);
+    throw error;
+  }
+};
+
+export const subscribeToMakingCharges = (callback) => {
+  const docRef = doc(db, "makingCharges", "current");
+  return onSnapshot(docRef, (doc) => {
+    if (doc.exists()) {
+      const data = doc.data();
+      callback(data.charges || null);
+    } else {
+      callback(null);
+    }
+  });
+};
+
+// Initialize dummy rates if they don't exist
+export const initializeDummyRates = async () => {
+  try {
+    const dummyGoldRates = [
+      { carat: "24K", rate: 7000, lastUpdated: new Date().toISOString().split('T')[0] },
+      { carat: "22K", rate: 6510, lastUpdated: new Date().toISOString().split('T')[0] },
+      { carat: "18K", rate: 5320, lastUpdated: new Date().toISOString().split('T')[0] },
+      { carat: "14K", rate: 4200, lastUpdated: new Date().toISOString().split('T')[0] },
+      { carat: "9K", rate: 2730, lastUpdated: new Date().toISOString().split('T')[0] }
+    ];
+
+    const dummyDiamondRates = [
+      { color: "GH", clarity: "VVS1", certification: "IGI", rate: 45000 },
+      { color: "GH", clarity: "VVS2", certification: "IGI", rate: 42000 },
+      { color: "GH", clarity: "VS1", certification: "IGI", rate: 38000 },
+      { color: "GH", clarity: "VS2", certification: "IGI", rate: 35000 },
+      { color: "HI", clarity: "VVS1", certification: "IGI", rate: 40000 },
+      { color: "HI", clarity: "VVS2", certification: "IGI", rate: 37000 },
+      { color: "IJ", clarity: "VS1", certification: "IGI", rate: 32000 },
+      { color: "JK", clarity: "SI1", certification: "Self", rate: 25000 },
+      { color: "KL", clarity: "SI2", certification: "None", rate: 20000 }
+    ];
+
+    const dummyMakingCharges = {
+      chains: 2.5,
+      plain: 3.5,
+      temple: 7,
+      italianGold: 18
+    };
+
+    // Check if rates already exist
+    const existingGoldRates = await getGoldRates();
+    const existingDiamondRates = await getDiamondRates();
+    const existingMakingCharges = await getMakingCharges();
+
+    const results = {};
+
+    // Initialize only if they don't exist
+    if (!existingGoldRates) {
+      await createGoldRates(dummyGoldRates);
+      results.goldRates = dummyGoldRates;
+    } else {
+      results.goldRates = existingGoldRates;
+    }
+
+    if (!existingDiamondRates) {
+      await createDiamondRates(dummyDiamondRates);
+      results.diamondRates = dummyDiamondRates;
+    } else {
+      results.diamondRates = existingDiamondRates;
+    }
+
+    if (!existingMakingCharges) {
+      await createMakingCharges(dummyMakingCharges);
+      results.makingCharges = dummyMakingCharges;
+    } else {
+      results.makingCharges = existingMakingCharges;
+    }
+
+    return results;
+  } catch (error) {
+    console.error("Error initializing dummy rates:", error);
+    throw error;
+  }
+};
 
 // Export query helpers for advanced queries
 export { where, orderBy, limit, serverTimestamp };

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -28,12 +28,30 @@ import { useNavigate } from "react-router-dom";
 export default function Admin() {
   const [newGoldRate24K, setNewGoldRate24K] = useState("");
   const [isUploading, setIsUploading] = useState(false);
+  const [makingChargesForm, setMakingChargesForm] = useState({
+    chains: "",
+    plain: "",
+    temple: "",
+    italianGold: ""
+  });
   const { toast } = useToast();
   const { user, logout } = useAuth();
-  const { goldRates, updateGoldRates, diamondRates, updateDiamondRates, getAnalytics } = useRates();
+  const { goldRates, updateGoldRates, diamondRates, updateDiamondRates, makingCharges, updateMakingCharges, getAnalytics, loading } = useRates();
   const navigate = useNavigate();
 
   const analytics = getAnalytics();
+
+  // Initialize making charges form when making charges are loaded
+  useEffect(() => {
+    if (makingCharges) {
+      setMakingChargesForm({
+        chains: makingCharges.chains.toString(),
+        plain: makingCharges.plain.toString(),
+        temple: makingCharges.temple.toString(),
+        italianGold: makingCharges.italianGold.toString()
+      });
+    }
+  }, [makingCharges]);
 
   // Conversion factors for different carat gold
   const conversionFactors = {
@@ -76,8 +94,6 @@ export default function Admin() {
     setIsUploading(true);
     
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
       // Calculate rates for all carats based on 24K price
       const updatedRates: GoldRate[] = Object.entries(conversionFactors).map(([carat, factor]) => ({
         carat,
@@ -85,7 +101,7 @@ export default function Admin() {
         lastUpdated: new Date().toISOString().split('T')[0]
       }));
       
-      updateGoldRates(updatedRates);
+      await updateGoldRates(updatedRates);
       setNewGoldRate24K("");
       
       toast({
@@ -93,6 +109,7 @@ export default function Admin() {
         description: `All gold rates updated based on 24K price of ₹${rate24K}/g`
       });
     } catch (error) {
+      console.error('Error updating gold rates:', error);
       toast({
         title: "Update failed",
         description: "Failed to update gold rates. Please try again.",
@@ -115,19 +132,35 @@ export default function Admin() {
       
       // Mock processing - in real app, parse CSV and update diamond rates
       const mockDiamondRates: DiamondRate[] = [
-        { color: "GH", clarity: "VVS1", certification: "IGI", rate: 45000 },
-        { color: "GH", clarity: "VVS2", certification: "IGI", rate: 42000 },
-        { color: "HI", clarity: "VS1", certification: "IGI", rate: 38000 },
-        { color: "IJ", clarity: "SI1", certification: "Self", rate: 25000 }
+        { color: "GH", clarity: "VVS1", certification: "IGI", rate: 47000 },
+        { color: "GH", clarity: "VVS2", certification: "IGI", rate: 44000 },
+        { color: "HI", clarity: "VS1", certification: "IGI", rate: 40000 },
+        { color: "IJ", clarity: "SI1", certification: "Self", rate: 27000 }
       ];
       
-      updateDiamondRates([...diamondRates, ...mockDiamondRates]);
+      // Merge with existing rates, replacing duplicates
+      const updatedRates = [...diamondRates];
+      mockDiamondRates.forEach(newRate => {
+        const existingIndex = updatedRates.findIndex(rate => 
+          rate.color === newRate.color && 
+          rate.clarity === newRate.clarity && 
+          rate.certification === newRate.certification
+        );
+        if (existingIndex >= 0) {
+          updatedRates[existingIndex] = newRate;
+        } else {
+          updatedRates.push(newRate);
+        }
+      });
+      
+      await updateDiamondRates(updatedRates);
       
       toast({
         title: "CSV uploaded successfully",
         description: `Processed ${file.name} with diamond rates.`
       });
     } catch (error) {
+      console.error('Error updating diamond rates:', error);
       toast({
         title: "Upload failed",
         description: "Failed to process CSV file. Please check the format.",
@@ -136,6 +169,46 @@ export default function Admin() {
     } finally {
       setIsUploading(false);
       event.target.value = "";
+    }
+  };
+
+  const handleMakingChargesUpdate = async () => {
+    // Validate all fields
+    const charges = {
+      chains: parseFloat(makingChargesForm.chains),
+      plain: parseFloat(makingChargesForm.plain),
+      temple: parseFloat(makingChargesForm.temple),
+      italianGold: parseFloat(makingChargesForm.italianGold)
+    };
+
+    // Check if all values are valid numbers
+    if (Object.values(charges).some(value => isNaN(value) || value < 0)) {
+      toast({
+        title: "Invalid input",
+        description: "Please enter valid positive numbers for all making charges.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsUploading(true);
+    
+    try {
+      await updateMakingCharges(charges);
+      
+      toast({
+        title: "Making charges updated",
+        description: "All making charges have been updated successfully."
+      });
+    } catch (error) {
+      console.error('Error updating making charges:', error);
+      toast({
+        title: "Update failed",
+        description: "Failed to update making charges. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -160,7 +233,7 @@ export default function Admin() {
                 <Settings className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
                 <span className="hidden sm:inline">{user?.username} - </span>Administrator
               </Badge>
-              <Button 
+              {/* <Button 
                 onClick={handleLogout}
                 variant="ghost" 
                 size="sm"
@@ -168,7 +241,7 @@ export default function Admin() {
               >
                 <LogOut className="h-4 w-4 sm:mr-2" />
                 <span className="hidden sm:inline">Logout</span>
-              </Button>
+              </Button> */}
             </div>
           </div>
 
@@ -241,7 +314,7 @@ export default function Admin() {
 
           {/* Main Content Tabs - Mobile responsive */}
           <Tabs defaultValue="rates" className="space-y-4 sm:space-y-6">
-            <TabsList className="grid w-full grid-cols-3 h-auto p-1">
+            <TabsList className="grid w-full grid-cols-4 h-auto p-1">
               <TabsTrigger value="rates" className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm py-2">
                 <Crown className="h-3 w-3 sm:h-4 sm:w-4" />
                 <span>Gold Rates</span>
@@ -249,6 +322,10 @@ export default function Admin() {
               <TabsTrigger value="diamonds" className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm py-2">
                 <Diamond className="h-3 w-3 sm:h-4 sm:w-4" />
                 <span>Diamond Rates</span>
+              </TabsTrigger>
+              <TabsTrigger value="making" className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm py-2">
+                <Settings className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span>Making Charges</span>
               </TabsTrigger>
               <TabsTrigger value="analytics" className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm py-2">
                 <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4" />
@@ -378,6 +455,137 @@ export default function Admin() {
                   </div>
                 </CardContent>
               </Card>
+            </TabsContent>
+
+            {/* Making Charges Tab */}
+            <TabsContent value="making" className="space-y-4 sm:space-y-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+                {/* Current Making Charges */}
+                <Card className="shadow-card">
+                  <CardHeader className="pb-4">
+                    <CardTitle className="flex items-center space-x-2 text-lg sm:text-xl">
+                      <Settings className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                      <span>Current Making Charges</span>
+                    </CardTitle>
+                    <CardDescription className="text-sm">
+                      Current making charges by jewelry type (% of gold value)
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3 sm:space-y-4">
+                      <div className="flex items-center justify-between p-3 sm:p-4 rounded-lg bg-muted/30">
+                        <div>
+                          <p className="font-semibold text-sm sm:text-base">Chains</p>
+                          <p className="text-xs sm:text-sm text-muted-foreground">Basic chain jewelry</p>
+                        </div>
+                        <Badge className="text-sm sm:text-lg px-2 sm:px-3 py-1 gradient-gold font-semibold">
+                          {makingCharges.chains}%
+                        </Badge>
+                      </div>
+                      <div className="flex items-center justify-between p-3 sm:p-4 rounded-lg bg-muted/30">
+                        <div>
+                          <p className="font-semibold text-sm sm:text-base">Plain Jewelry</p>
+                          <p className="text-xs sm:text-sm text-muted-foreground">Simple designs</p>
+                        </div>
+                        <Badge className="text-sm sm:text-lg px-2 sm:px-3 py-1 gradient-gold font-semibold">
+                          {makingCharges.plain}%
+                        </Badge>
+                      </div>
+                      <div className="flex items-center justify-between p-3 sm:p-4 rounded-lg bg-muted/30">
+                        <div>
+                          <p className="font-semibold text-sm sm:text-base">Temple Jewelry</p>
+                          <p className="text-xs sm:text-sm text-muted-foreground">Traditional designs</p>
+                        </div>
+                        <Badge className="text-sm sm:text-lg px-2 sm:px-3 py-1 gradient-gold font-semibold">
+                          {makingCharges.temple}%
+                        </Badge>
+                      </div>
+                      <div className="flex items-center justify-between p-3 sm:p-4 rounded-lg bg-muted/30">
+                        <div>
+                          <p className="font-semibold text-sm sm:text-base">Italian Gold</p>
+                          <p className="text-xs sm:text-sm text-muted-foreground">Premium craftsmanship</p>
+                        </div>
+                        <Badge className="text-sm sm:text-lg px-2 sm:px-3 py-1 gradient-gold font-semibold">
+                          {makingCharges.italianGold}%
+                        </Badge>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Update Making Charges */}
+                <Card className="shadow-card">
+                  <CardHeader className="pb-4">
+                    <CardTitle className="flex items-center space-x-2 text-lg sm:text-xl">
+                      <Upload className="h-4 w-4 sm:h-5 sm:w-5" />
+                      <span>Update Making Charges</span>
+                    </CardTitle>
+                    <CardDescription className="text-sm">
+                      Update making charges percentage for different jewelry types
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="chains" className="text-sm font-medium">Chains (%)</Label>
+                        <Input
+                          id="chains"
+                          type="number"
+                          step="0.1"
+                          placeholder="Chains percentage"
+                          value={makingChargesForm.chains}
+                          onChange={(e) => setMakingChargesForm(prev => ({ ...prev, chains: e.target.value }))}
+                          className="h-11 text-base"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="plain" className="text-sm font-medium">Plain (%)</Label>
+                        <Input
+                          id="plain"
+                          type="number"
+                          step="0.1"
+                          placeholder="Plain jewelry percentage"
+                          value={makingChargesForm.plain}
+                          onChange={(e) => setMakingChargesForm(prev => ({ ...prev, plain: e.target.value }))}
+                          className="h-11 text-base"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="temple" className="text-sm font-medium">Temple (%)</Label>
+                        <Input
+                          id="temple"
+                          type="number"
+                          step="0.1"
+                          placeholder="Temple jewelry percentage"
+                          value={makingChargesForm.temple}
+                          onChange={(e) => setMakingChargesForm(prev => ({ ...prev, temple: e.target.value }))}
+                          className="h-11 text-base"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="italianGold" className="text-sm font-medium">Italian Gold (%)</Label>
+                        <Input
+                          id="italianGold"
+                          type="number"
+                          step="0.1"
+                          placeholder="Italian gold percentage"
+                          value={makingChargesForm.italianGold}
+                          onChange={(e) => setMakingChargesForm(prev => ({ ...prev, italianGold: e.target.value }))}
+                          className="h-11 text-base"
+                        />
+                      </div>
+                    </div>
+
+                    <Button
+                      onClick={handleMakingChargesUpdate}
+                      disabled={isUploading}
+                      className="w-full gradient-gold hover-glow h-11 sm:h-12 font-semibold"
+                    >
+                      {isUploading ? "Updating..." : "Update Making Charges"}
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
             </TabsContent>
 
             {/* Analytics Tab */}

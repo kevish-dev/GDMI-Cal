@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { RatesProvider } from "@/contexts/RatesContext";
+import { UserVerificationProvider } from "@/contexts/UserVerificationContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -19,9 +20,10 @@ const App = () => (
     <TooltipProvider>
       <AuthProvider>
         <RatesProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
+          <UserVerificationProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
             <Routes>
               <Route path="/" element={<Calculator />} />
               <Route path="/login" element={<Login />} />
@@ -37,7 +39,8 @@ const App = () => (
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
-          </BrowserRouter>
+            </BrowserRouter>
+          </UserVerificationProvider>
         </RatesProvider>
       </AuthProvider>
     </TooltipProvider>

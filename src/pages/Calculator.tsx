@@ -23,6 +23,8 @@ import { Crown, Diamond, Gem, IndianRupee } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { useRates } from "@/contexts/RatesContext";
+import { useUserVerification } from "@/contexts/UserVerificationContext";
+import { UserVerificationModal } from "@/components/UserVerificationModal";
 
 type JewelryType = "gold" | "diamond" | null;
 type GoldType = "chains" | "plain" | "temple" | "italian";
@@ -82,7 +84,8 @@ export default function Calculator() {
   const [isCalculating, setIsCalculating] = useState(false);
 
   const { toast } = useToast();
-  const { goldRates, diamondRates, makingCharges, addCalculation } = useRates();
+  const { goldRates, diamondRates, makingCharges, addCalculation, loading } = useRates();
+  const { isVerifiedUser, openVerificationModal } = useUserVerification();
 
   const handleJewelryTypeSelect = (type: JewelryType) => {
     setJewelryType(type);
@@ -104,6 +107,12 @@ export default function Calculator() {
   };
 
   const calculatePrice = async () => {
+    // Check if user is verified before allowing calculation
+    if (!isVerifiedUser) {
+      openVerificationModal();
+      return;
+    }
+
     setIsCalculating(true);
 
     try {
@@ -218,6 +227,23 @@ export default function Calculator() {
     return false;
   };
 
+  if (loading) {
+    return (
+      <Layout>
+        <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 lg:py-8">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center">
+              <div className="flex justify-center items-center space-x-2 mb-4">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                <p className="text-lg text-muted-foreground">Loading jewelry rates...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
   return (
     <Layout>
       <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 lg:py-8">
@@ -239,8 +265,16 @@ export default function Calculator() {
               <Card className="shadow-card">
                 <CardHeader className="pb-4">
                   <CardTitle className="flex items-center space-x-2 text-lg sm:text-xl">
-                    <Gem className="h-4 w-4 sm:h-5 sm:w-5" />
-                    <span>Select Jewelry Type</span>
+                    <Gem className={cn(
+                      "h-4 w-4 sm:h-5 sm:w-5 transition-colors",
+                      jewelryType === "gold" ? "text-primary" : 
+                      jewelryType === "diamond" ? "text-secondary" : "text-muted-foreground"
+                    )} />
+                    <span className={cn(
+                      "transition-colors",
+                      jewelryType === "gold" ? "text-primary" : 
+                      jewelryType === "diamond" ? "text-secondary" : ""
+                    )}>Select Jewelry Type</span>
                   </CardTitle>
                   <CardDescription className="text-sm">
                     Choose the type of jewelry to calculate
@@ -282,8 +316,10 @@ export default function Calculator() {
               {jewelryType && (
                 <Card
                   className={cn(
-                    "shadow-card transition-smooth animate-fade-in",
-                    jewelryType === "gold" ? "jewelry-gold" : "jewelry-diamond"
+                    "shadow-card transition-smooth animate-fade-in border-2",
+                    jewelryType === "gold" 
+                      ? "border-primary/20 bg-gradient-to-br from-background via-background to-primary/5" 
+                      : "border-secondary/20 bg-gradient-to-br from-background via-background to-secondary/5"
                   )}
                 >
                   <CardHeader className="pb-4">
@@ -291,12 +327,12 @@ export default function Calculator() {
                       {jewelryType === "gold" ? (
                         <>
                           <Crown className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-                          <span>Gold Jewelry Details</span>
+                          <span className="text-primary">Gold Jewelry Details</span>
                         </>
                       ) : (
                         <>
                           <Diamond className="h-4 w-4 sm:h-5 sm:w-5 text-secondary" />
-                          <span>Diamond Jewelry Details</span>
+                          <span className="text-secondary">Diamond Jewelry Details</span>
                         </>
                       )}
                     </CardTitle>
@@ -573,7 +609,10 @@ export default function Calculator() {
                     <Button
                       onClick={calculatePrice}
                       disabled={!isFormValid() || isCalculating}
-                      className="w-full gradient-gold hover-glow text-base h-12 sm:h-14 mt-6 font-semibold"
+                      className={cn(
+                        "w-full hover-glow text-base h-12 sm:h-14 mt-6 font-semibold transition-smooth",
+                        jewelryType === "gold" ? "gradient-gold" : "gradient-diamond"
+                      )}
                     >
                       {isCalculating ? "Calculating..." : "Calculate Price"}
                     </Button>
@@ -585,25 +624,37 @@ export default function Calculator() {
             {/* Results Panel - Mobile optimized */}
             <div className="space-y-4 sm:space-y-6">
               {priceBreakdown ? (
-                <Card className="shadow-elegant animate-fade-in">
+                <Card className={cn(
+                  "shadow-elegant animate-fade-in border-2",
+                  jewelryType === "gold" 
+                    ? "border-primary/30 bg-gradient-to-br from-background via-background to-primary/10" 
+                    : "border-secondary/30 bg-gradient-to-br from-background via-background to-secondary/10"
+                )}>
                   <CardHeader className="pb-4">
                     <CardTitle className="flex items-center space-x-2 text-lg sm:text-xl">
-                      <IndianRupee className="h-4 w-4 sm:h-5 sm:w-5" />
-                      <span>Price Breakdown</span>
+                      {jewelryType === "gold" ? (
+                        <Crown className={cn("h-4 w-4 sm:h-5 sm:w-5 text-primary")} />
+                      ) : (
+                        <Diamond className={cn("h-4 w-4 sm:h-5 sm:w-5 text-secondary")} />
+                      )}
+                      <span className={cn(
+                        jewelryType === "gold" ? "text-primary" : "text-secondary"
+                      )}>Price Breakdown</span>
                     </CardTitle>
-                    <CardDescription className="text-sm">
-                      Detailed calculation of your jewelry price
+                    <CardDescription className="text-sm text-black">
+                      Detailed calculation of your {jewelryType} jewelry price
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="space-y-3">
                       <div className="flex justify-between items-center py-2 border-b border-border/50">
-                        <span className="text-sm sm:text-base text-muted-foreground">
-                          Gold Value:
+                        <span className="text-sm sm:text-base text-muted-foreground flex items-center space-x-2">
+                          <Crown className="h-4 w-4 text-primary" />
+                          <span className="text-black">Gold Value:</span>
                         </span>
                         <Badge
                           variant="outline"
-                          className="text-sm sm:text-base px-2 sm:px-3 py-1 font-semibold"
+                          className="text-sm sm:text-base px-2 sm:px-3 py-1 font-semibold border-primary/30 text-primary"
                         >
                           ₹{priceBreakdown.goldValue.toLocaleString("en-IN")}
                         </Badge>
@@ -611,41 +662,58 @@ export default function Calculator() {
 
                       {priceBreakdown.diamondValue > 0 && (
                         <div className="flex justify-between items-center py-2 border-b border-border/50">
-                          <span className="text-sm sm:text-base text-muted-foreground">
-                            Diamond Value:
+                          <span className="text-sm sm:text-base text-muted-foreground flex items-center space-x-2">
+                            <Diamond className="h-4 w-4 text-secondary" />
+                            <span className="text-black">Diamond Value:</span>
                           </span>
                           <Badge
                             variant="outline"
-                            className="text-sm sm:text-base px-2 sm:px-3 py-1 font-semibold"
+                            className="text-sm sm:text-base px-2 sm:px-3 py-1 font-semibold border-secondary/30 text-secondary"
                           >
-                            ₹
-                            {priceBreakdown.diamondValue.toLocaleString(
-                              "en-IN"
-                            )}
+                            ₹{priceBreakdown.diamondValue.toLocaleString("en-IN")}
                           </Badge>
                         </div>
                       )}
 
                       <div className="flex justify-between items-center py-2 border-b border-border/50">
-                        <span className="text-sm sm:text-base text-muted-foreground">
-                          Making Charges:
+                        <span className="text-sm sm:text-base text-muted-foreground flex items-center space-x-2">
+                          <Gem className={cn(
+                            "h-4 w-4",
+                            jewelryType === "gold" ? "text-primary" : "text-secondary"
+                          )} />
+                          <span className="text-black">Making Charges:</span>
                         </span>
                         <Badge
                           variant="outline"
-                          className="text-sm sm:text-base px-2 sm:px-3 py-1 font-semibold"
+                          className={cn(
+                            "text-sm sm:text-base px-2 sm:px-3 py-1 font-semibold",
+                            jewelryType === "gold" 
+                              ? "border-primary/30 text-primary" 
+                              : "border-secondary/30 text-secondary"
+                          )}
                         >
-                          ₹
-                          {priceBreakdown.makingCharges.toLocaleString("en-IN")}
+                          ₹{priceBreakdown.makingCharges.toLocaleString("en-IN")}
                         </Badge>
                       </div>
 
                       <Separator className="my-4" />
 
-                      <div className="flex justify-between items-center py-3 bg-muted/30 rounded-lg px-3">
-                        <span className="text-base sm:text-lg font-bold">
+                      <div className={cn(
+                        "flex justify-between items-center py-3 rounded-lg px-3",
+                        jewelryType === "gold" 
+                          ? "bg-primary/10 border border-primary/20" 
+                          : "bg-secondary/10 border border-secondary/20"
+                      )}>
+                        <span className={cn(
+                          "text-base sm:text-lg font-bold",
+                          jewelryType === "gold" ? "text-primary" : "text-secondary"
+                        )}>
                           Final Price:
                         </span>
-                        <Badge className="text-lg sm:text-xl px-3 sm:px-4 py-2 gradient-gold font-bold">
+                        <Badge className={cn(
+                          "text-lg sm:text-xl px-3 sm:px-4 py-2 font-bold",
+                          jewelryType === "gold" ? "gradient-gold" : "gradient-diamond"
+                        )}>
                           ₹{priceBreakdown.finalPrice.toLocaleString("en-IN")}
                         </Badge>
                       </div>
@@ -698,14 +766,34 @@ export default function Calculator() {
                   </CardContent>
                 </Card>
               ) : (
-                <Card className="shadow-card border-dashed">
+                <Card className={cn(
+                  "shadow-card border-dashed transition-all duration-300",
+                  jewelryType === "gold" 
+                    ? "border-primary/30 bg-gradient-to-br from-background to-primary/5" 
+                    : jewelryType === "diamond"
+                    ? "border-secondary/30 bg-gradient-to-br from-background to-secondary/5"
+                    : "border-muted-foreground/30"
+                )}>
                   <CardContent className="flex flex-col items-center justify-center py-12 sm:py-16 text-center px-4">
-                    <Gem className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground mb-3 sm:mb-4" />
-                    <h3 className="text-base sm:text-lg font-semibold mb-2">
-                      No calculation yet
+                    {jewelryType === "gold" ? (
+                      <Crown className="h-10 w-10 sm:h-12 sm:w-12 text-primary/60 mb-3 sm:mb-4" />
+                    ) : jewelryType === "diamond" ? (
+                      <Diamond className="h-10 w-10 sm:h-12 sm:w-12 text-secondary/60 mb-3 sm:mb-4" />
+                    ) : (
+                      <Gem className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground mb-3 sm:mb-4" />
+                    )}
+                    <h3 className={cn(
+                      "text-base sm:text-lg font-semibold mb-2",
+                      jewelryType === "gold" ? "text-primary" : 
+                      jewelryType === "diamond" ? "text-secondary" : ""
+                    )}>
+                      {jewelryType ? `Ready to calculate ${jewelryType} jewelry` : "No calculation yet"}
                     </h3>
                     <p className="text-sm text-muted-foreground">
-                      Select jewelry type and enter details to calculate pricing
+                      {jewelryType 
+                        ? "Enter the details above and click calculate to get pricing" 
+                        : "Select jewelry type and enter details to calculate pricing"
+                      }
                     </p>
                   </CardContent>
                 </Card>
@@ -714,6 +802,9 @@ export default function Calculator() {
           </div>
         </div>
       </div>
+      
+      {/* User Verification Modal */}
+      <UserVerificationModal />
     </Layout>
   );
 }
