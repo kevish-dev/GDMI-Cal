@@ -508,11 +508,12 @@ export default function Calculator() {
                                 })
                               }
                             >
-                              <SelectTrigger className="h-11 text-base">
+                              <SelectTrigger className="h-11 text-base text-left">
                                 <SelectValue placeholder="Select certification" />
                               </SelectTrigger>
                               <SelectContent>
 
+                                <SelectItem value="Self">None/ Other non-IGI certificate</SelectItem>
                                 <SelectItem value="IGI">IGI certified</SelectItem>
                               </SelectContent>
                             </Select>
