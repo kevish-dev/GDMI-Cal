@@ -25,6 +25,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useRates } from "@/contexts/RatesContext";
 import { useUserVerification } from "@/contexts/UserVerificationContext";
 import { UserVerificationModal } from "@/components/UserVerificationModal";
+import { LiveGoldRateIndicator } from "@/components/LiveGoldRateIndicator";
 
 type JewelryType = "gold" | "diamond" | null;
 type GoldType = "chains" | "plain" | "temple" | "italian";
@@ -324,19 +325,22 @@ export default function Calculator() {
                   )}
                 >
                   <CardHeader className="pb-4">
-                    <CardTitle className="flex items-center space-x-2 text-lg sm:text-xl">
-                      {jewelryType === "gold" ? (
-                        <>
-                          <Crown className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-                          <span className="text-primary">Gold Jewelry Details</span>
-                        </>
-                      ) : (
-                        <>
-                          <Diamond className="h-4 w-4 sm:h-5 sm:w-5 text-secondary" />
-                          <span className="text-secondary">Diamond Jewelry Details</span>
-                        </>
-                      )}
-                    </CardTitle>
+                    <div className="flex items-center justify-between flex-wrap gap-2">
+                      <CardTitle className="flex items-center space-x-2 text-lg sm:text-xl">
+                        {jewelryType === "gold" ? (
+                          <>
+                            <Crown className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                            <span className="text-primary">Gold Jewelry Details</span>
+                          </>
+                        ) : (
+                          <>
+                            <Diamond className="h-4 w-4 sm:h-5 sm:w-5 text-secondary" />
+                            <span className="text-secondary">Diamond Jewelry Details</span>
+                          </>
+                        )}
+                      </CardTitle>
+                      {jewelryType === "gold" && <LiveGoldRateIndicator />}
+                    </div>
                     <CardDescription className="text-sm">
                       Enter the specifications for accurate pricing
                     </CardDescription>
