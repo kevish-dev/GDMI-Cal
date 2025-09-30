@@ -129,42 +129,146 @@ export default function Admin() {
     setIsUploading(true);
     
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      const text = await file.text();
+      const lines = text.trim().split('\n');
       
-      // Mock processing - in real app, parse CSV and update diamond rates
-      const mockDiamondRates: DiamondRate[] = [
-        { color: "GH", clarity: "VVS1", certification: "IGI", rate: 47000 },
-        { color: "GH", clarity: "VVS2", certification: "IGI", rate: 44000 },
-        { color: "HI", clarity: "VS1", certification: "IGI", rate: 40000 },
-        { color: "IJ", clarity: "SI1", certification: "Self", rate: 27000 }
-      ];
+      if (lines.length < 2) {
+        throw new Error('CSV file must have at least a header and one data row');
+      }
       
-      // Merge with existing rates, replacing duplicates
-      const updatedRates = [...diamondRates];
-      mockDiamondRates.forEach(newRate => {
-        const existingIndex = updatedRates.findIndex(rate => 
-          rate.color === newRate.color && 
-          rate.clarity === newRate.clarity && 
-          rate.certification === newRate.certification
-        );
-        if (existingIndex >= 0) {
-          updatedRates[existingIndex] = newRate;
-        } else {
-          updatedRates.push(newRate);
+      const headers = lines[0].split(',').map(h => h.trim());
+      
+      // More robust header validation
+      const expectedHeaders = ['Color', 'Clarity'];
+      const hasColorAndClarity = expectedHeaders.every(header => 
+        headers.some(h => h.toLowerCase().includes(header.toLowerCase()))
+      );
+      
+      // Check for price columns (more flexible matching)
+      const hasSelfPriceColumn = headers.some(h => 
+        h.toLowerCase().includes('non') || 
+        h.toLowerCase().includes('self') || 
+        h.toLowerCase().includes('certified') && !h.toLowerCase().includes('igi')
+      );
+      
+      const hasIGIPriceColumn = headers.some(h => 
+        h.toLowerCase().includes('igi') || 
+        h.toLowerCase().includes('igi-certified')
+      );
+      
+      if (!hasColorAndClarity || !hasSelfPriceColumn || !hasIGIPriceColumn) {
+        throw new Error(`CSV headers invalid. Found: ${headers.join(', ')}. Expected columns: Color, Clarity, Non-Certified/Self Price, IGI Price`);
+      }
+      
+      // Find the actual column indices
+      const colorIndex = headers.findIndex(h => h.toLowerCase().includes('color'));
+      const clarityIndex = headers.findIndex(h => h.toLowerCase().includes('clarity'));
+      const selfPriceIndex = headers.findIndex(h => 
+        (h.toLowerCase().includes('non') || h.toLowerCase().includes('self')) && 
+        (h.includes('₹') || h.toLowerCase().includes('per ct'))
+      );
+      const igiPriceIndex = headers.findIndex(h => 
+        h.toLowerCase().includes('igi') && 
+        (h.includes('₹') || h.toLowerCase().includes('per ct'))
+      );
+      
+      const parsedRates: DiamondRate[] = [];
+      
+      // Process each data row
+      for (let i = 1; i < lines.length; i++) {
+        const values = lines[i].split(',').map(v => v.trim());
+        
+        if (values.length < Math.max(colorIndex, clarityIndex, selfPriceIndex, igiPriceIndex) + 1) {
+          console.warn(`Skipping row ${i + 1}: insufficient columns`);
+          continue;
         }
+        
+        const color = values[colorIndex];
+        const clarity = values[clarityIndex];
+        const nonCertifiedRate = parseFloat(values[selfPriceIndex]);
+        const igiCertifiedRate = parseFloat(values[igiPriceIndex]);
+        
+        // Validate data
+        if (!color || !clarity || isNaN(nonCertifiedRate) || isNaN(igiCertifiedRate)) {
+          console.warn(`Skipping invalid row ${i + 1}: color="${color}", clarity="${clarity}", selfRate=${nonCertifiedRate}, igiRate=${igiCertifiedRate}`);
+          continue;
+        }
+        
+        // Validate rates are positive
+        if (nonCertifiedRate <= 0 || igiCertifiedRate <= 0) {
+          console.warn(`Skipping row ${i + 1}: rates must be positive numbers`);
+          continue;
+        }
+        
+        // Create two entries - one for each certification type
+        parsedRates.push({
+          color: color.toUpperCase(),
+          clarity: clarity.toUpperCase(),
+          certification: "Self",
+          rate: nonCertifiedRate
+        });
+        
+        parsedRates.push({
+          color: color.toUpperCase(),
+          clarity: clarity.toUpperCase(),
+          certification: "IGI",
+          rate: igiCertifiedRate
+        });
+      }
+      
+      if (parsedRates.length === 0) {
+        throw new Error('No valid diamond rates found in CSV file');
+      }
+      
+      // Replace all existing rates with new ones from CSV
+      console.log('Updating diamond rates with:', parsedRates.length, 'entries');
+      console.log('Sample rates:', parsedRates.slice(0, 4));
+      
+      await updateDiamondRates(parsedRates);
+      
+      // Count unique combinations for better feedback
+      const uniqueCombinations = new Set();
+      const certificationCounts = { Self: 0, IGI: 0 };
+      
+      parsedRates.forEach(rate => {
+        uniqueCombinations.add(`${rate.color}-${rate.clarity}`);
+        certificationCounts[rate.certification as 'Self' | 'IGI']++;
       });
       
-      await updateDiamondRates(updatedRates);
+      console.log('Successfully updated diamond rates:', {
+        totalEntries: parsedRates.length,
+        uniqueCombinations: uniqueCombinations.size,
+        selfCertified: certificationCounts.Self,
+        igiCertified: certificationCounts.IGI
+      });
       
       toast({
-        title: "CSV uploaded successfully",
-        description: `Processed ${file.name} with diamond rates.`
+        title: "Diamond rates updated successfully!",
+        description: `Processed ${file.name}: ${uniqueCombinations.size} color/clarity combinations (${certificationCounts.Self} Self + ${certificationCounts.IGI} IGI certified rates).`,
       });
+      
     } catch (error) {
-      console.error('Error updating diamond rates:', error);
+      console.error('Error processing CSV file:', error);
+      
+      let errorMessage = "Failed to process CSV file. Please check the format.";
+      
+      if (error instanceof Error) {
+        if (error.message.includes('headers invalid')) {
+          errorMessage = error.message;
+        } else if (error.message.includes('must have at least')) {
+          errorMessage = "CSV file is empty or has no data rows.";
+        } else if (error.message.includes('No valid diamond rates')) {
+          errorMessage = "No valid diamond rates found. Please check that all rows have valid Color, Clarity, and price values.";
+        } else if (error.message.includes('Error creating/updating')) {
+          errorMessage = "Failed to save diamond rates to database. Please try again.";
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
       toast({
-        title: "Upload failed",
-        description: "Failed to process CSV file. Please check the format.",
+        title: "CSV Upload Failed",
+        description: errorMessage,
         variant: "destructive"
       });
     } finally {
@@ -450,20 +554,28 @@ export default function Admin() {
                   <CardContent>
                     <div className="space-y-3">
                       <div>
+                        <p className="font-medium text-sm">Required CSV Columns</p>
+                        <div className="text-xs text-muted-foreground space-y-1">
+                          <div>1. Color</div>
+                          <div>2. Clarity</div>
+                          <div>3. Non‑Certified / Self (₹ per ct)</div>
+                          <div>4. IGI‑Certified (₹ per ct)</div>
+                        </div>
+                      </div>
+                      <div>
                         <p className="font-medium text-sm">Color Options</p>
                         <p className="text-sm text-muted-foreground">KL, JK, IJ, HI, GH</p>
                       </div>
                       <div>
                         <p className="font-medium text-sm">Clarity Grades</p>
-                        <p className="text-sm text-muted-foreground">I1-I3, SI1, SI2, VS1, VS2, VVS1, VVS2</p>
+                        <p className="text-sm text-muted-foreground">I1/I2/I3, SI1, SI2, VS1, VS2, VVS1, VVS2</p>
                       </div>
                       <div>
-                        <p className="font-medium text-sm">Certification</p>
-                        <p className="text-sm text-muted-foreground">IGI, Self, None</p>
-                      </div>
-                      <div>
-                        <p className="font-medium text-sm">Rate</p>
-                        <p className="text-sm text-muted-foreground">Price per carat in ₹</p>
+                        <p className="font-medium text-sm">Sample Format</p>
+                        <p className="text-xs text-muted-foreground font-mono bg-muted/50 p-2 rounded">
+                          Color,Clarity,Non‑Certified / Self (₹ per ct),IGI‑Certified (₹ per ct)<br/>
+                          GH,VVS1,32333,51332
+                        </p>
                       </div>
                     </div>
                   </CardContent>

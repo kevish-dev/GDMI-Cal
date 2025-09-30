@@ -30,8 +30,8 @@ type JewelryType = "gold" | "diamond" | null;
 type GoldType = "chains" | "plain" | "temple" | "italian";
 type Carat = "9k" | "14k" | "18k" | "22k" | "24k";
 type DiamondColor = "KL" | "JK" | "IJ" | "HI" | "GH";
-type DiamondClarity = "I1-I3" | "SI1" | "SI2" | "VS1" | "VS2" | "VVS1" | "VVS2";
-type Certification = "IGI" | "Self" | "None";
+type DiamondClarity = "I1/I2/I3" | "SI1" | "SI2" | "VS1" | "VS2" | "VVS1" | "VVS2";
+type Certification = "IGI" | "Self";
 
 interface GoldFormData {
   weight: string;
@@ -149,13 +149,20 @@ export default function Calculator() {
         goldValue = goldWeight * goldRate;
 
         // Get diamond rate from admin-managed rates
-        const diamondRate =
-          diamondRates.find(
-            (rate) =>
-              rate.color === diamondForm.color &&
-              rate.clarity === diamondForm.clarity &&
-              rate.certification === diamondForm.certification
-          )?.rate || 50000; // Fallback rate
+        const matchingRate = diamondRates.find(
+          (rate) =>
+            rate.color === diamondForm.color &&
+            rate.clarity === diamondForm.clarity &&
+            rate.certification === diamondForm.certification
+        );
+        
+        const diamondRate = matchingRate?.rate || 50000; // Fallback rate
+        
+        // Log for debugging if no matching rate found
+        if (!matchingRate) {
+          console.warn(`No diamond rate found for: ${diamondForm.color}-${diamondForm.clarity}-${diamondForm.certification}. Using fallback rate.`);
+          console.log('Available rates:', diamondRates.map(r => `${r.color}-${r.clarity}-${r.certification}`));
+        }
 
         diamondValue = diamondWeight * diamondRate;
         calculatedMakingCharges = 800 * goldWeight; // ₹800 per gram of gold weight
@@ -501,7 +508,7 @@ export default function Calculator() {
                                 <SelectValue placeholder="Select certification" />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="None">None / Other non-IGI certified</SelectItem>
+
                                 <SelectItem value="IGI">IGI certified</SelectItem>
                               </SelectContent>
                             </Select>
@@ -524,7 +531,7 @@ export default function Calculator() {
                                 <SelectValue placeholder="Select clarity" />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="I1-I3">I1-I3</SelectItem>
+                                <SelectItem value="I1/I2/I3">I1/I2/I3</SelectItem>
                                 <SelectItem value="SI1">SI1</SelectItem>
                                 <SelectItem value="SI2">SI2</SelectItem>
                                 <SelectItem value="VS1">VS1</SelectItem>

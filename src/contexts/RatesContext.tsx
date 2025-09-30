@@ -168,15 +168,18 @@ export function RatesProvider({ children }: { children: ReactNode }) {
         ];
         
         const fallbackDiamondRates = [
-          { color: "GH", clarity: "VVS1", certification: "IGI", rate: 45000 },
-          { color: "GH", clarity: "VVS2", certification: "IGI", rate: 42000 },
-          { color: "GH", clarity: "VS1", certification: "IGI", rate: 38000 },
-          { color: "GH", clarity: "VS2", certification: "IGI", rate: 35000 },
-          { color: "HI", clarity: "VVS1", certification: "IGI", rate: 40000 },
-          { color: "HI", clarity: "VVS2", certification: "IGI", rate: 37000 },
-          { color: "IJ", clarity: "VS1", certification: "IGI", rate: 32000 },
-          { color: "JK", clarity: "SI1", certification: "Self", rate: 25000 },
-          { color: "KL", clarity: "SI2", certification: "None", rate: 20000 }
+          { color: "GH", clarity: "VVS1", certification: "IGI", rate: 51332 },
+          { color: "GH", clarity: "VVS1", certification: "Self", rate: 32333 },
+          { color: "GH", clarity: "VVS2", certification: "IGI", rate: 51999 },
+          { color: "GH", clarity: "VVS2", certification: "Self", rate: 33000 },
+          { color: "HI", clarity: "VVS1", certification: "IGI", rate: 47332 },
+          { color: "HI", clarity: "VVS1", certification: "Self", rate: 28499 },
+          { color: "IJ", clarity: "VS1", certification: "IGI", rate: 42000 },
+          { color: "IJ", clarity: "VS1", certification: "Self", rate: 24000 },
+          { color: "JK", clarity: "SI1", certification: "IGI", rate: 36666 },
+          { color: "JK", clarity: "SI1", certification: "Self", rate: 20500 },
+          { color: "KL", clarity: "I1/I2/I3", certification: "IGI", rate: 32000 },
+          { color: "KL", clarity: "I1/I2/I3", certification: "Self", rate: 17000 }
         ];
         
         setGoldRates(fallbackGoldRates);
