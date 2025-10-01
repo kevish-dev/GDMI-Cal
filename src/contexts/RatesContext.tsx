@@ -50,6 +50,9 @@ interface CalculationRecord {
   jewelryType?: string;
   jewellerQuote?: number;
   priceDifference?: number;
+  diamondColor?: string; // Optional diamond color
+  diamondClarity?: string; // Optional diamond clarity
+  certification?: string; // Diamond certification
 }
 
 interface SystemAnalytics {

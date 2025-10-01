@@ -150,19 +150,19 @@ export default function Calculator() {
         goldValue = goldWeight * goldRate;
 
         // Get diamond rate from admin-managed rates
+        // Diamond rate calculation now only depends on certification
         const matchingRate = diamondRates.find(
-          (rate) =>
-            rate.color === diamondForm.color &&
-            rate.clarity === diamondForm.clarity &&
-            rate.certification === diamondForm.certification
+          (rate) => rate.certification === diamondForm.certification
         );
         
         const diamondRate = matchingRate?.rate || 50000; // Fallback rate
         
         // Log for debugging if no matching rate found
         if (!matchingRate) {
-          console.warn(`No diamond rate found for: ${diamondForm.color}-${diamondForm.clarity}-${diamondForm.certification}. Using fallback rate.`);
-          console.log('Available rates:', diamondRates.map(r => `${r.color}-${r.clarity}-${r.certification}`));
+          console.warn(`No diamond rate found for certification: ${diamondForm.certification}. Using fallback rate.`);
+          console.log('Available certifications:', diamondRates.map(r => r.certification));
+        } else {
+          console.info(`Using diamond rate for ${diamondForm.certification} certification: ₹${diamondRate.toLocaleString("en-IN")} per carat.`);
         }
 
         diamondValue = diamondWeight * diamondRate;
@@ -204,6 +204,10 @@ export default function Calculator() {
         jewelryType: jewelryType === "gold" ? goldForm.type : "diamond",
         jewellerQuote: jewellerQuoteValue > 0 ? jewellerQuoteValue : undefined,
         priceDifference: priceDifference,
+        // Include optional diamond fields for saving to database
+        diamondColor: jewelryType === "diamond" ? diamondForm.color || undefined : undefined,
+        diamondClarity: jewelryType === "diamond" ? diamondForm.clarity || undefined : undefined,
+        certification: jewelryType === "diamond" ? diamondForm.certification || undefined : undefined,
       });
 
       toast({
@@ -229,9 +233,8 @@ export default function Calculator() {
         diamondForm.goldWeight &&
         diamondForm.carat &&
         diamondForm.diamondWeight &&
-        diamondForm.color &&
-        diamondForm.clarity &&
         diamondForm.certification
+        // Note: color and clarity are now optional
       );
     }
     return false;
