@@ -293,4 +293,29 @@ Elegant luxury design with sophisticated color palette and modern aesthetics
   .animate-marquee:hover {
     animation-play-state: paused;
   }
+
+  /* Hide scrollbars for better mobile experience */
+  .scrollbar-hide {
+    -ms-overflow-style: none;  /* Internet Explorer 10+ */
+    scrollbar-width: none;  /* Firefox */
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;  /* Safari and Chrome */
+  }
+
+  /* Smooth scrolling for touch devices */
+  .touch-pan-x {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+  }
+
+  /* Enhanced mobile touch experience */
+  @media (max-width: 640px) {
+    .scrollbar-hide {
+      scroll-snap-type: x proximity;
+    }
+    .scrollbar-hide > div > div {
+      scroll-snap-align: start;
+    }
+  }
 }

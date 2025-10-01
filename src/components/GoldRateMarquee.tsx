@@ -93,129 +93,91 @@ export function GoldRateMarquee() {
 
   return (
     <div className="w-full bg-gradient-to-r from-slate-50 via-white to-slate-50 border-b border-slate-200/60 shadow-sm">
-      <div className="relative overflow-hidden py-3">
-        {/* Live indicator */}
-        <div className="absolute left-4 top-1/2 -translate-y-1/2 z-10 flex items-center space-x-2 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1.5 shadow-sm border border-slate-200/60">
+      <div className="relative py-3 sm:py-4">
+        {/* Live indicator - Fixed position */}
+        <div className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-20 flex items-center space-x-1.5 sm:space-x-2 bg-white/95 backdrop-blur-sm rounded-full px-2 sm:px-3 py-1 sm:py-1.5 shadow-sm border border-slate-200/60">
           <div className="relative">
-            <div className="h-2 w-2 bg-red-500 rounded-full"></div>
-            <div className="absolute inset-0 h-2 w-2 bg-red-400 rounded-full animate-ping opacity-60"></div>
+            <div className="h-1.5 w-1.5 sm:h-2 sm:w-2 bg-red-500 rounded-full"></div>
+            <div className="absolute inset-0 h-1.5 w-1.5 sm:h-2 sm:w-2 bg-red-400 rounded-full animate-ping opacity-60"></div>
           </div>
-          <span className="text-xs font-bold text-slate-700 uppercase tracking-wide">LIVE RATES</span>
+          <span className="text-[10px] sm:text-xs font-bold text-slate-700 uppercase tracking-wide">
+            <span className="hidden sm:inline">LIVE RATES</span>
+            <span className="sm:hidden">LIVE</span>
+          </span>
         </div>
 
-        {/* Marquee content */}
-        <div className="flex animate-marquee space-x-8 pl-32">
-          {/* First set of items */}
-          {marqueeItems.map((item, index) => (
-            <div key={`first-${index}`} className="flex-shrink-0">
-              <Badge 
-                variant="secondary" 
-                className={cn(
-                  "relative overflow-hidden bg-gradient-to-r border-2 px-4 py-2.5 text-sm font-medium rounded-full shadow-sm hover:shadow-lg transition-all duration-300 backdrop-blur-sm",
-                  item.bgColor,
-                  item.borderColor,
-                  item.textColor
-                )}
-              >
-                {/* Animated background */}
-                <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent rounded-full animate-pulse"></div>
-                
-                <div className="relative z-10 flex items-center space-x-3">
-                  <div className="flex items-center space-x-1.5">
-                    <item.icon className={cn("h-3.5 w-3.5", item.iconColor)} />
-                    <span className="text-xs font-bold uppercase tracking-wide">
-                      {item.label}
-                    </span>
-                  </div>
-                  
-                  <div className="h-4 w-px bg-current opacity-30"></div>
-                  
-                  <div className="flex items-center space-x-0.5 bg-white/20 rounded-md px-2 py-0.5">
-                    <IndianRupee className="h-3.5 w-3.5" />
-                    <span className="font-black text-sm tracking-tight">
-                      {item.price.toLocaleString('en-IN')}
-                    </span>
-                    {item.type === 'physical' && (
-                      <span className="text-xs opacity-70 font-medium">/g</span>
-                    )}
-                    {item.type === 'mcx' && (
-                      <span className="text-xs opacity-70 font-medium">/10g</span>
-                    )}
-                  </div>
-
-                  {/* MCX change indicator */}
-                  {item.type === 'mcx' && (
-                    <>
-                      <div className="h-4 w-px bg-current opacity-30"></div>
-                      <div className={cn(
-                        "flex items-center space-x-1 text-xs font-bold px-1.5 py-0.5 rounded",
-                        item.change >= 0 ? "bg-green-100/50 text-green-700" : "bg-red-100/50 text-red-700"
-                      )}>
-                        <span>{item.change >= 0 ? '+' : ''}{item.change}</span>
-                        <span>({item.changePercent >= 0 ? '+' : ''}{item.changePercent}%)</span>
-                      </div>
-                    </>
-                  )}
-                </div>
-              </Badge>
+        {/* Scroll indicator for mobile */}
+        <div className="absolute right-2 top-1/2 -translate-y-1/2 z-20 sm:hidden">
+          <div className="flex items-center space-x-1 bg-white/90 backdrop-blur-sm rounded-full px-2 py-1 shadow-sm border border-slate-200/60">
+            <div className="flex space-x-0.5">
+              <div className="w-1 h-1 bg-slate-400 rounded-full animate-bounce"></div>
+              <div className="w-1 h-1 bg-slate-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+              <div className="w-1 h-1 bg-slate-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
             </div>
-          ))}
-          
-          {/* Duplicate set for seamless loop */}
-          {marqueeItems.map((item, index) => (
-            <div key={`second-${index}`} className="flex-shrink-0">
-              <Badge 
-                variant="secondary" 
-                className={cn(
-                  "relative overflow-hidden bg-gradient-to-r border-2 px-4 py-2.5 text-sm font-medium rounded-full shadow-sm hover:shadow-lg transition-all duration-300 backdrop-blur-sm",
-                  item.bgColor,
-                  item.borderColor,
-                  item.textColor
-                )}
-              >
-                {/* Animated background */}
-                <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent rounded-full animate-pulse"></div>
-                
-                <div className="relative z-10 flex items-center space-x-3">
-                  <div className="flex items-center space-x-1.5">
-                    <item.icon className={cn("h-3.5 w-3.5", item.iconColor)} />
-                    <span className="text-xs font-bold uppercase tracking-wide">
-                      {item.label}
-                    </span>
-                  </div>
-                  
-                  <div className="h-4 w-px bg-current opacity-30"></div>
-                  
-                  <div className="flex items-center space-x-0.5 bg-white/20 rounded-md px-2 py-0.5">
-                    <IndianRupee className="h-3.5 w-3.5" />
-                    <span className="font-black text-sm tracking-tight">
-                      {item.price.toLocaleString('en-IN')}
-                    </span>
-                    {item.type === 'physical' && (
-                      <span className="text-xs opacity-70 font-medium">/g</span>
-                    )}
-                    {item.type === 'mcx' && (
-                      <span className="text-xs opacity-70 font-medium">/10g</span>
-                    )}
-                  </div>
+          </div>
+        </div>
 
-                  {/* MCX change indicator */}
-                  {item.type === 'mcx' && (
-                    <>
-                      <div className="h-4 w-px bg-current opacity-30"></div>
-                      <div className={cn(
-                        "flex items-center space-x-1 text-xs font-bold px-1.5 py-0.5 rounded",
-                        item.change >= 0 ? "bg-green-100/50 text-green-700" : "bg-red-100/50 text-red-700"
-                      )}>
-                        <span>{item.change >= 0 ? '+' : ''}{item.change}</span>
-                        <span>({item.changePercent >= 0 ? '+' : ''}{item.changePercent}%)</span>
-                      </div>
-                    </>
+        {/* Scrollable content container */}
+        <div className="overflow-x-auto scrollbar-hide pl-16 sm:pl-24 pr-4 touch-pan-x scroll-smooth">
+          <div className="flex animate-marquee space-x-3 sm:space-x-6 min-w-max pb-1">
+            {/* Rate items */}
+            {marqueeItems.map((item, index) => (
+              <div key={index} className="flex-shrink-0">
+                <Badge 
+                  variant="secondary" 
+                  className={cn(
+                    "relative overflow-hidden bg-gradient-to-r border-2 transition-all duration-300 backdrop-blur-sm hover:scale-105",
+                    "px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium rounded-full shadow-sm hover:shadow-lg",
+                    item.bgColor,
+                    item.borderColor,
+                    item.textColor
                   )}
-                </div>
-              </Badge>
-            </div>
-          ))}
+                >
+                  {/* Animated background */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent rounded-full animate-pulse"></div>
+                  
+                  <div className="relative z-10 flex items-center space-x-2 sm:space-x-3">
+                    <div className="flex items-center space-x-1 sm:space-x-1.5">
+                      <item.icon className={cn("h-3 w-3 sm:h-3.5 sm:w-3.5", item.iconColor)} />
+                      <span className="text-xs sm:text-xs font-bold uppercase tracking-wide">
+                        <span className="hidden sm:inline">{item.label}</span>
+                        <span className="sm:hidden">{item.label.split(' ')[0]}</span>
+                      </span>
+                    </div>
+                    
+                    <div className="h-3 sm:h-4 w-px bg-current opacity-30"></div>
+                    
+                    <div className="flex items-center space-x-0.5 bg-white/20 rounded-md px-1.5 sm:px-2 py-0.5">
+                      <IndianRupee className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                      <span className="font-black text-xs sm:text-sm tracking-tight">
+                        {item.price.toLocaleString('en-IN')}
+                      </span>
+                      {item.type === 'physical' && (
+                        <span className="text-[10px] sm:text-xs opacity-70 font-medium">/g</span>
+                      )}
+                      {item.type === 'mcx' && (
+                        <span className="text-[10px] sm:text-xs opacity-70 font-medium hidden sm:inline">/10g</span>
+                      )}
+                    </div>
+
+                    {/* MCX change indicator */}
+                    {item.type === 'mcx' && (
+                      <>
+                        <div className="hidden sm:block h-4 w-px bg-current opacity-30"></div>
+                        <div className={cn(
+                          "flex items-center space-x-0.5 sm:space-x-1 text-[10px] sm:text-xs font-bold px-1 sm:px-1.5 py-0.5 rounded",
+                          item.change >= 0 ? "bg-green-100/50 text-green-700" : "bg-red-100/50 text-red-700"
+                        )}>
+                          <span>{item.change >= 0 ? '+' : ''}{item.change}</span>
+                          <span className="hidden sm:inline">({item.changePercent >= 0 ? '+' : ''}{item.changePercent}%)</span>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </Badge>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
