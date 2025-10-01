@@ -706,22 +706,11 @@ export default function Calculator() {
 
                       <Separator className="my-4" />
 
-                      <div className={cn(
-                        "flex justify-between items-center py-3 rounded-lg px-3",
-                        jewelryType === "gold" 
-                          ? "bg-primary/10 border border-primary/20" 
-                          : "bg-secondary/10 border border-secondary/20"
-                      )}>
-                        <span className={cn(
-                          "text-base sm:text-lg font-bold",
-                          jewelryType === "gold" ? "text-primary" : "text-secondary"
-                        )}>
+                      <div className="flex justify-between items-center py-3 rounded-lg px-3 bg-gradient-to-r from-emerald-50/90 to-green-50/90 border border-emerald-200/60 transition-all duration-450">
+                        <span className="text-base sm:text-lg font-bold text-emerald-800">
                           Final Price:
                         </span>
-                        <Badge className={cn(
-                          "text-lg sm:text-xl px-3 sm:px-4 py-2 font-bold",
-                          jewelryType === "gold" ? "gradient-gold" : "gradient-diamond"
-                        )}>
+                        <Badge className="text-lg sm:text-xl px-3 sm:px-4 py-2 font-bold bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white border-0 shadow-lg transition-all duration-450">
                           ₹{priceBreakdown.finalPrice.toLocaleString("en-IN")}
                         </Badge>
                       </div>
