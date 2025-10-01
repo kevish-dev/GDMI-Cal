@@ -315,32 +315,63 @@ export default function Calculator() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                    <Button
-                      variant={jewelryType === "gold" ? "default" : "outline"}
+                    <div
                       className={cn(
-                        "h-16 sm:h-20 flex-col space-y-2 text-left transition-smooth",
-                        jewelryType === "gold" && "gradient-gold shadow-glow"
+                        "relative h-16 sm:h-20 flex items-center p-4 rounded-lg border-2 cursor-pointer transition-all duration-200",
+                        "hover:border-gray-300 hover:bg-gray-50/50",
+                        jewelryType === "gold" 
+                          ? "border-primary bg-primary/10 text-primary" 
+                          : "border-gray-200 bg-background text-gray-600"
                       )}
                       onClick={() => handleJewelryTypeSelect("gold")}
                     >
-                      <Crown className="h-6 w-6 sm:h-8 sm:w-8" />
-                      <span className="font-medium text-sm sm:text-base">Gold Jewelry</span>
-                    </Button>
+                      {/* Radio button indicator */}
+                      <div className={cn(
+                        "absolute left-3 w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all duration-200",
+                        jewelryType === "gold" 
+                          ? "border-primary bg-primary" 
+                          : "border-gray-300 bg-white"
+                      )}>
+                        {jewelryType === "gold" && (
+                          <div className="w-2 h-2 rounded-full bg-white"></div>
+                        )}
+                      </div>
+                      
+                      {/* Content */}
+                      <div className="flex items-center space-x-3 ml-6">
+                        <Crown className="h-5 w-5 sm:h-6 sm:w-6" />
+                        <span className="font-medium text-sm sm:text-base">Gold Jewelry</span>
+                      </div>
+                    </div>
 
-                    <Button
-                      variant={
-                        jewelryType === "diamond" ? "default" : "outline"
-                      }
+                    <div
                       className={cn(
-                        "h-16 sm:h-20 flex-col space-y-2 text-left transition-smooth",
-                        jewelryType === "diamond" &&
-                          "gradient-diamond shadow-glow"
+                        "relative h-16 sm:h-20 flex items-center p-4 rounded-lg border-2 cursor-pointer transition-all duration-200",
+                        "hover:border-gray-300 hover:bg-gray-50/50",
+                        jewelryType === "diamond" 
+                          ? "border-secondary bg-secondary/10 text-secondary" 
+                          : "border-gray-200 bg-background text-gray-600"
                       )}
                       onClick={() => handleJewelryTypeSelect("diamond")}
                     >
-                      <Diamond className="h-6 w-6 sm:h-8 sm:w-8" />
-                      <span className="font-medium text-sm sm:text-base">Diamond Jewelry</span>
-                    </Button>
+                      {/* Radio button indicator */}
+                      <div className={cn(
+                        "absolute left-3 w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all duration-200",
+                        jewelryType === "diamond" 
+                          ? "border-secondary bg-secondary" 
+                          : "border-gray-300 bg-white"
+                      )}>
+                        {jewelryType === "diamond" && (
+                          <div className="w-2 h-2 rounded-full bg-white"></div>
+                        )}
+                      </div>
+                      
+                      {/* Content */}
+                      <div className="flex items-center space-x-3 ml-6">
+                        <Diamond className="h-5 w-5 sm:h-6 sm:w-6" />
+                        <span className="font-medium text-sm sm:text-base">Diamond Jewelry</span>
+                      </div>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -445,7 +476,7 @@ export default function Calculator() {
                               }
                             }}
                             className={cn(
-                              "grid grid-cols-1 sm:grid-cols-2 gap-2",
+                              "grid grid-cols-2 gap-2",
                               validationErrors.type && "ring-2 ring-red-500 ring-offset-2 rounded-lg p-1"
                             )}
                             options={[
