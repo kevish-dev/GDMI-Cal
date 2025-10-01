@@ -57,11 +57,9 @@ export default function Admin() {
 
   // Conversion factors for different carat gold
   const conversionFactors = {
-    "24K": 1.00,
     "22K": 0.93,
     "18K": 0.76,
-    "14K": 0.60,
-    "9K": 0.39
+    "14K": 0.60
   };
 
   const handleLogout = () => {
@@ -493,7 +491,6 @@ export default function Admin() {
                         <div>22K = 93%</div>
                         <div>18K = 76%</div>
                         <div>14K = 60%</div>
-                        <div>9K = 39%</div>
                       </div>
                     </div>
 

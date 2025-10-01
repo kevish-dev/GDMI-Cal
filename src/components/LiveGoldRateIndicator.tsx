@@ -10,9 +10,9 @@ interface LiveGoldRateIndicatorProps {
 export function LiveGoldRateIndicator({ className }: LiveGoldRateIndicatorProps) {
   const { goldRates } = useRates();
   
-  // Find 24K gold rate
-  const goldRate24K = goldRates.find(rate => rate.carat === "24K");
-  const currentRate = goldRate24K?.rate || 0;
+  // Find 22K gold rate
+  const goldRate22K = goldRates.find(rate => rate.carat === "22K");
+  const currentRate = goldRate22K?.rate || 0;
   
   if (!currentRate) {
     return null;
@@ -48,7 +48,7 @@ export function LiveGoldRateIndicator({ className }: LiveGoldRateIndicatorProps)
             
             <div className="flex items-center space-x-1.5">
               <TrendingUp className="h-3.5 w-3.5 text-emerald-600" />
-              <span className="text-sm font-bold text-emerald-800">24K</span>
+              <span className="text-sm font-bold text-emerald-800">22K</span>
             </div>
             
             <div className="flex items-center space-x-0.5 bg-emerald-100/50 rounded-md px-2 py-0.5">

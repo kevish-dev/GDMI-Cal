@@ -44,11 +44,11 @@ export function GoldRateMarquee() {
     return () => clearInterval(interval);
   }, []);
 
-  // Get physical gold rates (24K, 22K, 18K)
+  // Get physical gold rates (22K, 18K, 14K)
   const physicalRates = goldRates.filter(rate => 
-    ['24K', '22K', '18K'].includes(rate.carat)
+    ['22K', '18K', '14K'].includes(rate.carat)
   ).sort((a, b) => {
-    const order = ['24K', '22K', '18K'];
+    const order = ['22K', '18K', '14K'];
     return order.indexOf(a.carat) - order.indexOf(b.carat);
   });
 

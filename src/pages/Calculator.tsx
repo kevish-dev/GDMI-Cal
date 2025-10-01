@@ -2,13 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+
 import {
   Card,
   CardContent,
@@ -19,6 +13,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Layout } from "@/components/Layout/Layout";
 import { Badge } from "@/components/ui/badge";
+import { RadioButtonGroup } from "@/components/ui/radio-button-group";
 import { Crown, Diamond, Gem, IndianRupee } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
@@ -30,7 +25,7 @@ import { GoldRateMarquee } from "@/components/GoldRateMarquee";
 
 type JewelryType = "gold" | "diamond" | null;
 type GoldType = "chains" | "plain" | "temple" | "italian";
-type Carat = "9k" | "14k" | "18k" | "22k" | "24k";
+type Carat = "14k" | "18k" | "22k";
 type DiamondColor = "KL" | "JK" | "IJ" | "HI" | "GH";
 type DiamondClarity = "I1/I2/I3" | "SI1" | "SI2" | "VS1" | "VS2" | "VVS1" | "VVS2";
 type Certification = "IGI" | "Self";
@@ -375,7 +370,6 @@ export default function Calculator() {
                           </>
                         )}
                       </CardTitle>
-                      {jewelryType === "gold" && <LiveGoldRateIndicator />}
                     </div>
                     <CardDescription className="text-sm">
                       Enter the specifications for accurate pricing
@@ -413,7 +407,7 @@ export default function Calculator() {
                             <Label htmlFor="carat" className="text-sm font-medium">
                               Purity <span className="text-red-500">*</span>
                             </Label>
-                            <Select
+                            <RadioButtonGroup
                               value={goldForm.carat}
                               onValueChange={(value) => {
                                 setGoldForm({
@@ -424,28 +418,22 @@ export default function Calculator() {
                                   setValidationErrors(prev => ({...prev, carat: false}));
                                 }
                               }}
-                            >
-                              <SelectTrigger className={cn(
-                                "h-11 text-base",
-                                validationErrors.carat && "border-red-500 focus:border-red-500"
-                              )}>
-                                <SelectValue placeholder="22K / 18K / 14K"/>
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="24k">24K</SelectItem>
-                                <SelectItem value="22k">22K</SelectItem>
-                                <SelectItem value="18k">18K</SelectItem>
-                                <SelectItem value="14k">14K</SelectItem>
-                                <SelectItem value="9k">9K</SelectItem>
-                              </SelectContent>
-                            </Select>
+                              className={cn(
+                                validationErrors.carat && "ring-2 ring-red-500 ring-offset-2 rounded-lg p-1"
+                              )}
+                              options={[
+                                { value: "22k", label: "22K" },
+                                { value: "18k", label: "18K" },
+                                { value: "14k", label: "14K" }
+                              ]}
+                            />
                           </div>
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="type" className="text-sm font-medium">
                             Jewellery Type <span className="text-red-500">*</span>
                           </Label>
-                          <Select
+                          <RadioButtonGroup
                             value={goldForm.type}
                             onValueChange={(value) => {
                               setGoldForm({
@@ -456,22 +444,17 @@ export default function Calculator() {
                                 setValidationErrors(prev => ({...prev, type: false}));
                               }
                             }}
-                          >
-                            <SelectTrigger className={cn(
-                              "h-11 text-base",
-                              validationErrors.type && "border-red-500 focus:border-red-500"
-                            )}>
-                              <SelectValue placeholder="Chains / Plain / Temple / Italian" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="chains">Chains {"(2% making charges)"}</SelectItem>
-                              <SelectItem value="plain">Plain {"(3.5% making charges)"}</SelectItem>
-                              <SelectItem value="temple">Temple {"(7% making charges)"}</SelectItem>
-                              <SelectItem value="italian">
-                                Italian Gold {"(18% making charges)"}
-                              </SelectItem>
-                            </SelectContent>
-                          </Select>
+                            className={cn(
+                              "grid grid-cols-1 sm:grid-cols-2 gap-2",
+                              validationErrors.type && "ring-2 ring-red-500 ring-offset-2 rounded-lg p-1"
+                            )}
+                            options={[
+                              { value: "chains", label: "Chains", description: "(2% making charges)" },
+                              { value: "plain", label: "Plain", description: "(3.5% making charges)" },
+                              { value: "temple", label: "Temple", description: "(7% making charges)" },
+                              { value: "italian", label: "Italian Gold", description: "(18% making charges)" }
+                            ]}
+                          />
                         </div>
                         
                         <div className="space-y-2">
@@ -524,7 +507,7 @@ export default function Calculator() {
                             <Label htmlFor="diamondcarat" className="text-sm font-medium">
                               Purity <span className="text-red-500">*</span>
                             </Label>
-                            <Select
+                            <RadioButtonGroup
                               value={diamondForm.carat}
                               onValueChange={(value) => {
                                 setDiamondForm({
@@ -535,21 +518,15 @@ export default function Calculator() {
                                   setValidationErrors(prev => ({...prev, diamondCarat: false}));
                                 }
                               }}
-                            >
-                              <SelectTrigger className={cn(
-                                "h-11 text-base",
-                                validationErrors.diamondCarat && "border-red-500 focus:border-red-500"
-                              )}>
-                                <SelectValue placeholder="22K / 18K / 14K" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="24k">24K</SelectItem>
-                                <SelectItem value="22k">22K</SelectItem>
-                                <SelectItem value="18k">18K</SelectItem>
-                                <SelectItem value="14k">14K</SelectItem>
-                                <SelectItem value="9k">9K</SelectItem>
-                              </SelectContent>
-                            </Select>
+                              className={cn(
+                                validationErrors.diamondCarat && "ring-2 ring-red-500 ring-offset-2 rounded-lg p-1"
+                              )}
+                              options={[
+                                { value: "22k", label: "22K" },
+                                { value: "18k", label: "18K" },
+                                { value: "14k", label: "14K" }
+                              ]}
+                            />
                           </div>
                         </div>
 
@@ -583,7 +560,7 @@ export default function Calculator() {
                             <Label htmlFor="certification" className="text-sm font-medium">
                               Certification <span className="text-red-500">*</span>
                             </Label>
-                            <Select
+                            <RadioButtonGroup
                               value={diamondForm.certification}
                               onValueChange={(value) => {
                                 setDiamondForm({
@@ -594,26 +571,22 @@ export default function Calculator() {
                                   setValidationErrors(prev => ({...prev, certification: false}));
                                 }
                               }}
-                            >
-                              <SelectTrigger className={cn(
-                                "h-11 text-base text-left",
-                                validationErrors.certification && "border-red-500 focus:border-red-500"
-                              )}>
-                                <SelectValue placeholder="Select certification" />
-                              </SelectTrigger>
-                              <SelectContent>
-
-                                <SelectItem value="Self">None/ Other non-IGI certificate</SelectItem>
-                                <SelectItem value="IGI">IGI certified</SelectItem>
-                              </SelectContent>
-                            </Select>
+                              className={cn(
+                                "grid grid-cols-1 gap-2",
+                                validationErrors.certification && "ring-2 ring-red-500 ring-offset-2 rounded-lg p-1"
+                              )}
+                              options={[
+                                { value: "Self", label: "None/ Other non-IGI certificate" },
+                                { value: "IGI", label: "IGI certified" }
+                              ]}
+                            />
                           </div>
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div className="space-y-2">
                             <Label htmlFor="clarity" className="text-sm font-medium">Diamond Clarity (optional)</Label>
-                            <Select
+                            <RadioButtonGroup
                               value={diamondForm.clarity}
                               onValueChange={(value) =>
                                 setDiamondForm({
@@ -621,24 +594,21 @@ export default function Calculator() {
                                   clarity: value as DiamondClarity,
                                 })
                               }
-                            >
-                              <SelectTrigger className="h-11 text-base">
-                                <SelectValue placeholder="Select clarity" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="I1/I2/I3">I1/I2/I3</SelectItem>
-                                <SelectItem value="SI1">SI1</SelectItem>
-                                <SelectItem value="SI2">SI2</SelectItem>
-                                <SelectItem value="VS1">VS1</SelectItem>
-                                <SelectItem value="VS2">VS2</SelectItem>
-                                <SelectItem value="VVS1">VVS1</SelectItem>
-                                <SelectItem value="VVS2">VVS2</SelectItem>
-                              </SelectContent>
-                            </Select>
+                              className="grid grid-cols-2 sm:grid-cols-3 gap-2"
+                              options={[
+                                { value: "I1/I2/I3", label: "I1/I2/I3" },
+                                { value: "SI1", label: "SI1" },
+                                { value: "SI2", label: "SI2" },
+                                { value: "VS1", label: "VS1" },
+                                { value: "VS2", label: "VS2" },
+                                { value: "VVS1", label: "VVS1" },
+                                { value: "VVS2", label: "VVS2" }
+                              ]}
+                            />
                           </div>
                           <div className="space-y-2">
                             <Label htmlFor="color" className="text-sm font-medium">Diamond Color (optional)</Label>
-                            <Select
+                            <RadioButtonGroup
                               value={diamondForm.color}
                               onValueChange={(value) =>
                                 setDiamondForm({
@@ -646,18 +616,15 @@ export default function Calculator() {
                                   color: value as DiamondColor,
                                 })
                               }
-                            >
-                              <SelectTrigger className="h-11 text-base">
-                                <SelectValue placeholder="Select color" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="KL">KL</SelectItem>
-                                <SelectItem value="JK">JK</SelectItem>
-                                <SelectItem value="IJ">IJ</SelectItem>
-                                <SelectItem value="HI">HI</SelectItem>
-                                <SelectItem value="GH">GH</SelectItem>
-                              </SelectContent>
-                            </Select>
+                              className="grid grid-cols-3 sm:grid-cols-5 gap-2"
+                              options={[
+                                { value: "KL", label: "KL" },
+                                { value: "JK", label: "JK" },
+                                { value: "IJ", label: "IJ" },
+                                { value: "HI", label: "HI" },
+                                { value: "GH", label: "GH" }
+                              ]}
+                            />
                           </div>
                         </div>
 
