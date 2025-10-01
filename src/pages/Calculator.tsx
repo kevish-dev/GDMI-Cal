@@ -83,6 +83,7 @@ export default function Calculator() {
     null
   );
   const [isCalculating, setIsCalculating] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<{[key: string]: boolean}>({});
 
   const { toast } = useToast();
   const { goldRates, diamondRates, makingCharges, addCalculation, loading } = useRates();
@@ -111,6 +112,16 @@ export default function Calculator() {
     // Check if user is verified before allowing calculation
     if (!isVerifiedUser) {
       openVerificationModal();
+      return;
+    }
+
+    // Validate form and show errors if invalid
+    if (!validateForm()) {
+      toast({
+        title: "Missing required fields",
+        description: "Please fill in all required fields marked with a red star.",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -223,6 +234,24 @@ export default function Calculator() {
     } finally {
       setIsCalculating(false);
     }
+  };
+
+  const validateForm = () => {
+    const errors: {[key: string]: boolean} = {};
+    
+    if (jewelryType === "gold") {
+      if (!goldForm.weight) errors.weight = true;
+      if (!goldForm.carat) errors.carat = true;
+      if (!goldForm.type) errors.type = true;
+    } else if (jewelryType === "diamond") {
+      if (!diamondForm.goldWeight) errors.goldWeight = true;
+      if (!diamondForm.carat) errors.diamondCarat = true;
+      if (!diamondForm.diamondWeight) errors.diamondWeight = true;
+      if (!diamondForm.certification) errors.certification = true;
+    }
+    
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   const isFormValid = () => {
@@ -353,33 +382,49 @@ export default function Calculator() {
                       <>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div className="space-y-2">
-                            <Label htmlFor="weight" className="text-sm font-medium">Gold Weight (g)</Label>
+                            <Label htmlFor="weight" className="text-sm font-medium">
+                              Gold Weight (g) <span className="text-red-500">*</span>
+                            </Label>
                             <Input
                               id="weight"
                               type="number"
                               placeholder="0.00"
                               value={goldForm.weight}
-                              onChange={(e) =>
+                              onChange={(e) => {
                                 setGoldForm({
                                   ...goldForm,
                                   weight: e.target.value,
-                                })
-                              }
-                              className="h-11 text-base"
+                                });
+                                if (validationErrors.weight) {
+                                  setValidationErrors(prev => ({...prev, weight: false}));
+                                }
+                              }}
+                              className={cn(
+                                "h-11 text-base",
+                                validationErrors.weight && "border-red-500 focus:border-red-500"
+                              )}
                             />
                           </div>
                           <div className="space-y-2">
-                            <Label htmlFor="carat" className="text-sm font-medium">Purity</Label>
+                            <Label htmlFor="carat" className="text-sm font-medium">
+                              Purity <span className="text-red-500">*</span>
+                            </Label>
                             <Select
                               value={goldForm.carat}
-                              onValueChange={(value) =>
+                              onValueChange={(value) => {
                                 setGoldForm({
                                   ...goldForm,
                                   carat: value as Carat,
-                                })
-                              }
+                                });
+                                if (validationErrors.carat) {
+                                  setValidationErrors(prev => ({...prev, carat: false}));
+                                }
+                              }}
                             >
-                              <SelectTrigger className="h-11 text-base">
+                              <SelectTrigger className={cn(
+                                "h-11 text-base",
+                                validationErrors.carat && "border-red-500 focus:border-red-500"
+                              )}>
                                 <SelectValue placeholder="22K / 18K / 14K"/>
                               </SelectTrigger>
                               <SelectContent>
@@ -393,17 +438,25 @@ export default function Calculator() {
                           </div>
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor="type" className="text-sm font-medium">Jewellery Type</Label>
+                          <Label htmlFor="type" className="text-sm font-medium">
+                            Jewellery Type <span className="text-red-500">*</span>
+                          </Label>
                           <Select
                             value={goldForm.type}
-                            onValueChange={(value) =>
+                            onValueChange={(value) => {
                               setGoldForm({
                                 ...goldForm,
                                 type: value as GoldType,
-                              })
-                            }
+                              });
+                              if (validationErrors.type) {
+                                setValidationErrors(prev => ({...prev, type: false}));
+                              }
+                            }}
                           >
-                            <SelectTrigger className="h-11 text-base">
+                            <SelectTrigger className={cn(
+                              "h-11 text-base",
+                              validationErrors.type && "border-red-500 focus:border-red-500"
+                            )}>
                               <SelectValue placeholder="Chains / Plain / Temple / Italian" />
                             </SelectTrigger>
                             <SelectContent>
@@ -440,33 +493,49 @@ export default function Calculator() {
                       <>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div className="space-y-2">
-                            <Label htmlFor="goldWeight" className="text-sm font-medium">Gold Weight (g)</Label>
+                            <Label htmlFor="goldWeight" className="text-sm font-medium">
+                              Gold Weight (g) <span className="text-red-500">*</span>
+                            </Label>
                             <Input
                               id="goldWeight"
                               type="number"
                               placeholder="0.00"
                               value={diamondForm.goldWeight}
-                              onChange={(e) =>
+                              onChange={(e) => {
                                 setDiamondForm({
                                   ...diamondForm,
                                   goldWeight: e.target.value,
-                                })
-                              }
-                              className="h-11 text-base"
+                                });
+                                if (validationErrors.goldWeight) {
+                                  setValidationErrors(prev => ({...prev, goldWeight: false}));
+                                }
+                              }}
+                              className={cn(
+                                "h-11 text-base",
+                                validationErrors.goldWeight && "border-red-500 focus:border-red-500"
+                              )}
                             />
                           </div>
                           <div className="space-y-2">
-                            <Label htmlFor="diamondcarat" className="text-sm font-medium">Purity</Label>
+                            <Label htmlFor="diamondcarat" className="text-sm font-medium">
+                              Purity <span className="text-red-500">*</span>
+                            </Label>
                             <Select
                               value={diamondForm.carat}
-                              onValueChange={(value) =>
+                              onValueChange={(value) => {
                                 setDiamondForm({
                                   ...diamondForm,
                                   carat: value as Carat,
-                                })
-                              }
+                                });
+                                if (validationErrors.diamondCarat) {
+                                  setValidationErrors(prev => ({...prev, diamondCarat: false}));
+                                }
+                              }}
                             >
-                              <SelectTrigger className="h-11 text-base">
+                              <SelectTrigger className={cn(
+                                "h-11 text-base",
+                                validationErrors.diamondCarat && "border-red-500 focus:border-red-500"
+                              )}>
                                 <SelectValue placeholder="22K / 18K / 14K" />
                               </SelectTrigger>
                               <SelectContent>
@@ -483,7 +552,7 @@ export default function Calculator() {
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div className="space-y-2">
                             <Label htmlFor="diamondWeight" className="text-sm font-medium">
-                              Diamond Weight (ct)
+                              Diamond Weight (ct) <span className="text-red-500">*</span>
                             </Label>
                             <Input
                               id="diamondWeight"
@@ -491,27 +560,41 @@ export default function Calculator() {
                               step="0.01"
                               placeholder="0.00"
                               value={diamondForm.diamondWeight}
-                              onChange={(e) =>
+                              onChange={(e) => {
                                 setDiamondForm({
                                   ...diamondForm,
                                   diamondWeight: e.target.value,
-                                })
-                              }
-                              className="h-11 text-base"
+                                });
+                                if (validationErrors.diamondWeight) {
+                                  setValidationErrors(prev => ({...prev, diamondWeight: false}));
+                                }
+                              }}
+                              className={cn(
+                                "h-11 text-base",
+                                validationErrors.diamondWeight && "border-red-500 focus:border-red-500"
+                              )}
                             />
                           </div>
                           <div className="space-y-2">
-                            <Label htmlFor="certification" className="text-sm font-medium">Certification</Label>
+                            <Label htmlFor="certification" className="text-sm font-medium">
+                              Certification <span className="text-red-500">*</span>
+                            </Label>
                             <Select
                               value={diamondForm.certification}
-                              onValueChange={(value) =>
+                              onValueChange={(value) => {
                                 setDiamondForm({
                                   ...diamondForm,
                                   certification: value as Certification,
-                                })
-                              }
+                                });
+                                if (validationErrors.certification) {
+                                  setValidationErrors(prev => ({...prev, certification: false}));
+                                }
+                              }}
                             >
-                              <SelectTrigger className="h-11 text-base text-left">
+                              <SelectTrigger className={cn(
+                                "h-11 text-base text-left",
+                                validationErrors.certification && "border-red-500 focus:border-red-500"
+                              )}>
                                 <SelectValue placeholder="Select certification" />
                               </SelectTrigger>
                               <SelectContent>
@@ -736,8 +819,12 @@ export default function Calculator() {
                                 Price Difference:
                               </span>
                               <Badge 
-                                variant={priceBreakdown.priceDifference! > 0 ? "destructive" : "default"}
-                                className="text-sm px-2 py-1 font-semibold"
+                                className={cn(
+                                  "text-sm px-2 py-1 font-semibold",
+                                  priceBreakdown.priceDifference! > 0 
+                                    ? "bg-red-100 text-red-800 border-red-200 hover:bg-red-200" 
+                                    : "bg-green-100 text-green-800 border-green-200 hover:bg-green-200"
+                                )}
                               >
                                 {priceBreakdown.priceDifference! > 0 ? "+" : ""}
                                 ₹{Math.abs(priceBreakdown.priceDifference!).toLocaleString("en-IN")}
