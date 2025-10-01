@@ -277,7 +277,7 @@ Elegant luxury design with sophisticated color palette and modern aesthetics
 
   /* Marquee animation for gold rates */
   .animate-marquee {
-    animation: marquee 40s linear infinite;
+    animation: marquee 45s linear infinite;
   }
 
   @keyframes marquee {
@@ -289,9 +289,16 @@ Elegant luxury design with sophisticated color palette and modern aesthetics
     }
   }
 
-  /* Pause marquee on hover */
+  /* Pause marquee on hover/touch and allow manual scrolling */
   .animate-marquee:hover {
     animation-play-state: paused;
+  }
+
+  /* Mobile-specific: pause animation when user is actively scrolling */
+  @media (max-width: 640px) {
+    .scrollbar-hide:active .animate-marquee {
+      animation-play-state: paused;
+    }
   }
 
   /* Hide scrollbars for better mobile experience */
