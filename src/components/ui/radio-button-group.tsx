@@ -26,8 +26,8 @@ const RadioButtonGroup = React.forwardRef<
           value={option.value}
           className={cn(
             "flex flex-col items-center justify-center px-3 py-2 rounded-md border text-sm font-medium transition-all duration-200 cursor-pointer",
-            "text-gray-400 border-gray-200 bg-background hover:text-gray-600 hover:border-gray-300 hover:bg-gray-50/50",
-            "data-[state=checked]:text-foreground data-[state=checked]:border-primary data-[state=checked]:bg-primary/10 data-[state=checked]:shadow-sm",
+            "text-gray-500 border-gray-400 bg-white hover:text-gray-700 hover:border-gray-500 hover:bg-gray-50 hover:shadow-md hover:scale-[1.02] active:scale-[0.98]",
+            "data-[state=checked]:text-white data-[state=checked]:border-primary data-[state=checked]:bg-primary data-[state=checked]:shadow-lg data-[state=checked]:scale-[1.02]",
             "focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
             "disabled:cursor-not-allowed disabled:opacity-50",
             "dark:data-[state=checked]:bg-primary/20 dark:hover:bg-gray-800/50"
