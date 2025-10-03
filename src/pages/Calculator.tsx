@@ -22,6 +22,7 @@ import { useUserVerification } from "@/contexts/UserVerificationContext";
 import { UserVerificationModal } from "@/components/UserVerificationModal";
 import { LiveGoldRateIndicator } from "@/components/LiveGoldRateIndicator";
 import { GoldRateMarquee } from "@/components/GoldRateMarquee";
+import { ContactSupportBox } from "@/components/ContactSupportBox";
 
 type JewelryType = "gold" | "diamond" | null;
 type GoldType = "chains" | "plain" | "temple" | "italian";
@@ -885,6 +886,11 @@ export default function Calculator() {
                 </Card>
               )}
             </div>
+          </div>
+          
+          {/* Contact Support Box */}
+          <div className="mt-8">
+            <ContactSupportBox />
           </div>
         </div>
       </div>
