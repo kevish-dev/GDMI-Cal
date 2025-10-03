@@ -168,13 +168,30 @@ export const createGoldRates = async (goldRates) => {
   try {
     // Use a fixed document ID for gold rates to maintain single source of truth
     const docRef = doc(db, "goldRates", "current");
+    
+    // Get existing rates to preserve as lastRate
+    const existingDoc = await getDoc(docRef);
+    let existingRates = [];
+    if (existingDoc.exists()) {
+      existingRates = existingDoc.data().rates || [];
+    }
+    
+    // Merge new rates with last rates
+    const updatedRates = goldRates.map(newRate => {
+      const existingRate = existingRates.find(rate => rate.carat === newRate.carat);
+      return {
+        ...newRate,
+        lastRate: existingRate ? existingRate.rate : newRate.rate // Set lastRate to previous value or current if first time
+      };
+    });
+    
     await setDoc(docRef, {
-      rates: goldRates,
+      rates: updatedRates,
       lastUpdated: serverTimestamp(),
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
     }, { merge: true });
-    return goldRates;
+    return updatedRates;
   } catch (error) {
     console.error("Error creating/updating gold rates:", error);
     throw error;
@@ -306,11 +323,11 @@ export const subscribeToMakingCharges = (callback) => {
 export const initializeDummyRates = async () => {
   try {
     const dummyGoldRates = [
-      { carat: "24K", rate: 7000, lastUpdated: new Date().toISOString().split('T')[0] },
-      { carat: "22K", rate: 6510, lastUpdated: new Date().toISOString().split('T')[0] },
-      { carat: "18K", rate: 5320, lastUpdated: new Date().toISOString().split('T')[0] },
-      { carat: "14K", rate: 4200, lastUpdated: new Date().toISOString().split('T')[0] },
-      { carat: "9K", rate: 2730, lastUpdated: new Date().toISOString().split('T')[0] }
+      { carat: "24K", rate: 7000, lastRate: 6950, lastUpdated: new Date().toISOString().split('T')[0] },
+      { carat: "22K", rate: 6510, lastRate: 6460, lastUpdated: new Date().toISOString().split('T')[0] },
+      { carat: "18K", rate: 5320, lastRate: 5280, lastUpdated: new Date().toISOString().split('T')[0] },
+      { carat: "14K", rate: 4200, lastRate: 4160, lastUpdated: new Date().toISOString().split('T')[0] },
+      { carat: "9K", rate: 2730, lastRate: 2700, lastUpdated: new Date().toISOString().split('T')[0] }
     ];
 
     const dummyDiamondRates = [

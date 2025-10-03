@@ -1,6 +1,6 @@
 import { useRates } from "@/contexts/RatesContext";
 import { Badge } from "@/components/ui/badge";
-import { IndianRupee, TrendingUp } from "lucide-react";
+import { IndianRupee, TrendingUp, TrendingDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface LiveGoldRateIndicatorProps {
@@ -10,9 +10,13 @@ interface LiveGoldRateIndicatorProps {
 export function LiveGoldRateIndicator({ className }: LiveGoldRateIndicatorProps) {
   const { goldRates } = useRates();
   
-  // Find 22K gold rate
-  const goldRate22K = goldRates.find(rate => rate.carat === "22K");
-  const currentRate = goldRate22K?.rate || 0;
+  // Find 24K gold rate
+  const goldRate24K = goldRates.find(rate => rate.carat === "24K");
+  const currentRate = goldRate24K?.rate || 0;
+  const lastRate = goldRate24K?.lastRate || currentRate;
+  const rateChange = currentRate - lastRate;
+  const isUp = rateChange > 0;
+  const isDown = rateChange < 0;
   
   if (!currentRate) {
     return null;
@@ -47,8 +51,14 @@ export function LiveGoldRateIndicator({ className }: LiveGoldRateIndicatorProps)
             <div className="h-4 w-px bg-emerald-300/50"></div>
             
             <div className="flex items-center space-x-1.5">
-              <TrendingUp className="h-3.5 w-3.5 text-emerald-600" />
-              <span className="text-sm font-bold text-emerald-800">22K</span>
+              {isUp ? (
+                <TrendingUp className="h-3.5 w-3.5 text-emerald-600" />
+              ) : isDown ? (
+                <TrendingDown className="h-3.5 w-3.5 text-red-500" />
+              ) : (
+                <TrendingUp className="h-3.5 w-3.5 text-emerald-600" />
+              )}
+              <span className="text-sm font-bold text-emerald-800">24K</span>
             </div>
             
             <div className="flex items-center space-x-0.5 bg-emerald-100/50 rounded-md px-2 py-0.5">
@@ -58,8 +68,28 @@ export function LiveGoldRateIndicator({ className }: LiveGoldRateIndicatorProps)
               </span>
               <span className="text-xs text-emerald-600 font-medium">/g</span>
             </div>
+            
+            {/* Rate change indicator */}
+            {rateChange !== 0 && (
+              <>
+                <div className="h-4 w-px bg-emerald-300/50"></div>
+                <div className={cn(
+                  "flex items-center space-x-0.5 text-xs font-bold px-1.5 py-0.5 rounded",
+                  isUp ? "bg-green-100/60 text-green-700" : "bg-red-100/60 text-red-700"
+                )}>
+                  <span>{isUp ? '+' : ''}{rateChange}</span>
+                </div>
+              </>
+            )}
           </div>
         </Badge>
+        
+        {/* Last rate indicator */}
+        {lastRate !== currentRate && (
+          <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 bg-slate-100/90 backdrop-blur-sm px-2 py-1 rounded text-xs text-slate-600 whitespace-nowrap">
+            Last: ₹{lastRate.toLocaleString('en-IN')}/g
+          </div>
+        )}
       </div>
     </div>
   );

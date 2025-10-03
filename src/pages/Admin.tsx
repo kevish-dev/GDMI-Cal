@@ -94,12 +94,21 @@ export default function Admin() {
     setIsUploading(true);
     
     try {
-      // Calculate rates for all carats based on 24K price
-      const updatedRates: GoldRate[] = Object.entries(conversionFactors).map(([carat, factor]) => ({
-        carat,
-        rate: Math.round(rate24K * factor),
-        lastUpdated: new Date().toISOString().split('T')[0]
-      }));
+      // Create rates for all carats including 24K and calculated rates
+      const updatedRates: GoldRate[] = [
+        // Include 24K rate first
+        {
+          carat: "24K",
+          rate: rate24K,
+          lastUpdated: new Date().toISOString().split('T')[0]
+        },
+        // Then calculate rates for other carats based on 24K price
+        ...Object.entries(conversionFactors).map(([carat, factor]) => ({
+          carat,
+          rate: Math.round(rate24K * factor),
+          lastUpdated: new Date().toISOString().split('T')[0]
+        }))
+      ];
       
       await updateGoldRates(updatedRates);
       setNewGoldRate24K("");

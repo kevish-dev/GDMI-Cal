@@ -79,11 +79,11 @@ export function GoldRateMarquee() {
     };
   }, []);
 
-  // Get physical gold rates (22K, 18K, 14K)
+  // Get physical gold rates (24K, 22K, 18K, 14K)
   const physicalRates = goldRates.filter(rate => 
-    ['22K', '18K', '14K'].includes(rate.carat)
+    ['24K', '22K', '18K', '14K'].includes(rate.carat)
   ).sort((a, b) => {
-    const order = ['22K', '18K', '14K'];
+    const order = ['24K', '22K', '18K', '14K'];
     return order.indexOf(a.carat) - order.indexOf(b.carat);
   });
 
@@ -91,39 +91,72 @@ export function GoldRateMarquee() {
     return null;
   }
 
+  // Find 24K rate for the special MCX-style display
+  const goldRate24K = goldRates.find(rate => rate.carat === "24K");
+  
   const marqueeItems = [
-    // Physical gold rates
-    ...physicalRates.map(rate => ({
-      type: 'physical' as const,
-      label: `${rate.carat} Physical`,
-      price: rate.rate,
-      icon: TrendingUp,
-      bgColor: 'from-yellow-50/90 to-amber-50/90',
-      borderColor: 'border-yellow-200/60',
-      textColor: 'text-yellow-800',
-      iconColor: 'text-yellow-600'
-    })),
-    // MCX gold price
-    {
-      type: 'mcx' as const,
-      label: 'MCX Gold',
-      price: mcxPrice.price,
-      change: mcxPrice.change,
-      changePercent: mcxPrice.changePercent,
-      icon: mcxPrice.change >= 0 ? TrendingUp : TrendingDown,
-      bgColor: mcxPrice.change >= 0 
-        ? 'from-green-50/90 to-emerald-50/90' 
-        : 'from-red-50/90 to-rose-50/90',
-      borderColor: mcxPrice.change >= 0 
-        ? 'border-green-200/60' 
-        : 'border-red-200/60',
-      textColor: mcxPrice.change >= 0 
-        ? 'text-green-800' 
-        : 'text-red-800',
-      iconColor: mcxPrice.change >= 0 
-        ? 'text-green-600' 
-        : 'text-red-600'
-    }
+    // All gold rates with MCX-style animation and layout
+    ...physicalRates.map(rate => {
+      const isFeatureRate = rate.carat === '24K';
+      const rateChange = rate.lastRate ? rate.rate - rate.lastRate : 0;
+      const hasChange = rateChange !== 0;
+      const isUp = rateChange > 0;
+      
+      return {
+        type: isFeatureRate ? '24k-featured' as const : 'gold' as const,
+        label: `Gold ${rate.carat === '24K' ? '24KT' : rate.carat}`,
+        price: rate.rate,
+        change: hasChange ? rateChange : undefined,
+        changePercent: rate.lastRate && hasChange ? ((rateChange / rate.lastRate) * 100) : undefined,
+        icon: hasChange 
+          ? (isUp ? TrendingUp : TrendingDown)
+          : TrendingUp,
+        bgColor: isFeatureRate 
+          ? (hasChange 
+              ? (isUp 
+                  ? 'from-green-50/90 to-emerald-50/90' 
+                  : 'from-red-50/90 to-rose-50/90')
+              : 'from-blue-50/90 to-indigo-50/90')
+          : (hasChange 
+              ? (isUp 
+                  ? 'from-green-50/90 to-emerald-50/90' 
+                  : 'from-red-50/90 to-rose-50/90')
+              : 'from-yellow-50/90 to-amber-50/90'),
+        borderColor: isFeatureRate 
+          ? (hasChange 
+              ? (isUp 
+                  ? 'border-green-200/60' 
+                  : 'border-red-200/60')
+              : 'border-blue-200/60')
+          : (hasChange 
+              ? (isUp 
+                  ? 'border-green-200/60' 
+                  : 'border-red-200/60')
+              : 'border-yellow-200/60'),
+        textColor: isFeatureRate 
+          ? (hasChange 
+              ? (isUp 
+                  ? 'text-green-800' 
+                  : 'text-red-800')
+              : 'text-blue-800')
+          : (hasChange 
+              ? (isUp 
+                  ? 'text-green-800' 
+                  : 'text-red-800')
+              : 'text-yellow-800'),
+        iconColor: isFeatureRate 
+          ? (hasChange 
+              ? (isUp 
+                  ? 'text-green-600' 
+                  : 'text-red-600')
+              : 'text-blue-600')
+          : (hasChange 
+              ? (isUp 
+                  ? 'text-green-600' 
+                  : 'text-red-600')
+              : 'text-yellow-600')
+      };
+    })
   ];
 
   return (
@@ -155,7 +188,7 @@ export function GoldRateMarquee() {
         {/* Scrollable content container */}
         <div 
           ref={scrollContainerRef}
-          className="overflow-x-auto scrollbar-hide pl-16 sm:pl-24 pr-4 touch-pan-x scroll-smooth"
+          className="overflow-x-auto scrollbar-hide pl-16 sm:pl-24 pr-4 touch-pan-x scroll-smooth z-1000"
         >
           <div 
             className={cn(
@@ -196,24 +229,23 @@ export function GoldRateMarquee() {
                       <span className="font-black text-xs sm:text-sm tracking-tight">
                         {item.price.toLocaleString('en-IN')}
                       </span>
-                      {item.type === 'physical' && (
+                      {(item.type === 'gold' || item.type === '24k-featured') && (
                         <span className="text-[10px] sm:text-xs opacity-70 font-medium">/g</span>
-                      )}
-                      {item.type === 'mcx' && (
-                        <span className="text-[10px] sm:text-xs opacity-70 font-medium hidden sm:inline">/10g</span>
                       )}
                     </div>
 
-                    {/* MCX change indicator */}
-                    {item.type === 'mcx' && (
+                    {/* Rate change indicator for all rates */}
+                    {'change' in item && item.change !== undefined && (
                       <>
                         <div className="hidden sm:block h-4 w-px bg-current opacity-30"></div>
                         <div className={cn(
                           "flex items-center space-x-0.5 sm:space-x-1 text-[10px] sm:text-xs font-bold px-1 sm:px-1.5 py-0.5 rounded",
                           item.change >= 0 ? "bg-green-100/50 text-green-700" : "bg-red-100/50 text-red-700"
                         )}>
-                          <span>{item.change >= 0 ? '+' : ''}{item.change}</span>
-                          <span className="hidden sm:inline">({item.changePercent >= 0 ? '+' : ''}{item.changePercent}%)</span>
+                          <span>{item.change >= 0 ? '+' : ''}{Math.round(item.change)}</span>
+                          {'changePercent' in item && item.changePercent !== undefined && (
+                            <span className="hidden sm:inline">({item.changePercent >= 0 ? '+' : ''}{item.changePercent.toFixed(1)}%)</span>
+                          )}
                         </div>
                       </>
                     )}
@@ -254,24 +286,23 @@ export function GoldRateMarquee() {
                       <span className="font-black text-xs sm:text-sm tracking-tight">
                         {item.price.toLocaleString('en-IN')}
                       </span>
-                      {item.type === 'physical' && (
+                      {(item.type === 'gold' || item.type === '24k-featured') && (
                         <span className="text-[10px] sm:text-xs opacity-70 font-medium">/g</span>
-                      )}
-                      {item.type === 'mcx' && (
-                        <span className="text-[10px] sm:text-xs opacity-70 font-medium hidden sm:inline">/10g</span>
                       )}
                     </div>
 
-                    {/* MCX change indicator */}
-                    {item.type === 'mcx' && (
+                    {/* Rate change indicator for all rates */}
+                    {'change' in item && item.change !== undefined && (
                       <>
                         <div className="hidden sm:block h-4 w-px bg-current opacity-30"></div>
                         <div className={cn(
                           "flex items-center space-x-0.5 sm:space-x-1 text-[10px] sm:text-xs font-bold px-1 sm:px-1.5 py-0.5 rounded",
                           item.change >= 0 ? "bg-green-100/50 text-green-700" : "bg-red-100/50 text-red-700"
                         )}>
-                          <span>{item.change >= 0 ? '+' : ''}{item.change}</span>
-                          <span className="hidden sm:inline">({item.changePercent >= 0 ? '+' : ''}{item.changePercent}%)</span>
+                          <span>{item.change >= 0 ? '+' : ''}{Math.round(item.change)}</span>
+                          {'changePercent' in item && item.changePercent !== undefined && (
+                            <span className="hidden sm:inline">({item.changePercent >= 0 ? '+' : ''}{item.changePercent.toFixed(1)}%)</span>
+                          )}
                         </div>
                       </>
                     )}

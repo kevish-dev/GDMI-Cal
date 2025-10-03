@@ -22,6 +22,7 @@ import {
 export interface GoldRate {
   carat: string;
   rate: number;
+  lastRate?: number; // Previous rate for comparison
   lastUpdated: string;
 }
 
@@ -163,11 +164,11 @@ export function RatesProvider({ children }: { children: ReactNode }) {
         
         // Fallback to local dummy data
         const fallbackGoldRates = [
-          { carat: "24K", rate: 7000, lastUpdated: new Date().toISOString().split('T')[0] },
-          { carat: "22K", rate: 6510, lastUpdated: new Date().toISOString().split('T')[0] },
-          { carat: "18K", rate: 5320, lastUpdated: new Date().toISOString().split('T')[0] },
-          { carat: "14K", rate: 4200, lastUpdated: new Date().toISOString().split('T')[0] },
-          { carat: "9K", rate: 2730, lastUpdated: new Date().toISOString().split('T')[0] }
+          { carat: "24K", rate: 7000, lastRate: 6950, lastUpdated: new Date().toISOString().split('T')[0] },
+          { carat: "22K", rate: 6510, lastRate: 6460, lastUpdated: new Date().toISOString().split('T')[0] },
+          { carat: "18K", rate: 5320, lastRate: 5280, lastUpdated: new Date().toISOString().split('T')[0] },
+          { carat: "14K", rate: 4200, lastRate: 4160, lastUpdated: new Date().toISOString().split('T')[0] },
+          { carat: "9K", rate: 2730, lastRate: 2700, lastUpdated: new Date().toISOString().split('T')[0] }
         ];
         
         const fallbackDiamondRates = [
