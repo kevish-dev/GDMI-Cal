@@ -14,7 +14,7 @@ import { Separator } from "@/components/ui/separator";
 import { Layout } from "@/components/Layout/Layout";
 import { Badge } from "@/components/ui/badge";
 import { RadioButtonGroup } from "@/components/ui/radio-button-group";
-import { Crown, Diamond, Gem, IndianRupee } from "lucide-react";
+import { Crown, Diamond, Gem, IndianRupee, ScanLine } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { useRates } from "@/contexts/RatesContext";
@@ -23,6 +23,7 @@ import { UserVerificationModal } from "@/components/UserVerificationModal";
 import { LiveGoldRateIndicator } from "@/components/LiveGoldRateIndicator";
 import { GoldRateMarquee } from "@/components/GoldRateMarquee";
 import { ContactSupportBox } from "@/components/ContactSupportBox";
+import { JewelryTagScanner } from "@/components/JewelryTagScanner";
 
 type JewelryType = "gold" | "diamond" | null;
 type GoldType = "chains" | "plain" | "temple" | "italian";
@@ -60,6 +61,7 @@ interface PriceBreakdown {
 
 export default function Calculator() {
   const [jewelryType, setJewelryType] = useState<JewelryType>(null);
+  const [isScannerOpen, setIsScannerOpen] = useState(false);
   const [goldForm, setGoldForm] = useState<GoldFormData>({
     weight: "",
     carat: "",
@@ -85,6 +87,37 @@ export default function Calculator() {
   const { toast } = useToast();
   const { goldRates, diamondRates, makingCharges, addCalculation, loading } = useRates();
   const { isVerifiedUser, openVerificationModal } = useUserVerification();
+
+  const handleScanComplete = (result: any) => {
+    // Set jewelry type from scan
+    setJewelryType(result.jewelryType);
+    
+    // Populate form based on extracted data
+    if (result.jewelryType === "gold") {
+      setGoldForm({
+        weight: result.extractedData.weight?.toString() || result.extractedData.netWeight?.toString() || "",
+        carat: result.extractedData.carat?.toLowerCase() || "",
+        type: "", // User needs to select this manually
+        jewellerQuote: "",
+      });
+    } else if (result.jewelryType === "diamond") {
+      setDiamondForm({
+        goldWeight: result.extractedData.weight?.toString() || result.extractedData.netWeight?.toString() || "",
+        carat: result.extractedData.carat?.toLowerCase() || "",
+        diamondWeight: result.extractedData.diamondWeight?.toString() || "",
+        color: result.extractedData.color || "",
+        clarity: result.extractedData.clarity || "",
+        certification: result.verificationAnswers.certificationType === "IGI" ? "IGI" : "Self",
+        stoneWeight: result.extractedData.stoneWeight?.toString() || "",
+        jewellerQuote: "",
+      });
+    }
+    
+    toast({
+      title: "Scan completed successfully!",
+      description: "Form has been populated with extracted data. Please review and complete any missing fields.",
+    });
+  };
 
   const handleJewelryTypeSelect = (type: JewelryType) => {
     setJewelryType(type);
@@ -295,6 +328,39 @@ export default function Calculator() {
           <div className="grid lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
             {/* Input Panel */}
             <div className="space-y-4 sm:space-y-6">
+              {/* Jewelry Tag Scanner Section */}
+              <Card className="shadow-card border-2 border-primary/30 bg-gradient-to-br from-primary/5 via-background to-primary/10">
+                <CardHeader className="pb-4">
+                  <CardTitle className="flex items-center space-x-2 text-lg sm:text-xl">
+                    <ScanLine className="h-5 w-5 text-primary animate-pulse" />
+                    <span className="text-primary">Quick Scan</span>
+                    <Badge variant="secondary" className="ml-2 text-xs">New</Badge>
+                  </CardTitle>
+                  <CardDescription className="text-sm">
+                    Scan jewelry tag to auto-fill details
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button
+                    onClick={() => setIsScannerOpen(true)}
+                    className="w-full gap-2 h-12 text-base font-semibold bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg"
+                  >
+                    <ScanLine className="h-5 w-5" />
+                    Scan Jewelry Tag
+                  </Button>
+                  <p className="text-xs text-muted-foreground text-center mt-3">
+                    Upload images of jewelry tag for instant price calculation
+                  </p>
+                </CardContent>
+              </Card>
+
+              {/* Divider */}
+              <div className="flex items-center gap-4">
+                <Separator className="flex-1" />
+                <span className="text-xs text-muted-foreground font-medium">OR</span>
+                <Separator className="flex-1" />
+              </div>
+
               {/* Jewelry Type Selection */}
               <Card className="shadow-card">
                 <CardHeader className="pb-4">
@@ -897,6 +963,14 @@ export default function Calculator() {
       
       {/* User Verification Modal */}
       <UserVerificationModal />
+      
+      {/* Jewelry Tag Scanner Modal */}
+      {isScannerOpen && (
+        <JewelryTagScanner
+          onScanComplete={handleScanComplete}
+          onClose={() => setIsScannerOpen(false)}
+        />
+      )}
     </Layout>
   );
 }

@@ -10,13 +10,13 @@ interface ContactSupportBoxProps {
 export function ContactSupportBox({ className, compact = false }: ContactSupportBoxProps) {
   const handleCallNow = () => {
     // Replace with actual phone number
-    window.open("tel:+1234567890", "_self");
+    window.open("tel:+919971187600", "_self");
   };
 
   const handleWhatsApp = () => {
     // Replace with actual WhatsApp number and message
     const message = encodeURIComponent("Hi, I'm facing difficulty with filling details for jewelry calculation. Can you help me?");
-    window.open(`https://wa.me/1234567890?text=${message}`, "_blank");
+    window.open(`https://wa.me/919971187600?text=${message}`, "_blank");
   };
 
   if (compact) {

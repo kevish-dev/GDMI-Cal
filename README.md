@@ -32,9 +32,28 @@ cd <YOUR_PROJECT_NAME>
 # Step 3: Install the necessary dependencies.
 npm i
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Step 4: Set up environment variables
+# Copy sample.env to .env and add your API keys
+cp sample.env .env
+# Then edit .env and add your VITE_GEMINI_API_KEY for the jewelry tag scanner feature
+
+# Step 5: Start the development server with auto-reloading and an instant preview.
 npm run dev
 ```
+
+## 🆕 New Feature: Jewelry Tag Scanner
+
+This app now includes an AI-powered jewelry tag scanner that allows users to:
+- Upload images of jewelry tags (top and bottom view)
+- Automatically extract jewelry information using AI (Google Gemini)
+- Auto-populate the calculator with extracted data
+- Get instant price calculations
+
+**Setup Required:**
+1. Get a free API key from [Google AI Studio](https://aistudio.google.com/app/apikey)
+2. Add it to your `.env` file as `VITE_GEMINI_API_KEY`
+
+For detailed documentation, see [JEWELRY_TAG_SCANNER_README.md](./JEWELRY_TAG_SCANNER_README.md)
 
 **Edit a file directly in GitHub**
 
