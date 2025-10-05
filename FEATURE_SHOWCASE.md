@@ -71,11 +71,12 @@
 ├─────────────────────────────────────────────────────┤
 │                                                      │
 │         📸 Upload Tag Images                         │
-│    Upload clear images of the jewelry tag           │
+│    Upload at least one clear image of the tag       │
+│    (top view required, bottom view optional)         │
 │                                                      │
 │      ⚡ Scanning Mode Active                        │
 │                                                      │
-│  Top View [Required]      Bottom View [Required]    │
+│  Top View [Required]      Bottom View [Optional]    │
 │  ┌─────────────┐          ┌─────────────┐          │
 │  │             │          │             │          │
 │  │      📤     │          │      📤     │          │
@@ -214,8 +215,13 @@
 │  │  ○ IGI Certified   ○ Non-IGI (Self Cert)     │   │
 │  └─────────────────────────────────────────────┘   │
 │                                                      │
-│  [← Back]                    [Complete Scan →]      │
+│  [← Back]            [Calculate & Complete →]       │
 └─────────────────────────────────────────────────────┘
+
+Note: Price is automatically calculated when you 
+      click "Calculate & Complete" - no manual 
+      calculation step required!
+```
 ```
 
 ---
@@ -408,17 +414,22 @@ Step 3: ████████████████████ 100%
 │     Data        │
 │      ↓          │
 │  Ask Questions  │
+│      ↓          │
+│ AUTO CALCULATE  │
+│  PRICE (No MC)  │
 └─────────────────┘
      ↓
-[Complete Scan]
+[Price Displayed]
      ↓
-[Auto-fill Form]
+[Scanner Closes]
      ↓
-[User Reviews]
+[Form Auto-filled]
      ↓
-[Calculate Price]
+[Price Shown]
      ↓
     END
+
+Note: MC = Making Charges (not included)
 ```
 
 ---

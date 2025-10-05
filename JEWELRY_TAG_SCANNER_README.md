@@ -13,16 +13,16 @@ The Jewelry Tag Scanner is a new feature that allows users to quickly calculate 
 - Progress bar shows current step (1 of 3)
 
 #### Step 2: Image Upload
-- Users upload exactly **2 images** of the same jewelry tag:
-  - **Top View**: Front/top side of the tag
-  - **Bottom View**: Back/bottom side of the tag
-- Features:
-  - Drag-and-drop or click to upload
+- **Upload Options**: Upload 1-2 clear images of the jewelry tag
+  - **Top View** (Required): Must be uploaded
+  - **Bottom View** (Optional): Can be uploaded for better accuracy
+- **Features**:
   - Image preview with remove option
-  - Real-time validation (only image files accepted)
-  - Visual feedback with checkmarks when images are uploaded
-  - "Scanning Mode Active" indicator for enhanced UX
-  - Loading animation during OCR extraction
+  - Visual feedback with checkmarks
+  - Drag-and-drop or click to upload
+  - Mobile-responsive camera integration
+  - Real-time OCR text extraction using Google Gemini AI
+  - Scan-like UI with animations
 
 #### Step 3: Verification Questions
 After text extraction, users answer specific questions based on jewelry type:
@@ -34,6 +34,12 @@ After text extraction, users answer specific questions based on jewelry type:
 **For Diamond Jewelry:**
 1. Does your jeweller give appreciation on diamond?
 2. Select type of certificate on diamond (IGI or Non-IGI)
+
+**Then automatically:**
+- Price is calculated based on current market rates
+- No making charges are included in the calculation
+- Final price is displayed immediately
+- No manual calculation step required
 
 ## Technology Stack
 

@@ -36,9 +36,9 @@ npm run dev
    - Choose either Gold or Diamond
    - Click "Continue"
 
-4. **Upload Images** (2 required)
-   - **Top View**: Click and upload front/top of tag
-   - **Bottom View**: Click and upload back/bottom of tag
+4. **Upload Images** (1-2 images)
+   - **Top View**: Click and upload front/top of tag (Required)
+   - **Bottom View**: Click and upload back/bottom of tag (Optional - for better accuracy)
    - Wait for AI to extract text (shows loading animation)
 
 5. **Answer Questions**
@@ -49,10 +49,11 @@ npm run dev
      * Diamond appreciation?
      * Certificate type (IGI/Non-IGI)?
 
-6. **Complete Scan**
-   - Click "Complete Scan"
-   - Form auto-fills with extracted data
-   - Review and calculate!
+6. **Get Instant Price**
+   - Price is calculated automatically
+   - No making charges included
+   - Results displayed immediately
+   - No manual calculation needed!
 
 ## 📸 Photo Tips for Best Results
 

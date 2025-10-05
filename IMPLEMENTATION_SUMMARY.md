@@ -53,13 +53,14 @@
 - ✅ Type-specific styling (primary for gold, secondary for diamond)
 
 ### Step 2: Image Upload
-- ✅ Dual upload (top view + bottom view)
+- ✅ Dual upload (top view required, bottom view optional)
 - ✅ Image preview with remove option
 - ✅ File type validation
 - ✅ Visual feedback (checkmarks, badges)
 - ✅ "Scanning Mode Active" indicator
 - ✅ Loading animation during OCR extraction
 - ✅ Mobile-responsive upload areas
+- ✅ Works with 1 or 2 images for flexibility
 
 ### Step 3: Verification Questions
 
@@ -70,6 +71,13 @@
 **Diamond Jewelry:**
 - ✅ Diamond appreciation question (Yes/No)
 - ✅ Certificate type selection (IGI/Non-IGI)
+
+**Automatic Price Calculation:**
+- ✅ Price calculated automatically after questions
+- ✅ No making charges included
+- ✅ Uses current market rates from admin settings
+- ✅ Instant price display
+- ✅ No manual calculation step required
 
 ### UI/UX Features
 - ✅ Scan-line animated icon

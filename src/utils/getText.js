@@ -22,7 +22,7 @@ async function fileToBase64(file) {
 /**
  * Extract text from jewelry tag images using Google Gemini
  * @param {File} topImage - Top view of jewelry tag
- * @param {File} bottomImage - Bottom view of jewelry tag
+ * @param {File|null} bottomImage - Bottom view of jewelry tag (optional)
  * @param {string} jewelryType - Type of jewelry: "gold" or "diamond"
  * @returns {Promise<Object>} Extracted data as JSON
  */
@@ -32,11 +32,14 @@ export async function extractTextFromImages(topImage, bottomImage, jewelryType) 
 
     // Convert images to base64
     const topImageBase64 = await fileToBase64(topImage);
-    const bottomImageBase64 = await fileToBase64(bottomImage);
+    const bottomImageBase64 = bottomImage ? await fileToBase64(bottomImage) : null;
 
     // Create jewelry-specific prompt
+    const imageCount = bottomImageBase64 ? "two images" : "one image";
+    const viewText = bottomImageBase64 ? "(top view and bottom view)" : "(top view)";
+    
     const prompt = jewelryType === "gold" 
-      ? `Analyze these two images of a gold jewelry tag (top view and bottom view). Extract all visible text and convert it into a JSON object with the following fields:
+      ? `Analyze ${imageCount} of a gold jewelry tag ${viewText}. Extract all visible text and convert it into a JSON object with the following fields:
 - weight (in grams, as a number)
 - carat (as string, e.g., "22K", "18K", "14K")
 - grossWeight (total weight with stones, in grams, as a number)
@@ -46,8 +49,8 @@ export async function extractTextFromImages(topImage, bottomImage, jewelryType) 
 - itemCode (product/item code if visible)
 - type (type of jewelry like chain, ring, bangle, etc.)
 
-Only include fields that are clearly visible in the images. Use null for fields that cannot be determined. Return ONLY valid JSON, no additional text or markdown.`
-      : `Analyze these two images of a diamond jewelry tag (top view and bottom view). Extract all visible text and convert it into a JSON object with the following fields:
+Only include fields that are clearly visible in the image${bottomImageBase64 ? 's' : ''}. Use null for fields that cannot be determined. Return ONLY valid JSON, no additional text or markdown.`
+      : `Analyze ${imageCount} of a diamond jewelry tag ${viewText}. Extract all visible text and convert it into a JSON object with the following fields:
 - weight (gold weight in grams, as a number)
 - carat (gold carat as string, e.g., "22K", "18K", "14K")
 - diamondWeight (diamond weight in carats, as a number)
@@ -59,10 +62,10 @@ Only include fields that are clearly visible in the images. Use null for fields 
 - itemCode (product/item code if visible)
 - certification (if certificate number is visible, include it)
 
-Only include fields that are clearly visible in the images. Use null for fields that cannot be determined. Return ONLY valid JSON, no additional text or markdown.`;
+Only include fields that are clearly visible in the image${bottomImageBase64 ? 's' : ''}. Use null for fields that cannot be determined. Return ONLY valid JSON, no additional text or markdown.`;
 
-    // Call Gemini API with both images
-    const result = await model.generateContent([
+    // Prepare content array for API call
+    const contentParts = [
       { text: prompt },
       {
         inlineData: {
@@ -70,13 +73,20 @@ Only include fields that are clearly visible in the images. Use null for fields 
           mimeType: topImage.type,
         },
       },
-      {
+    ];
+
+    // Add bottom image only if it exists
+    if (bottomImageBase64) {
+      contentParts.push({
         inlineData: {
           data: bottomImageBase64,
           mimeType: bottomImage.type,
         },
-      },
-    ]);
+      });
+    }
+
+    // Call Gemini API with images
+    const result = await model.generateContent(contentParts);
 
     const response = await result.response;
     const text = response.text();

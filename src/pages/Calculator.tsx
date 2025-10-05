@@ -97,7 +97,7 @@ export default function Calculator() {
       setGoldForm({
         weight: result.extractedData.weight?.toString() || result.extractedData.netWeight?.toString() || "",
         carat: result.extractedData.carat?.toLowerCase() || "",
-        type: "", // User needs to select this manually
+        type: result.extractedData.type || "", // Use extracted type if available
         jewellerQuote: "",
       });
     } else if (result.jewelryType === "diamond") {
@@ -113,9 +113,17 @@ export default function Calculator() {
       });
     }
     
+    // Set the calculated price breakdown directly
+    setPriceBreakdown({
+      goldValue: result.priceBreakdown.goldValue,
+      diamondValue: result.priceBreakdown.diamondValue,
+      makingCharges: result.priceBreakdown.makingCharges,
+      finalPrice: result.priceBreakdown.finalPrice,
+    });
+    
     toast({
       title: "Scan completed successfully!",
-      description: "Form has been populated with extracted data. Please review and complete any missing fields.",
+      description: `Price calculated: ₹${result.calculatedPrice.toLocaleString("en-IN")}`,
     });
   };
 

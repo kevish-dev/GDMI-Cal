@@ -44,7 +44,7 @@ npm run dev
 ## 🆕 New Feature: Jewelry Tag Scanner
 
 This app now includes an AI-powered jewelry tag scanner that allows users to:
-- Upload images of jewelry tags (top and bottom view)
+- Upload 1-2 images of jewelry tags (top view required, bottom view optional for better accuracy)
 - Automatically extract jewelry information using AI (Google Gemini)
 - Auto-populate the calculator with extracted data
 - Get instant price calculations

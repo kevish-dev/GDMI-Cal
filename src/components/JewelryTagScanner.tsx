@@ -21,6 +21,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { extractTextFromImages } from "@/utils/getText";
+import { useRates } from "@/contexts/RatesContext";
 
 type JewelryType = "gold" | "diamond" | null;
 type Certification = "IGI" | "Non-IGI";
@@ -48,7 +49,13 @@ interface ScanResult {
   jewelryType: JewelryType;
   extractedData: ExtractedData;
   verificationAnswers: VerificationAnswers;
-  calculatedPrice?: number;
+  calculatedPrice: number;
+  priceBreakdown: {
+    goldValue: number;
+    diamondValue: number;
+    makingCharges: number;
+    finalPrice: number;
+  };
 }
 
 interface JewelryTagScannerProps {
@@ -68,9 +75,13 @@ export function JewelryTagScanner({ onScanComplete, onClose }: JewelryTagScanner
     bottom: "",
   });
   const [isExtracting, setIsExtracting] = useState(false);
+  const [isCalculating, setIsCalculating] = useState(false);
   const [extractedData, setExtractedData] = useState<ExtractedData | null>(null);
   const [verificationAnswers, setVerificationAnswers] = useState<VerificationAnswers>({});
+  const [calculatedPrice, setCalculatedPrice] = useState<number | null>(null);
+  const [priceBreakdown, setPriceBreakdown] = useState<any>(null);
   const { toast } = useToast();
+  const { goldRates, diamondRates, makingCharges } = useRates();
 
   const handleImageUpload = (view: "top" | "bottom", file: File | null) => {
     if (file) {
@@ -107,10 +118,10 @@ export function JewelryTagScanner({ onScanComplete, onClose }: JewelryTagScanner
   };
 
   const handleExtractText = async () => {
-    if (!images.top || !images.bottom) {
+    if (!images.top) {
       toast({
-        title: "Missing images",
-        description: "Please upload both top and bottom view images",
+        title: "Missing image",
+        description: "Please upload at least the top view image",
         variant: "destructive",
       });
       return;
@@ -138,21 +149,80 @@ export function JewelryTagScanner({ onScanComplete, onClose }: JewelryTagScanner
     }
   };
 
-  const handleComplete = () => {
+  const handleComplete = async () => {
     if (!jewelryType || !extractedData) return;
 
-    const result: ScanResult = {
-      jewelryType,
-      extractedData,
-      verificationAnswers,
-    };
+    setIsCalculating(true);
 
-    onScanComplete(result);
-    onClose();
+    try {
+      // Calculate price based on extracted data (without making charges)
+      let goldValue = 0;
+      let diamondValue = 0;
+      const calculatedMakingCharges = 0; // No making charges as per requirement
+
+      if (jewelryType === "gold") {
+        const weight = extractedData.weight || extractedData.netWeight || 0;
+        const caratKey = extractedData.carat?.toUpperCase();
+        
+        const goldRate = goldRates.find((rate) => rate.carat === caratKey)?.rate || 0;
+        goldValue = weight * goldRate;
+      } else if (jewelryType === "diamond") {
+        const goldWeight = extractedData.weight || extractedData.netWeight || 0;
+        const diamondWeight = extractedData.diamondWeight || 0;
+        const caratKey = extractedData.carat?.toUpperCase();
+        
+        const goldRate = goldRates.find((rate) => rate.carat === caratKey)?.rate || 0;
+        goldValue = goldWeight * goldRate;
+
+        // Get diamond rate based on certification from verification answers
+        const certification = verificationAnswers.certificationType === "IGI" ? "IGI" : "Self";
+        const matchingRate = diamondRates.find((rate) => rate.certification === certification);
+        const diamondRate = matchingRate?.rate || 50000;
+        
+        diamondValue = diamondWeight * diamondRate;
+      }
+
+      const finalPrice = goldValue + diamondValue + calculatedMakingCharges;
+
+      const breakdown = {
+        goldValue,
+        diamondValue,
+        makingCharges: calculatedMakingCharges,
+        finalPrice,
+      };
+
+      setCalculatedPrice(finalPrice);
+      setPriceBreakdown(breakdown);
+
+      const result: ScanResult = {
+        jewelryType,
+        extractedData,
+        verificationAnswers,
+        calculatedPrice: finalPrice,
+        priceBreakdown: breakdown,
+      };
+
+      toast({
+        title: "Price calculated!",
+        description: `Total price: ₹${finalPrice.toLocaleString("en-IN")}`,
+      });
+
+      onScanComplete(result);
+      onClose();
+    } catch (error) {
+      toast({
+        title: "Calculation failed",
+        description: "Failed to calculate price. Please try again.",
+        variant: "destructive",
+      });
+      console.error("Calculation Error:", error);
+    } finally {
+      setIsCalculating(false);
+    }
   };
 
   const canProceedToStep2 = jewelryType !== null;
-  const canProceedToStep3 = images.top !== null && images.bottom !== null;
+  const canProceedToStep3 = images.top !== null; // Only top image required
   const canComplete = jewelryType === "gold" 
     ? verificationAnswers.buyBackGuarantee !== undefined && verificationAnswers.showsRawForm !== undefined
     : verificationAnswers.diamondAppreciation !== undefined && verificationAnswers.certificationType !== undefined;
@@ -255,21 +325,19 @@ export function JewelryTagScanner({ onScanComplete, onClose }: JewelryTagScanner
           {/* Step 2: Upload Images */}
           {step === 2 && (
             <div className="space-y-6 animate-in fade-in duration-500">
-              <div className="text-center space-y-2">
+                <div className="text-center space-y-2">
                 <div className="flex items-center justify-center gap-2 mb-4">
                   <Camera className="h-6 w-6 text-primary" />
                   <h3 className="text-lg font-semibold">Upload Tag Images</h3>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  Upload clear images of the jewelry tag from both sides
+                  Upload at least one clear image of the jewelry tag (top view required, bottom view optional)
                 </p>
                 <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full text-xs font-medium text-primary">
                   <ScanLine className="h-4 w-4 animate-pulse" />
                   Scanning Mode Active
                 </div>
-              </div>
-
-              <div className="grid sm:grid-cols-2 gap-4">
+              </div>              <div className="grid sm:grid-cols-2 gap-4">
                 {/* Top View Upload */}
                 <div className="space-y-2">
                   <Label className="text-sm font-medium flex items-center gap-2">
@@ -324,7 +392,7 @@ export function JewelryTagScanner({ onScanComplete, onClose }: JewelryTagScanner
                 <div className="space-y-2">
                   <Label className="text-sm font-medium flex items-center gap-2">
                     Bottom View
-                    <Badge variant="outline" className="text-xs">Required</Badge>
+                    <Badge variant="secondary" className="text-xs">Optional</Badge>
                   </Label>
                   {imagePreviews.bottom ? (
                     <div className="relative group">
@@ -574,17 +642,27 @@ export function JewelryTagScanner({ onScanComplete, onClose }: JewelryTagScanner
                   variant="outline"
                   onClick={() => setStep(2)}
                   className="gap-2"
+                  disabled={isCalculating}
                 >
                   <ChevronLeft className="h-4 w-4" />
                   Back
                 </Button>
                 <Button
                   onClick={handleComplete}
-                  disabled={!canComplete}
+                  disabled={!canComplete || isCalculating}
                   className="gap-2"
                 >
-                  Complete Scan
-                  <ArrowRight className="h-4 w-4" />
+                  {isCalculating ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Calculating Price...
+                    </>
+                  ) : (
+                    <>
+                      Calculate & Complete
+                      <ArrowRight className="h-4 w-4" />
+                    </>
+                  )}
                 </Button>
               </div>
             </div>
