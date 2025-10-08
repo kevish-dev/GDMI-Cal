@@ -286,7 +286,21 @@ export function JewelryTagScanner({
               <X className="h-5 w-5" />
             </Button>
           </div>
-          <Progress value={progressPercentage} className="mt-4" />
+          
+          {/* Custom Stepped Progress Bar */}
+          <div className="mt-6 flex items-center justify-center gap-3">
+            {[1, 2, 3].map((stepNumber) => (
+              <div
+                key={stepNumber}
+                className={cn(
+                  "flex-1 h-2 rounded-full transition-all duration-300",
+                  stepNumber <= step
+                    ? "bg-primary"
+                    : "bg-muted"
+                )}
+              />
+            ))}
+          </div>
         </CardHeader>
 
         <CardContent className="pt-6 space-y-6">
@@ -314,7 +328,7 @@ export function JewelryTagScanner({
                   <Label
                     htmlFor="scan-gold"
                     className={cn(
-                      "flex flex-col items-center justify-center rounded-lg border-2 border-muted bg-popover p-6 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary cursor-pointer transition-all",
+                      "flex flex-col items-center justify-center rounded-lg border-2 border-muted bg-popover p-6 peer-data-[state=checked]:border-primary cursor-pointer transition-all",
                       jewelryType === "gold" && "border-primary bg-primary/5"
                     )}
                   >
@@ -332,7 +346,7 @@ export function JewelryTagScanner({
                   <Label
                     htmlFor="scan-diamond"
                     className={cn(
-                      "flex flex-col items-center justify-center rounded-lg border-2 border-muted bg-popover p-6 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-secondary cursor-pointer transition-all",
+                      "flex flex-col items-center justify-center rounded-lg border-2 border-muted bg-popover p-6 peer-data-[state=checked]:border-secondary cursor-pointer transition-all",
                       jewelryType === "diamond" &&
                         "border-secondary bg-secondary/5"
                     )}
@@ -386,7 +400,7 @@ export function JewelryTagScanner({
                         alt="Top view"
                         className="w-full h-48 object-cover rounded-lg border-2 border-primary"
                       />
-                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
+                      <div className="absolute inset-0 bg-black/50 opacity-0 transition-opacity rounded-lg flex items-center justify-center">
                         <Button
                           size="sm"
                           variant="destructive"
@@ -404,9 +418,9 @@ export function JewelryTagScanner({
                   ) : (
                     <Label
                       htmlFor="top-image"
-                      className="flex flex-col items-center justify-center h-48 border-2 border-dashed border-muted-foreground/25 rounded-lg cursor-pointer hover:border-primary hover:bg-primary/5 transition-all group"
+                      className="flex flex-col items-center justify-center h-48 border-2 border-dashed border-muted-foreground/25 rounded-lg cursor-pointer transition-all group"
                     >
-                      <Upload className="h-8 w-8 text-muted-foreground group-hover:text-primary transition-colors" />
+                      <Upload className="h-8 w-8 text-muted-foreground transition-colors" />
                       <span className="text-sm text-muted-foreground mt-2">
                         Click to upload
                       </span>
@@ -435,7 +449,7 @@ export function JewelryTagScanner({
                         alt="Bottom view"
                         className="w-full h-48 object-cover rounded-lg border-2 border-primary"
                       />
-                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
+                      <div className="absolute inset-0 bg-black/50 opacity-0 transition-opacity rounded-lg flex items-center justify-center">
                         <Button
                           size="sm"
                           variant="destructive"
@@ -453,9 +467,9 @@ export function JewelryTagScanner({
                   ) : (
                     <Label
                       htmlFor="bottom-image"
-                      className="flex flex-col items-center justify-center h-48 border-2 border-dashed border-muted-foreground/25 rounded-lg cursor-pointer hover:border-primary hover:bg-primary/5 transition-all group"
+                      className="flex flex-col items-center justify-center h-48 border-2 border-dashed border-muted-foreground/25 rounded-lg cursor-pointer transition-all group"
                     >
-                      <Upload className="h-8 w-8 text-muted-foreground group-hover:text-primary transition-colors" />
+                      <Upload className="h-8 w-8 text-muted-foreground transition-colors" />
                       <span className="text-sm text-muted-foreground mt-2">
                         Click to upload
                       </span>

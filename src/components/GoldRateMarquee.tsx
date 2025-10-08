@@ -203,8 +203,8 @@ export function GoldRateMarquee() {
                 <Badge 
                   variant="secondary" 
                   className={cn(
-                    "relative overflow-hidden bg-gradient-to-r border-2 transition-all duration-300 backdrop-blur-sm hover:scale-105",
-                    "px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium rounded-full shadow-sm hover:shadow-lg",
+                    "relative overflow-hidden bg-gradient-to-r border-2 transition-all duration-300 backdrop-blur-sm",
+                    "px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium rounded-full shadow-sm",
                     item.bgColor,
                     item.borderColor,
                     item.textColor
@@ -260,8 +260,8 @@ export function GoldRateMarquee() {
                 <Badge 
                   variant="secondary" 
                   className={cn(
-                    "relative overflow-hidden bg-gradient-to-r border-2 transition-all duration-300 backdrop-blur-sm hover:scale-105",
-                    "px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium rounded-full shadow-sm hover:shadow-lg",
+                    "relative overflow-hidden bg-gradient-to-r border-2 transition-all duration-300 backdrop-blur-sm",
+                    "px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium rounded-full shadow-sm",
                     item.bgColor,
                     item.borderColor,
                     item.textColor

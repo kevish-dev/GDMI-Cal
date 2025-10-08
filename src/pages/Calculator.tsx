@@ -327,7 +327,6 @@ export default function Calculator() {
                     <div
                       className={cn(
                         "relative h-16 sm:h-20 flex items-center p-4 rounded-lg border-2 cursor-pointer transition-all duration-200",
-                        "hover:border-gray-300 hover:bg-gray-50/50",
                         jewelryType === "gold" 
                           ? "border-primary bg-primary/10 text-primary" 
                           : "border-gray-200 bg-background text-gray-600"
@@ -356,7 +355,6 @@ export default function Calculator() {
                     <div
                       className={cn(
                         "relative h-16 sm:h-20 flex items-center p-4 rounded-lg border-2 cursor-pointer transition-all duration-200",
-                        "hover:border-gray-300 hover:bg-gray-50/50",
                         jewelryType === "diamond" 
                           ? "border-secondary bg-secondary/10 text-secondary" 
                           : "border-gray-200 bg-background text-gray-600"
@@ -804,7 +802,7 @@ export default function Calculator() {
                         <span className="text-base sm:text-lg font-bold text-emerald-800">
                           Final Price:
                         </span>
-                        <Badge className="text-lg sm:text-xl px-3 sm:px-4 py-2 font-bold bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white border-0 shadow-lg transition-all duration-450">
+                        <Badge className="text-lg sm:text-xl px-3 sm:px-4 py-2 font-bold bg-gradient-to-r from-emerald-500 to-green-600 text-white border-0 shadow-lg transition-all duration-450">
                           ₹{priceBreakdown.finalPrice.toLocaleString("en-IN")}
                         </Badge>
                       </div>
@@ -833,8 +831,8 @@ export default function Calculator() {
                                 className={cn(
                                   "text-sm px-2 py-1 font-semibold",
                                   priceBreakdown.priceDifference! > 0 
-                                    ? "bg-red-100 text-red-800 border-red-200 hover:bg-red-200" 
-                                    : "bg-green-100 text-green-800 border-green-200 hover:bg-green-200"
+                                    ? "bg-red-100 text-red-800 border-red-200" 
+                                    : "bg-green-100 text-green-800 border-green-200"
                                 )}
                               >
                                 {priceBreakdown.priceDifference! > 0 ? "+" : ""}

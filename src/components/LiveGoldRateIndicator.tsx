@@ -27,7 +27,7 @@ export function LiveGoldRateIndicator({ className }: LiveGoldRateIndicatorProps)
       <div className="relative">
         <Badge 
           variant="secondary" 
-          className="relative overflow-hidden bg-gradient-to-r from-emerald-50/90 to-green-50/90 border-emerald-200/60 text-emerald-800 px-4 py-2.5 text-sm font-medium rounded-full shadow-sm hover:shadow-lg transition-all duration-500 hover:scale-[1.02] backdrop-blur-sm border-2"
+          className="relative overflow-hidden bg-gradient-to-r from-emerald-50/90 to-green-50/90 border-emerald-200/60 text-emerald-800 px-4 py-2.5 text-sm font-medium rounded-full shadow-sm transition-all duration-500 backdrop-blur-sm border-2"
         >
           {/* Animated background pulse */}
           <div className="absolute inset-0 bg-gradient-to-r from-emerald-100/20 to-green-100/20 rounded-full animate-pulse"></div>

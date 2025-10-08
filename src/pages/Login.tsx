@@ -122,7 +122,7 @@ export default function Login() {
                       type="button"
                       variant="ghost"
                       size="sm"
-                      className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 hover:bg-muted/50"
+                      className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0"
                       onClick={() => setShowPassword(!showPassword)}
                     >
                       {showPassword ? (
@@ -157,7 +157,7 @@ export default function Login() {
                   Don't have an account?{" "}
                   <Link
                     to="/register"
-                    className="text-primary hover:underline font-medium transition-smooth"
+                    className="text-primary font-medium transition-smooth"
                   >
                     Create one here
                   </Link>

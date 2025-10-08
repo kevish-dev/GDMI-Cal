@@ -450,7 +450,7 @@ export default function Admin() {
                     <CardContent>
                       <div className="space-y-3">
                         {goldRates.map((rate, index) => (
-                          <div key={index} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors">
+                          <div key={index} className="flex items-center justify-between p-4 border rounded-lg transition-colors">
                             <div>
                               <p className="font-medium">{rate.carat} Gold</p>
                               <p className="text-sm text-muted-foreground">
@@ -599,7 +599,7 @@ export default function Admin() {
                 <CardContent>
                   <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-96 overflow-y-auto">
                     {diamondRates.map((rate, index) => (
-                      <div key={index} className="p-3 border rounded-lg hover:bg-muted/50 transition-colors">
+                      <div key={index} className="p-3 border rounded-lg transition-colors">
                         <div className="flex justify-between items-start mb-2">
                           <div>
                             <p className="font-medium text-sm">{rate.color} - {rate.clarity}</p>

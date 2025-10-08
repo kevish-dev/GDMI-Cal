@@ -51,7 +51,7 @@ export function Navbar() {
                 "px-3 py-2 rounded-lg transition-smooth text-sm font-medium flex items-center space-x-2",
                 isActive("/")
                   ? "bg-primary text-primary-foreground shadow-card"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  : "text-muted-foreground"
               )}
             >
               <Home className="h-4 w-4" />
@@ -64,7 +64,7 @@ export function Navbar() {
                 "px-3 py-2 rounded-lg transition-smooth text-sm font-medium flex items-center space-x-2",
                 isActive("/calculator")
                   ? "bg-primary text-primary-foreground shadow-card"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  : "text-muted-foreground"
               )}
             >
               <Calculator className="h-4 w-4" />
@@ -78,7 +78,7 @@ export function Navbar() {
                   "px-3 py-2 rounded-lg transition-smooth text-sm font-medium flex items-center space-x-2",
                   isActive("/admin")
                     ? "bg-accent text-accent-foreground shadow-card"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                    : "text-muted-foreground"
                 )}
               >
                 <Settings className="h-4 w-4" />
@@ -140,7 +140,7 @@ export function Navbar() {
                   "px-4 py-3 rounded-lg transition-smooth text-base font-medium flex items-center space-x-3",
                   isActive("/")
                     ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                    : "text-muted-foreground"
                 )}
                 onClick={() => setIsOpen(false)}
               >
@@ -154,7 +154,7 @@ export function Navbar() {
                   "px-4 py-3 rounded-lg transition-smooth text-base font-medium flex items-center space-x-3",
                   isActive("/calculator")
                     ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                    : "text-muted-foreground"
                 )}
                 onClick={() => setIsOpen(false)}
               >
@@ -169,7 +169,7 @@ export function Navbar() {
                     "px-4 py-3 rounded-lg transition-smooth text-base font-medium flex items-center space-x-3",
                     isActive("/admin")
                       ? "bg-accent text-accent-foreground"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                      : "text-muted-foreground"
                   )}
                   onClick={() => setIsOpen(false)}
                 >

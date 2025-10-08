@@ -64,7 +64,7 @@ export function ContactSupportBox({ className, compact = false }: ContactSupport
         <div className="flex flex-col sm:flex-row gap-2 justify-center">
           <Button
             onClick={handleCallNow}
-            className="flex items-center gap-2 bg-primary hover:bg-primary/90"
+            className="flex items-center gap-2 bg-primary"
           >
             <Phone className="h-4 w-4" />
             Call Now
@@ -72,7 +72,7 @@ export function ContactSupportBox({ className, compact = false }: ContactSupport
           <Button
             variant="outline"
             onClick={handleWhatsApp}
-            className="flex items-center gap-2 border-green-500 text-green-600 hover:bg-green-50"
+            className="flex items-center gap-2 border-green-500 text-green-600"
           >
             <MessageCircle className="h-4 w-4" />
             WhatsApp Us

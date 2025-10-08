@@ -85,7 +85,7 @@ export default function Home() {
             <CardContent className="space-y-4">
               <Button
                 onClick={() => setIsScannerOpen(true)}
-                className="w-full gap-2 h-14 sm:h-16 text-lg font-semibold bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg"
+                className="w-full gap-2 h-14 sm:h-16 text-lg font-semibold bg-gradient-to-r from-primary to-primary/80 shadow-lg"
               >
                 <ScanLine className="h-6 w-6" />
                 Scan Jewelry Tag
@@ -95,7 +95,7 @@ export default function Home() {
               <div className="text-center">
                 <Link
                   to="/calculator"
-                  className="text-sm text-primary hover:text-primary/80 underline underline-offset-4 transition-colors"
+                  className="text-sm text-primary underline underline-offset-4 transition-colors"
                 >
                   Need manual calculation? Click here
                 </Link>
@@ -132,7 +132,7 @@ export default function Home() {
 
                     <div className="flex justify-between items-center py-3 mt-4 rounded-lg px-3 bg-gradient-to-r from-emerald-50/90 to-green-50/90 border border-emerald-200/60">
                       <span className="text-base font-bold text-emerald-800">Final Price:</span>
-                      <Badge className="text-lg px-4 py-2 font-bold bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white border-0 shadow-lg">
+                      <Badge className="text-lg px-4 py-2 font-bold bg-gradient-to-r from-emerald-500 to-green-600 text-white border-0 shadow-lg">
                         ₹{priceBreakdown.finalPrice.toLocaleString("en-IN")}
                       </Badge>
                     </div>
