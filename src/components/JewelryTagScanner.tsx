@@ -1,22 +1,28 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { 
-  ScanLine, 
-  Camera, 
-  Upload, 
-  X, 
-  Check, 
-  Loader2, 
+import {
+  ScanLine,
+  Camera,
+  Upload,
+  X,
+  Check,
+  Loader2,
   ChevronRight,
   ChevronLeft,
   Crown,
   Diamond,
-  ArrowRight
+  ArrowRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
@@ -63,21 +69,33 @@ interface JewelryTagScannerProps {
   onClose: () => void;
 }
 
-export function JewelryTagScanner({ onScanComplete, onClose }: JewelryTagScannerProps) {
+export function JewelryTagScanner({
+  onScanComplete,
+  onClose,
+}: JewelryTagScannerProps) {
   const [step, setStep] = useState(1);
   const [jewelryType, setJewelryType] = useState<JewelryType>(null);
-  const [images, setImages] = useState<{ top: File | null; bottom: File | null }>({
+  const [images, setImages] = useState<{
+    top: File | null;
+    bottom: File | null;
+  }>({
     top: null,
     bottom: null,
   });
-  const [imagePreviews, setImagePreviews] = useState<{ top: string; bottom: string }>({
+  const [imagePreviews, setImagePreviews] = useState<{
+    top: string;
+    bottom: string;
+  }>({
     top: "",
     bottom: "",
   });
   const [isExtracting, setIsExtracting] = useState(false);
   const [isCalculating, setIsCalculating] = useState(false);
-  const [extractedData, setExtractedData] = useState<ExtractedData | null>(null);
-  const [verificationAnswers, setVerificationAnswers] = useState<VerificationAnswers>({});
+  const [extractedData, setExtractedData] = useState<ExtractedData | null>(
+    null
+  );
+  const [verificationAnswers, setVerificationAnswers] =
+    useState<VerificationAnswers>({});
   const [calculatedPrice, setCalculatedPrice] = useState<number | null>(null);
   const [priceBreakdown, setPriceBreakdown] = useState<any>(null);
   const { toast } = useToast();
@@ -130,12 +148,17 @@ export function JewelryTagScanner({ onScanComplete, onClose }: JewelryTagScanner
     setIsExtracting(true);
 
     try {
-      const data = await extractTextFromImages(images.top, images.bottom, jewelryType!);
+      const data = await extractTextFromImages(
+        images.top,
+        images.bottom,
+        jewelryType!
+      );
       setExtractedData(data);
       setStep(3);
       toast({
         title: "Text extracted successfully",
-        description: "Review the extracted information and answer the questions",
+        description:
+          "Review the extracted information and answer the questions",
       });
     } catch (error) {
       toast({
@@ -163,22 +186,27 @@ export function JewelryTagScanner({ onScanComplete, onClose }: JewelryTagScanner
       if (jewelryType === "gold") {
         const weight = extractedData.weight || extractedData.netWeight || 0;
         const caratKey = extractedData.carat?.toUpperCase();
-        
-        const goldRate = goldRates.find((rate) => rate.carat === caratKey)?.rate || 0;
+
+        const goldRate =
+          goldRates.find((rate) => rate.carat === caratKey)?.rate || 0;
         goldValue = weight * goldRate;
       } else if (jewelryType === "diamond") {
         const goldWeight = extractedData.weight || extractedData.netWeight || 0;
         const diamondWeight = extractedData.diamondWeight || 0;
         const caratKey = extractedData.carat?.toUpperCase();
-        
-        const goldRate = goldRates.find((rate) => rate.carat === caratKey)?.rate || 0;
+
+        const goldRate =
+          goldRates.find((rate) => rate.carat === caratKey)?.rate || 0;
         goldValue = goldWeight * goldRate;
 
         // Get diamond rate based on certification from verification answers
-        const certification = verificationAnswers.certificationType === "IGI" ? "IGI" : "Self";
-        const matchingRate = diamondRates.find((rate) => rate.certification === certification);
+        const certification =
+          verificationAnswers.certificationType === "IGI" ? "IGI" : "Self";
+        const matchingRate = diamondRates.find(
+          (rate) => rate.certification === certification
+        );
         const diamondRate = matchingRate?.rate || 50000;
-        
+
         diamondValue = diamondWeight * diamondRate;
       }
 
@@ -223,9 +251,12 @@ export function JewelryTagScanner({ onScanComplete, onClose }: JewelryTagScanner
 
   const canProceedToStep2 = jewelryType !== null;
   const canProceedToStep3 = images.top !== null; // Only top image required
-  const canComplete = jewelryType === "gold" 
-    ? verificationAnswers.buyBackGuarantee !== undefined && verificationAnswers.showsRawForm !== undefined
-    : verificationAnswers.diamondAppreciation !== undefined && verificationAnswers.certificationType !== undefined;
+  const canComplete =
+    jewelryType === "gold"
+      ? verificationAnswers.buyBackGuarantee !== undefined &&
+        verificationAnswers.showsRawForm !== undefined
+      : verificationAnswers.diamondAppreciation !== undefined &&
+        verificationAnswers.certificationType !== undefined;
 
   const progressPercentage = (step / 3) * 100;
 
@@ -240,7 +271,9 @@ export function JewelryTagScanner({ onScanComplete, onClose }: JewelryTagScanner
                 <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full" />
               </div>
               <div>
-                <CardTitle className="text-xl sm:text-2xl">Scan Jewelry Tag</CardTitle>
+                <CardTitle className="text-xl sm:text-2xl">
+                  Scan Jewelry Tag
+                </CardTitle>
                 <CardDescription>Step {step} of 3</CardDescription>
               </div>
             </div>
@@ -300,7 +333,8 @@ export function JewelryTagScanner({ onScanComplete, onClose }: JewelryTagScanner
                     htmlFor="scan-diamond"
                     className={cn(
                       "flex flex-col items-center justify-center rounded-lg border-2 border-muted bg-popover p-6 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-secondary cursor-pointer transition-all",
-                      jewelryType === "diamond" && "border-secondary bg-secondary/5"
+                      jewelryType === "diamond" &&
+                        "border-secondary bg-secondary/5"
                     )}
                   >
                     <Diamond className="h-10 w-10 mb-3 text-secondary" />
@@ -325,24 +359,25 @@ export function JewelryTagScanner({ onScanComplete, onClose }: JewelryTagScanner
           {/* Step 2: Upload Images */}
           {step === 2 && (
             <div className="space-y-6 animate-in fade-in duration-500">
-                <div className="text-center space-y-2">
+              <div className="text-center space-y-2">
                 <div className="flex items-center justify-center gap-2 mb-4">
                   <Camera className="h-6 w-6 text-primary" />
                   <h3 className="text-lg font-semibold">Upload Tag Images</h3>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  Upload at least one clear image of the jewelry tag (top view required, bottom view optional)
+                  Upload at least one clear image of the jewelry tag (top view
+                  and bottom view)
                 </p>
                 <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full text-xs font-medium text-primary">
                   <ScanLine className="h-4 w-4 animate-pulse" />
                   Scanning Mode Active
                 </div>
-              </div>              <div className="grid sm:grid-cols-2 gap-4">
+              </div>{" "}
+              <div className="grid sm:grid-cols-2 gap-4">
                 {/* Top View Upload */}
                 <div className="space-y-2">
                   <Label className="text-sm font-medium flex items-center gap-2">
                     Top View
-                    <Badge variant="outline" className="text-xs">Required</Badge>
                   </Label>
                   {imagePreviews.top ? (
                     <div className="relative group">
@@ -392,7 +427,6 @@ export function JewelryTagScanner({ onScanComplete, onClose }: JewelryTagScanner
                 <div className="space-y-2">
                   <Label className="text-sm font-medium flex items-center gap-2">
                     Bottom View
-                    <Badge variant="secondary" className="text-xs">Optional</Badge>
                   </Label>
                   {imagePreviews.bottom ? (
                     <div className="relative group">
@@ -431,14 +465,16 @@ export function JewelryTagScanner({ onScanComplete, onClose }: JewelryTagScanner
                         accept="image/*"
                         className="hidden"
                         onChange={(e) =>
-                          handleImageUpload("bottom", e.target.files?.[0] || null)
+                          handleImageUpload(
+                            "bottom",
+                            e.target.files?.[0] || null
+                          )
                         }
                       />
                     </Label>
                   )}
                 </div>
               </div>
-
               {isExtracting && (
                 <div className="bg-primary/5 border border-primary/20 rounded-lg p-6 text-center">
                   <div className="flex flex-col items-center gap-3">
@@ -447,7 +483,9 @@ export function JewelryTagScanner({ onScanComplete, onClose }: JewelryTagScanner
                       <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full animate-pulse" />
                     </div>
                     <div>
-                      <p className="font-semibold text-primary">Extracting Text...</p>
+                      <p className="font-semibold text-primary">
+                        Extracting Text...
+                      </p>
                       <p className="text-sm text-muted-foreground mt-1">
                         Analyzing jewelry tag images
                       </p>
@@ -455,7 +493,6 @@ export function JewelryTagScanner({ onScanComplete, onClose }: JewelryTagScanner
                   </div>
                 </div>
               )}
-
               <div className="flex justify-between pt-4">
                 <Button
                   variant="outline"
@@ -490,7 +527,9 @@ export function JewelryTagScanner({ onScanComplete, onClose }: JewelryTagScanner
           {step === 3 && extractedData && (
             <div className="space-y-6 animate-in fade-in duration-500">
               <div className="text-center space-y-2">
-                <h3 className="text-lg font-semibold">Verification Questions</h3>
+                <h3 className="text-lg font-semibold">
+                  Verification Questions
+                </h3>
                 <p className="text-sm text-muted-foreground">
                   Answer these questions to get accurate pricing
                 </p>
@@ -523,7 +562,9 @@ export function JewelryTagScanner({ onScanComplete, onClose }: JewelryTagScanner
                       Does your jeweller give 100% buy back on gold weight?
                     </Label>
                     <RadioGroup
-                      value={verificationAnswers.buyBackGuarantee?.toString() || ""}
+                      value={
+                        verificationAnswers.buyBackGuarantee?.toString() || ""
+                      }
                       onValueChange={(value) =>
                         setVerificationAnswers((prev) => ({
                           ...prev,
@@ -549,7 +590,8 @@ export function JewelryTagScanner({ onScanComplete, onClose }: JewelryTagScanner
                   {/* Question 2: Raw Form */}
                   <div className="space-y-3 p-4 border rounded-lg">
                     <Label className="text-sm font-semibold">
-                      Does your jeweller show you the raw form of jewelry (without stone/kundan)?
+                      Does your jeweller show you the raw form of jewelry
+                      (without stone/kundan)?
                     </Label>
                     <RadioGroup
                       value={verificationAnswers.showsRawForm?.toString() || ""}
@@ -583,7 +625,10 @@ export function JewelryTagScanner({ onScanComplete, onClose }: JewelryTagScanner
                       Does your jeweller give appreciation on diamond?
                     </Label>
                     <RadioGroup
-                      value={verificationAnswers.diamondAppreciation?.toString() || ""}
+                      value={
+                        verificationAnswers.diamondAppreciation?.toString() ||
+                        ""
+                      }
                       onValueChange={(value) =>
                         setVerificationAnswers((prev) => ({
                           ...prev,
@@ -593,13 +638,19 @@ export function JewelryTagScanner({ onScanComplete, onClose }: JewelryTagScanner
                     >
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="true" id="appreciation-yes" />
-                        <Label htmlFor="appreciation-yes" className="cursor-pointer">
+                        <Label
+                          htmlFor="appreciation-yes"
+                          className="cursor-pointer"
+                        >
                           Yes
                         </Label>
                       </div>
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="false" id="appreciation-no" />
-                        <Label htmlFor="appreciation-no" className="cursor-pointer">
+                        <Label
+                          htmlFor="appreciation-no"
+                          className="cursor-pointer"
+                        >
                           No
                         </Label>
                       </div>
@@ -628,7 +679,10 @@ export function JewelryTagScanner({ onScanComplete, onClose }: JewelryTagScanner
                       </div>
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="Non-IGI" id="cert-non-igi" />
-                        <Label htmlFor="cert-non-igi" className="cursor-pointer">
+                        <Label
+                          htmlFor="cert-non-igi"
+                          className="cursor-pointer"
+                        >
                           Non-IGI (Self Certified)
                         </Label>
                       </div>

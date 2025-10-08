@@ -10,6 +10,7 @@ import {
   UserPlus,
   Menu,
   X,
+  Home,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
@@ -49,6 +50,19 @@ export function Navbar() {
               className={cn(
                 "px-3 py-2 rounded-lg transition-smooth text-sm font-medium flex items-center space-x-2",
                 isActive("/")
+                  ? "bg-primary text-primary-foreground shadow-card"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
+              )}
+            >
+              <Home className="h-4 w-4" />
+              <span>Home</span>
+            </Link>
+
+            <Link
+              to="/calculator"
+              className={cn(
+                "px-3 py-2 rounded-lg transition-smooth text-sm font-medium flex items-center space-x-2",
+                isActive("/calculator")
                   ? "bg-primary text-primary-foreground shadow-card"
                   : "text-muted-foreground hover:text-foreground hover:bg-muted"
               )}
@@ -125,6 +139,20 @@ export function Navbar() {
                 className={cn(
                   "px-4 py-3 rounded-lg transition-smooth text-base font-medium flex items-center space-x-3",
                   isActive("/")
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                )}
+                onClick={() => setIsOpen(false)}
+              >
+                <Home className="h-5 w-5" />
+                <span>Home</span>
+              </Link>
+
+              <Link
+                to="/calculator"
+                className={cn(
+                  "px-4 py-3 rounded-lg transition-smooth text-base font-medium flex items-center space-x-3",
+                  isActive("/calculator")
                     ? "bg-primary text-primary-foreground"
                     : "text-muted-foreground hover:text-foreground hover:bg-muted"
                 )}

@@ -7,6 +7,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { RatesProvider } from "@/contexts/RatesContext";
 import { UserVerificationProvider } from "@/contexts/UserVerificationContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Calculator from "./pages/Calculator";
@@ -25,7 +26,8 @@ const App = () => (
             <Sonner />
             <BrowserRouter>
             <Routes>
-              <Route path="/" element={<Calculator />} />
+              <Route path="/" element={<Home />} />
+              <Route path="/calculator" element={<Calculator />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route
