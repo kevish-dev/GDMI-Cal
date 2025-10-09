@@ -653,140 +653,239 @@ export function JewelryTagScanner({
               {jewelryType === "gold" ? (
                 <div className="space-y-4">
                   {/* Question 1: Buy Back Guarantee */}
-                  <div className="space-y-3 p-3 sm:p-4 border rounded-lg">
-                    <Label className="text-sm sm:text-base font-semibold leading-relaxed">
-                      Does your jeweller give 100% buy back on gold weight?
-                    </Label>
-                    <RadioGroup
-                      value={
-                        verificationAnswers.buyBackGuarantee?.toString() || ""
-                      }
-                      onValueChange={(value) =>
-                        setVerificationAnswers((prev) => ({
-                          ...prev,
-                          buyBackGuarantee: value === "true",
-                        }))
-                      }
-                      className="flex flex-col sm:flex-row gap-3 sm:gap-4"
-                    >
-                      <div className="flex items-center space-x-2 p-3 border rounded-md sm:border-0 sm:p-0">
-                        <RadioGroupItem value="true" id="buyback-yes" />
-                        <Label htmlFor="buyback-yes" className="cursor-pointer font-normal flex-1">
-                          Yes
-                        </Label>
+                  <div className="space-y-4 p-4 sm:p-5 bg-gradient-to-br from-primary/5 to-primary/10 border-2 border-primary/20 rounded-xl shadow-sm">
+                    <div className="flex items-start gap-3">
+                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center mt-0.5">
+                        <span className="text-sm font-bold text-primary">1</span>
                       </div>
-                      <div className="flex items-center space-x-2 p-3 border rounded-md sm:border-0 sm:p-0">
-                        <RadioGroupItem value="false" id="buyback-no" />
-                        <Label htmlFor="buyback-no" className="cursor-pointer font-normal flex-1">
-                          No
+                      <div className="flex-1">
+                        <Label className="text-sm sm:text-base font-semibold leading-relaxed text-foreground block mb-3">
+                          Does your jeweller give 100% buy back on gold weight?
                         </Label>
+                        <RadioGroup
+                          value={
+                            verificationAnswers.buyBackGuarantee?.toString() || ""
+                          }
+                          onValueChange={(value) =>
+                            setVerificationAnswers((prev) => ({
+                              ...prev,
+                              buyBackGuarantee: value === "true",
+                            }))
+                          }
+                          className="grid grid-cols-2 gap-3"
+                        >
+                          <Label
+                            htmlFor="buyback-yes"
+                            className={cn(
+                              "flex items-center justify-center gap-2 p-4 rounded-lg border-2 cursor-pointer transition-all",
+                              verificationAnswers.buyBackGuarantee === true
+                                ? "border-primary bg-primary text-primary-foreground shadow-md"
+                                : "border-muted-foreground/20 bg-background hover:border-primary/50 hover:bg-primary/5"
+                            )}
+                          >
+                            <RadioGroupItem value="true" id="buyback-yes" className="sr-only" />
+                            <Check className={cn(
+                              "h-4 w-4",
+                              verificationAnswers.buyBackGuarantee === true ? "opacity-100" : "opacity-0"
+                            )} />
+                            <span className="font-medium">Yes</span>
+                          </Label>
+                          <Label
+                            htmlFor="buyback-no"
+                            className={cn(
+                              "flex items-center justify-center gap-2 p-4 rounded-lg border-2 cursor-pointer transition-all",
+                              verificationAnswers.buyBackGuarantee === false
+                                ? "border-primary bg-primary text-primary-foreground shadow-md"
+                                : "border-muted-foreground/20 bg-background hover:border-primary/50 hover:bg-primary/5"
+                            )}
+                          >
+                            <RadioGroupItem value="false" id="buyback-no" className="sr-only" />
+                            <Check className={cn(
+                              "h-4 w-4",
+                              verificationAnswers.buyBackGuarantee === false ? "opacity-100" : "opacity-0"
+                            )} />
+                            <span className="font-medium">No</span>
+                          </Label>
+                        </RadioGroup>
                       </div>
-                    </RadioGroup>
+                    </div>
                   </div>
 
                   {/* Question 2: Raw Form */}
-                  <div className="space-y-3 p-3 sm:p-4 border rounded-lg">
-                    <Label className="text-sm sm:text-base font-semibold leading-relaxed">
-                      Does your jeweller show you the raw form of jewelry
-                      (without stone/kundan)?
-                    </Label>
-                    <RadioGroup
-                      value={verificationAnswers.showsRawForm?.toString() || ""}
-                      onValueChange={(value) =>
-                        setVerificationAnswers((prev) => ({
-                          ...prev,
-                          showsRawForm: value === "true",
-                        }))
-                      }
-                      className="flex flex-col sm:flex-row gap-3 sm:gap-4"
-                    >
-                      <div className="flex items-center space-x-2 p-3 border rounded-md sm:border-0 sm:p-0">
-                        <RadioGroupItem value="true" id="rawform-yes" />
-                        <Label htmlFor="rawform-yes" className="cursor-pointer font-normal flex-1">
-                          Yes
-                        </Label>
+                  <div className="space-y-4 p-4 sm:p-5 bg-gradient-to-br from-primary/5 to-primary/10 border-2 border-primary/20 rounded-xl shadow-sm">
+                    <div className="flex items-start gap-3">
+                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center mt-0.5">
+                        <span className="text-sm font-bold text-primary">2</span>
                       </div>
-                      <div className="flex items-center space-x-2 p-3 border rounded-md sm:border-0 sm:p-0">
-                        <RadioGroupItem value="false" id="rawform-no" />
-                        <Label htmlFor="rawform-no" className="cursor-pointer font-normal flex-1">
-                          No
+                      <div className="flex-1">
+                        <Label className="text-sm sm:text-base font-semibold leading-relaxed text-foreground block mb-3">
+                          Does your jeweller show you the raw form of jewelry
+                          (without stone/kundan)?
                         </Label>
+                        <RadioGroup
+                          value={verificationAnswers.showsRawForm?.toString() || ""}
+                          onValueChange={(value) =>
+                            setVerificationAnswers((prev) => ({
+                              ...prev,
+                              showsRawForm: value === "true",
+                            }))
+                          }
+                          className="grid grid-cols-2 gap-3"
+                        >
+                          <Label
+                            htmlFor="rawform-yes"
+                            className={cn(
+                              "flex items-center justify-center gap-2 p-4 rounded-lg border-2 cursor-pointer transition-all",
+                              verificationAnswers.showsRawForm === true
+                                ? "border-primary bg-primary text-primary-foreground shadow-md"
+                                : "border-muted-foreground/20 bg-background hover:border-primary/50 hover:bg-primary/5"
+                            )}
+                          >
+                            <RadioGroupItem value="true" id="rawform-yes" className="sr-only" />
+                            <Check className={cn(
+                              "h-4 w-4",
+                              verificationAnswers.showsRawForm === true ? "opacity-100" : "opacity-0"
+                            )} />
+                            <span className="font-medium">Yes</span>
+                          </Label>
+                          <Label
+                            htmlFor="rawform-no"
+                            className={cn(
+                              "flex items-center justify-center gap-2 p-4 rounded-lg border-2 cursor-pointer transition-all",
+                              verificationAnswers.showsRawForm === false
+                                ? "border-primary bg-primary text-primary-foreground shadow-md"
+                                : "border-muted-foreground/20 bg-background hover:border-primary/50 hover:bg-primary/5"
+                            )}
+                          >
+                            <RadioGroupItem value="false" id="rawform-no" className="sr-only" />
+                            <Check className={cn(
+                              "h-4 w-4",
+                              verificationAnswers.showsRawForm === false ? "opacity-100" : "opacity-0"
+                            )} />
+                            <span className="font-medium">No</span>
+                          </Label>
+                        </RadioGroup>
                       </div>
-                    </RadioGroup>
+                    </div>
                   </div>
                 </div>
               ) : (
                 <div className="space-y-4">
                   {/* Question 1: Diamond Appreciation */}
-                  <div className="space-y-3 p-3 sm:p-4 border rounded-lg">
-                    <Label className="text-sm sm:text-base font-semibold leading-relaxed">
-                      Does your jeweller give appreciation on diamond?
-                    </Label>
-                    <RadioGroup
-                      value={
-                        verificationAnswers.diamondAppreciation?.toString() ||
-                        ""
-                      }
-                      onValueChange={(value) =>
-                        setVerificationAnswers((prev) => ({
-                          ...prev,
-                          diamondAppreciation: value === "true",
-                        }))
-                      }
-                      className="flex flex-col sm:flex-row gap-3 sm:gap-4"
-                    >
-                      <div className="flex items-center space-x-2 p-3 border rounded-md sm:border-0 sm:p-0">
-                        <RadioGroupItem value="true" id="appreciation-yes" />
-                        <Label
-                          htmlFor="appreciation-yes"
-                          className="cursor-pointer font-normal flex-1"
-                        >
-                          Yes
-                        </Label>
+                  <div className="space-y-4 p-4 sm:p-5 bg-gradient-to-br from-secondary/5 to-secondary/10 border-2 border-secondary/20 rounded-xl shadow-sm">
+                    <div className="flex items-start gap-3">
+                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-secondary/20 flex items-center justify-center mt-0.5">
+                        <span className="text-sm font-bold text-secondary">1</span>
                       </div>
-                      <div className="flex items-center space-x-2 p-3 border rounded-md sm:border-0 sm:p-0">
-                        <RadioGroupItem value="false" id="appreciation-no" />
-                        <Label
-                          htmlFor="appreciation-no"
-                          className="cursor-pointer font-normal flex-1"
-                        >
-                          No
+                      <div className="flex-1">
+                        <Label className="text-sm sm:text-base font-semibold leading-relaxed text-foreground block mb-3">
+                          Does your jeweller give appreciation on diamond?
                         </Label>
+                        <RadioGroup
+                          value={
+                            verificationAnswers.diamondAppreciation?.toString() ||
+                            ""
+                          }
+                          onValueChange={(value) =>
+                            setVerificationAnswers((prev) => ({
+                              ...prev,
+                              diamondAppreciation: value === "true",
+                            }))
+                          }
+                          className="grid grid-cols-2 gap-3"
+                        >
+                          <Label
+                            htmlFor="appreciation-yes"
+                            className={cn(
+                              "flex items-center justify-center gap-2 p-4 rounded-lg border-2 cursor-pointer transition-all",
+                              verificationAnswers.diamondAppreciation === true
+                                ? "border-secondary bg-secondary text-secondary-foreground shadow-md"
+                                : "border-muted-foreground/20 bg-background hover:border-secondary/50 hover:bg-secondary/5"
+                            )}
+                          >
+                            <RadioGroupItem value="true" id="appreciation-yes" className="sr-only" />
+                            <Check className={cn(
+                              "h-4 w-4",
+                              verificationAnswers.diamondAppreciation === true ? "opacity-100" : "opacity-0"
+                            )} />
+                            <span className="font-medium">Yes</span>
+                          </Label>
+                          <Label
+                            htmlFor="appreciation-no"
+                            className={cn(
+                              "flex items-center justify-center gap-2 p-4 rounded-lg border-2 cursor-pointer transition-all",
+                              verificationAnswers.diamondAppreciation === false
+                                ? "border-secondary bg-secondary text-secondary-foreground shadow-md"
+                                : "border-muted-foreground/20 bg-background hover:border-secondary/50 hover:bg-secondary/5"
+                            )}
+                          >
+                            <RadioGroupItem value="false" id="appreciation-no" className="sr-only" />
+                            <Check className={cn(
+                              "h-4 w-4",
+                              verificationAnswers.diamondAppreciation === false ? "opacity-100" : "opacity-0"
+                            )} />
+                            <span className="font-medium">No</span>
+                          </Label>
+                        </RadioGroup>
                       </div>
-                    </RadioGroup>
+                    </div>
                   </div>
 
                   {/* Question 2: Certificate Type */}
-                  <div className="space-y-3 p-3 sm:p-4 border rounded-lg">
-                    <Label className="text-sm sm:text-base font-semibold leading-relaxed">
-                      Select type of certificate on diamond
-                    </Label>
-                    <RadioGroup
-                      value={verificationAnswers.certificationType || ""}
-                      onValueChange={(value) =>
-                        setVerificationAnswers((prev) => ({
-                          ...prev,
-                          certificationType: value as Certification,
-                        }))
-                      }
-                      className="flex flex-col sm:flex-row gap-3 sm:gap-4"
-                    >
-                      <div className="flex items-center space-x-2 p-3 border rounded-md sm:border-0 sm:p-0">
-                        <RadioGroupItem value="IGI" id="cert-igi" />
-                        <Label htmlFor="cert-igi" className="cursor-pointer font-normal flex-1">
-                          IGI Certified
-                        </Label>
+                  <div className="space-y-4 p-4 sm:p-5 bg-gradient-to-br from-secondary/5 to-secondary/10 border-2 border-secondary/20 rounded-xl shadow-sm">
+                    <div className="flex items-start gap-3">
+                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-secondary/20 flex items-center justify-center mt-0.5">
+                        <span className="text-sm font-bold text-secondary">2</span>
                       </div>
-                      <div className="flex items-center space-x-2 p-3 border rounded-md sm:border-0 sm:p-0">
-                        <RadioGroupItem value="Non-IGI" id="cert-non-igi" />
-                        <Label
-                          htmlFor="cert-non-igi"
-                          className="cursor-pointer font-normal flex-1"
+                      <div className="flex-1">
+                        <Label className="text-sm sm:text-base font-semibold leading-relaxed text-foreground block mb-3">
+                          Select type of certificate on diamond
+                        </Label>
+                        <RadioGroup
+                          value={verificationAnswers.certificationType || ""}
+                          onValueChange={(value) =>
+                            setVerificationAnswers((prev) => ({
+                              ...prev,
+                              certificationType: value as Certification,
+                            }))
+                          }
+                          className="grid grid-cols-1 sm:grid-cols-2 gap-3"
                         >
-                          Non-IGI (Self Certified)
-                        </Label>
+                          <Label
+                            htmlFor="cert-igi"
+                            className={cn(
+                              "flex items-center justify-center gap-2 p-4 rounded-lg border-2 cursor-pointer transition-all",
+                              verificationAnswers.certificationType === "IGI"
+                                ? "border-secondary bg-secondary text-secondary-foreground shadow-md"
+                                : "border-muted-foreground/20 bg-background hover:border-secondary/50 hover:bg-secondary/5"
+                            )}
+                          >
+                            <RadioGroupItem value="IGI" id="cert-igi" className="sr-only" />
+                            <Check className={cn(
+                              "h-4 w-4",
+                              verificationAnswers.certificationType === "IGI" ? "opacity-100" : "opacity-0"
+                            )} />
+                            <span className="font-medium">IGI Certified</span>
+                          </Label>
+                          <Label
+                            htmlFor="cert-non-igi"
+                            className={cn(
+                              "flex items-center justify-center gap-2 p-4 rounded-lg border-2 cursor-pointer transition-all",
+                              verificationAnswers.certificationType === "Non-IGI"
+                                ? "border-secondary bg-secondary text-secondary-foreground shadow-md"
+                                : "border-muted-foreground/20 bg-background hover:border-secondary/50 hover:bg-secondary/5"
+                            )}
+                          >
+                            <RadioGroupItem value="Non-IGI" id="cert-non-igi" className="sr-only" />
+                            <Check className={cn(
+                              "h-4 w-4",
+                              verificationAnswers.certificationType === "Non-IGI" ? "opacity-100" : "opacity-0"
+                            )} />
+                            <span className="font-medium">Non-IGI (Self Certified)</span>
+                          </Label>
+                        </RadioGroup>
                       </div>
-                    </RadioGroup>
+                    </div>
                   </div>
                 </div>
               )}
@@ -818,7 +917,7 @@ export function JewelryTagScanner({
               <div className="text-center space-y-2">
                 <h3 className="text-lg font-semibold">Making Charges</h3>
                 <p className="text-sm text-muted-foreground">
-                  Select jewelry type and enter making charge percentage
+                  Select jewelry type and making charge percentage
                 </p>
               </div>
 
@@ -845,53 +944,130 @@ export function JewelryTagScanner({
                       }
                       className="grid grid-cols-1 sm:grid-cols-2 gap-3"
                     >
-                      <div className="flex items-center space-x-2 p-3 border rounded-md">
-                        <RadioGroupItem value="chains" id="type-chains" />
-                        <Label htmlFor="type-chains" className="cursor-pointer flex-1">
-                          <div className="font-medium">Chains</div>
-                          <div className="text-xs text-muted-foreground">
-                            {makingCharges.chains || 2}% making charges
-                          </div>
-                        </Label>
-                      </div>
-                      <div className="flex items-center space-x-2 p-3 border rounded-md">
-                        <RadioGroupItem value="plain" id="type-plain" />
-                        <Label htmlFor="type-plain" className="cursor-pointer flex-1">
-                          <div className="font-medium">Plain</div>
-                          <div className="text-xs text-muted-foreground">
-                            {makingCharges.plain || 3.5}% making charges
-                          </div>
-                        </Label>
-                      </div>
-                      <div className="flex items-center space-x-2 p-3 border rounded-md">
-                        <RadioGroupItem value="temple" id="type-temple" />
-                        <Label htmlFor="type-temple" className="cursor-pointer flex-1">
-                          <div className="font-medium">Temple</div>
-                          <div className="text-xs text-muted-foreground">
-                            {makingCharges.temple || 7}% making charges
-                          </div>
-                        </Label>
-                      </div>
-                      <div className="flex items-center space-x-2 p-3 border rounded-md">
-                        <RadioGroupItem value="italian" id="type-italian" />
-                        <Label htmlFor="type-italian" className="cursor-pointer flex-1">
-                          <div className="font-medium">Italian Gold</div>
-                          <div className="text-xs text-muted-foreground">
-                            {makingCharges.italianGold || 18}% making charges
-                          </div>
-                        </Label>
-                      </div>
+                      <Label
+                        htmlFor="type-chains"
+                        className={cn(
+                          "flex flex-col gap-1.5 p-4 rounded-lg border-2 cursor-pointer transition-all",
+                          makingChargesData.goldType === "chains"
+                            ? "border-primary bg-primary text-primary-foreground shadow-md"
+                            : "border-muted-foreground/20 bg-background hover:border-primary/50 hover:bg-primary/5"
+                        )}
+                      >
+                        <RadioGroupItem value="chains" id="type-chains" className="sr-only" />
+                        <div className="flex items-center justify-between">
+                          <span className="font-semibold">Chains</span>
+                          <Check className={cn(
+                            "h-5 w-5",
+                            makingChargesData.goldType === "chains" ? "opacity-100" : "opacity-0"
+                          )} />
+                        </div>
+                        <span className={cn(
+                          "text-xs",
+                          makingChargesData.goldType === "chains" 
+                            ? "text-primary-foreground/80" 
+                            : "text-muted-foreground"
+                        )}>
+                          {makingCharges.chains || 2}% making charges
+                        </span>
+                      </Label>
+
+                      <Label
+                        htmlFor="type-plain"
+                        className={cn(
+                          "flex flex-col gap-1.5 p-4 rounded-lg border-2 cursor-pointer transition-all",
+                          makingChargesData.goldType === "plain"
+                            ? "border-primary bg-primary text-primary-foreground shadow-md"
+                            : "border-muted-foreground/20 bg-background hover:border-primary/50 hover:bg-primary/5"
+                        )}
+                      >
+                        <RadioGroupItem value="plain" id="type-plain" className="sr-only" />
+                        <div className="flex items-center justify-between">
+                          <span className="font-semibold">Plain</span>
+                          <Check className={cn(
+                            "h-5 w-5",
+                            makingChargesData.goldType === "plain" ? "opacity-100" : "opacity-0"
+                          )} />
+                        </div>
+                        <span className={cn(
+                          "text-xs",
+                          makingChargesData.goldType === "plain" 
+                            ? "text-primary-foreground/80" 
+                            : "text-muted-foreground"
+                        )}>
+                          {makingCharges.plain || 3.5}% making charges
+                        </span>
+                      </Label>
+
+                      <Label
+                        htmlFor="type-temple"
+                        className={cn(
+                          "flex flex-col gap-1.5 p-4 rounded-lg border-2 cursor-pointer transition-all",
+                          makingChargesData.goldType === "temple"
+                            ? "border-primary bg-primary text-primary-foreground shadow-md"
+                            : "border-muted-foreground/20 bg-background hover:border-primary/50 hover:bg-primary/5"
+                        )}
+                      >
+                        <RadioGroupItem value="temple" id="type-temple" className="sr-only" />
+                        <div className="flex items-center justify-between">
+                          <span className="font-semibold">Temple</span>
+                          <Check className={cn(
+                            "h-5 w-5",
+                            makingChargesData.goldType === "temple" ? "opacity-100" : "opacity-0"
+                          )} />
+                        </div>
+                        <span className={cn(
+                          "text-xs",
+                          makingChargesData.goldType === "temple" 
+                            ? "text-primary-foreground/80" 
+                            : "text-muted-foreground"
+                        )}>
+                          {makingCharges.temple || 7}% making charges
+                        </span>
+                      </Label>
+
+                      <Label
+                        htmlFor="type-italian"
+                        className={cn(
+                          "flex flex-col gap-1.5 p-4 rounded-lg border-2 cursor-pointer transition-all",
+                          makingChargesData.goldType === "italian"
+                            ? "border-primary bg-primary text-primary-foreground shadow-md"
+                            : "border-muted-foreground/20 bg-background hover:border-primary/50 hover:bg-primary/5"
+                        )}
+                      >
+                        <RadioGroupItem value="italian" id="type-italian" className="sr-only" />
+                        <div className="flex items-center justify-between">
+                          <span className="font-semibold">Italian Gold</span>
+                          <Check className={cn(
+                            "h-5 w-5",
+                            makingChargesData.goldType === "italian" ? "opacity-100" : "opacity-0"
+                          )} />
+                        </div>
+                        <span className={cn(
+                          "text-xs",
+                          makingChargesData.goldType === "italian" 
+                            ? "text-primary-foreground/80" 
+                            : "text-muted-foreground"
+                        )}>
+                          {makingCharges.italianGold || 18}% making charges
+                        </span>
+                      </Label>
                     </RadioGroup>
                   </div>
 
                   {/* Display selected percentage */}
                   {makingChargesData.goldType && (
-                    <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
+                    <div className="bg-gradient-to-r from-primary/10 to-primary/5 border-2 border-primary/30 rounded-xl p-4 shadow-sm">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium">Making Charges:</span>
-                        <span className="text-lg font-bold text-primary">
-                          {makingChargesData.percentage}%
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
+                          <span className="text-sm font-semibold text-foreground">Selected Making Charges:</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <span className="text-2xl font-bold text-primary">
+                            {makingChargesData.percentage}
+                          </span>
+                          <span className="text-sm font-medium text-primary">%</span>
+                        </div>
                       </div>
                     </div>
                   )}
@@ -899,17 +1075,30 @@ export function JewelryTagScanner({
               ) : (
                 <div className="space-y-4">
                   {/* Diamond Making Charges Info */}
-                  <div className="bg-muted/50 rounded-lg p-4 space-y-3">
-                    <h4 className="font-semibold text-sm">Diamond Jewelry Making Charges</h4>
-                    <p className="text-sm text-muted-foreground">
-                      For diamond jewelry, making charges are calculated at ₹800 per gram of gold weight.
-                    </p>
-                    <div className="bg-primary/10 border border-primary/20 rounded-lg p-3">
+                  <div className="bg-gradient-to-br from-secondary/5 to-secondary/10 border-2 border-secondary/20 rounded-xl p-5 shadow-sm space-y-4">
+                    <div className="flex items-start gap-3">
+                      <div className="flex-shrink-0 w-10 h-10 rounded-full bg-secondary/20 flex items-center justify-center">
+                        <Diamond className="h-5 w-5 text-secondary" />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-base mb-2">Diamond Jewelry Making Charges</h4>
+                        <p className="text-sm text-muted-foreground leading-relaxed">
+                          For diamond jewelry, making charges are calculated at a fixed rate of ₹800 per gram of gold weight.
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-gradient-to-r from-secondary/10 to-secondary/5 border-2 border-secondary/30 rounded-lg p-4">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium">Rate:</span>
-                        <span className="text-lg font-bold text-primary">
-                          ₹800/gram
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full bg-secondary animate-pulse"></div>
+                          <span className="text-sm font-semibold text-foreground">Fixed Rate:</span>
+                        </div>
+                        <div className="flex items-baseline gap-1">
+                          <span className="text-xs font-medium text-muted-foreground">₹</span>
+                          <span className="text-2xl font-bold text-secondary">800</span>
+                          <span className="text-xs font-medium text-muted-foreground">/gram</span>
+                        </div>
                       </div>
                     </div>
                   </div>
