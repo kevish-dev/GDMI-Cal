@@ -76,7 +76,6 @@ export default function Home() {
               <CardTitle className="flex items-center justify-center space-x-2 text-xl sm:text-2xl">
                 <ScanLine className="h-6 w-6 text-primary animate-pulse" />
                 <span className="text-primary">Quick Scan</span>
-                <Badge variant="secondary" className="ml-2 text-xs">New</Badge>
               </CardTitle>
               <CardDescription className="text-center text-sm sm:text-base">
                 Upload images of your jewelry tag for instant price calculation
