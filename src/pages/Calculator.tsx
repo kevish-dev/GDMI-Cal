@@ -487,7 +487,7 @@ export default function Calculator() {
                               validationErrors.type && "ring-2 ring-red-500 ring-offset-2 rounded-lg p-1"
                             )}
                             options={[
-                              { value: "chains", label: "Chains", description: "(2% making charges)" },
+                              { value: "chains", label: "Chains", description: "(2.5% making charges)" },
                               { value: "plain", label: "Plain", description: "(3.5% making charges)" },
                               { value: "temple", label: "Temple", description: "(7% making charges)" },
                               { value: "italian", label: "Italian Gold", description: "(18% making charges)" }
