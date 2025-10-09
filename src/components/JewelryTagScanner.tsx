@@ -23,6 +23,7 @@ import {
   Crown,
   Diamond,
   ArrowRight,
+  Calculator,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
@@ -57,18 +58,27 @@ interface MakingCharges {
   percentage?: number;
 }
 
+interface PriceBreakdown {
+  goldRate: number;
+  goldWeight: number;
+  goldValue: number;
+  diamondRate?: number;
+  diamondWeight?: number;
+  diamondValue: number;
+  makingChargeRate: number | string;
+  makingCharges: number;
+  subTotal: number;
+  gst: number;
+  finalPrice: number;
+}
+
 interface ScanResult {
   jewelryType: JewelryType;
   extractedData: ExtractedData;
   verificationAnswers: VerificationAnswers;
   makingCharges: MakingCharges;
   calculatedPrice: number;
-  priceBreakdown: {
-    goldValue: number;
-    diamondValue: number;
-    makingCharges: number;
-    finalPrice: number;
-  };
+  priceBreakdown: PriceBreakdown;
 }
 
 interface JewelryTagScannerProps {
@@ -105,7 +115,7 @@ export function JewelryTagScanner({
     useState<VerificationAnswers>({});
   const [makingChargesData, setMakingChargesData] = useState<MakingCharges>({});
   const [calculatedPrice, setCalculatedPrice] = useState<number | null>(null);
-  const [priceBreakdown, setPriceBreakdown] = useState<any>(null);
+  const [priceBreakdown, setPriceBreakdown] = useState<PriceBreakdown | null>(null);
   const { toast } = useToast();
   const { goldRates, diamondRates, makingCharges } = useRates();
 
@@ -187,7 +197,7 @@ export function JewelryTagScanner({
     }
   };
 
-  const handleComplete = async () => {
+  const handleCalculatePreview = async () => {
     if (!jewelryType || !extractedData) return;
 
     setIsCalculating(true);
@@ -197,24 +207,33 @@ export function JewelryTagScanner({
       let goldValue = 0;
       let diamondValue = 0;
       let calculatedMakingCharges = 0;
+      let goldRate = 0;
+      let goldWeightValue = 0;
+      let diamondRate = 0;
+      let diamondWeightValue = 0;
+      let makingChargeRateDisplay: number | string = 0;
 
       if (jewelryType === "gold") {
         const weight = extractedData.weight || extractedData.netWeight || 0;
+        goldWeightValue = weight;
         const caratKey = extractedData.carat?.toUpperCase();
 
-        const goldRate =
+        goldRate =
           goldRates.find((rate) => rate.carat === caratKey)?.rate || 0;
         goldValue = weight * goldRate;
         
         // Calculate making charges as percentage of gold value
         const makingChargePercentage = makingChargesData.percentage || 0;
         calculatedMakingCharges = (goldValue * makingChargePercentage) / 100;
+        makingChargeRateDisplay = makingChargePercentage;
       } else if (jewelryType === "diamond") {
         const goldWeight = extractedData.weight || extractedData.netWeight || 0;
         const diamondWeight = extractedData.diamondWeight || 0;
+        goldWeightValue = goldWeight;
+        diamondWeightValue = diamondWeight;
         const caratKey = extractedData.carat?.toUpperCase();
 
-        const goldRate =
+        goldRate =
           goldRates.find((rate) => rate.carat === caratKey)?.rate || 0;
         goldValue = goldWeight * goldRate;
 
@@ -224,39 +243,65 @@ export function JewelryTagScanner({
         const matchingRate = diamondRates.find(
           (rate) => rate.certification === certification
         );
-        const diamondRate = matchingRate?.rate || 50000;
+        diamondRate = matchingRate?.rate || 50000;
 
         diamondValue = diamondWeight * diamondRate;
         
         // Calculate making charges as fixed rate per gram
         calculatedMakingCharges = (makingChargesData.percentage || 800) * goldWeight;
+        makingChargeRateDisplay = makingChargesData.percentage || 800;
       }
 
-      const finalPrice = goldValue + diamondValue + calculatedMakingCharges;
+      const subTotal = goldValue + diamondValue + calculatedMakingCharges;
+      const gstAmount = (subTotal * 3) / 100; // 3% GST
+      const finalPrice = subTotal + gstAmount;
 
-      const breakdown = {
+      const breakdown: PriceBreakdown = {
+        goldRate,
+        goldWeight: goldWeightValue,
         goldValue,
+        diamondRate: diamondRate > 0 ? diamondRate : undefined,
+        diamondWeight: diamondWeightValue > 0 ? diamondWeightValue : undefined,
         diamondValue,
+        makingChargeRate: makingChargeRateDisplay,
         makingCharges: calculatedMakingCharges,
+        subTotal,
+        gst: gstAmount,
         finalPrice,
       };
 
       setCalculatedPrice(finalPrice);
       setPriceBreakdown(breakdown);
+      setStep(5); // Move to preview step
 
+      toast({
+        title: "Price calculated!",
+        description: "Review the breakdown and confirm to complete",
+      });
+    } catch (error) {
+      toast({
+        title: "Calculation failed",
+        description: "Failed to calculate price. Please try again.",
+        variant: "destructive",
+      });
+      console.error("Calculation Error:", error);
+    } finally {
+      setIsCalculating(false);
+    }
+  };
+
+  const handleComplete = async () => {
+    if (!jewelryType || !extractedData || !priceBreakdown) return;
+
+    try {
       const result: ScanResult = {
         jewelryType,
         extractedData,
         verificationAnswers,
         makingCharges: makingChargesData,
-        calculatedPrice: finalPrice,
-        priceBreakdown: breakdown,
+        calculatedPrice: priceBreakdown.finalPrice,
+        priceBreakdown: priceBreakdown,
       };
-
-      toast({
-        title: "Price calculated!",
-        description: `Total price: ₹${finalPrice.toLocaleString("en-IN")}`,
-      });
 
       onScanComplete(result);
       onClose();
@@ -280,12 +325,12 @@ export function JewelryTagScanner({
         verificationAnswers.showsRawForm !== undefined
       : verificationAnswers.diamondAppreciation !== undefined &&
         verificationAnswers.certificationType !== undefined;
-  const canComplete =
+  const canCalculate =
     jewelryType === "gold"
       ? makingChargesData.goldType !== undefined && makingChargesData.percentage !== undefined
       : makingChargesData.percentage !== undefined;
 
-  const progressPercentage = (step / 4) * 100;
+  const progressPercentage = (step / 5) * 100;
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -301,7 +346,7 @@ export function JewelryTagScanner({
                 <CardTitle className="text-xl sm:text-2xl">
                   Scan Jewelry Tag
                 </CardTitle>
-                <CardDescription>Step {step} of 4</CardDescription>
+                <CardDescription>Step {step} of 5</CardDescription>
               </div>
             </div>
             <Button
@@ -316,7 +361,7 @@ export function JewelryTagScanner({
           
           {/* Custom Stepped Progress Bar */}
           <div className="mt-6 flex items-center justify-center gap-3">
-            {[1, 2, 3, 4].map((stepNumber) => (
+            {[1, 2, 3, 4, 5].map((stepNumber) => (
               <div
                 key={stepNumber}
                 className={cn(
@@ -1116,21 +1161,156 @@ export function JewelryTagScanner({
                   Back
                 </Button>
                 <Button
-                  onClick={handleComplete}
-                  disabled={!canComplete || isCalculating}
+                  onClick={handleCalculatePreview}
+                  disabled={!canCalculate || isCalculating}
                   className="gap-2"
                 >
                   {isCalculating ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin" />
-                      Calculating Price...
+                      Calculating...
                     </>
                   ) : (
                     <>
-                      Calculate & Complete
-                      <ArrowRight className="h-4 w-4" />
+                      Calculate Price
+                      <Calculator className="h-4 w-4" />
                     </>
                   )}
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Step 5: Price Breakdown Preview */}
+          {step === 5 && priceBreakdown && extractedData && (
+            <div className="space-y-6 animate-in fade-in duration-500">
+              <div className="text-center space-y-2">
+                <h3 className="text-lg font-semibold">Price Breakdown</h3>
+                <p className="text-sm text-muted-foreground">
+                  Review the calculated price and confirm to complete
+                </p>
+              </div>
+
+              {/* Price Breakdown Display */}
+              <div className="space-y-4">
+                {/* Gold/Diamond Details */}
+                <div className="bg-gradient-to-br from-primary/5 to-primary/10 border-2 border-primary/20 rounded-xl p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      {jewelryType === "gold" ? (
+                        <Crown className="h-5 w-5 text-primary" />
+                      ) : (
+                        <Diamond className="h-5 w-5 text-secondary" />
+                      )}
+                      <span className="font-semibold">
+                        {jewelryType === "gold" ? "Gold" : "Diamond Jewelry"} Value
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between p-2 bg-background/50 rounded">
+                      <span className="text-muted-foreground">Rate:</span>
+                      <span className="font-medium">₹{priceBreakdown.goldRate.toLocaleString("en-IN")}/g</span>
+                    </div>
+                    <div className="flex justify-between p-2 bg-background/50 rounded">
+                      <span className="text-muted-foreground">Weight:</span>
+                      <span className="font-medium">{priceBreakdown.goldWeight.toFixed(3)}g</span>
+                    </div>
+                    <div className="flex justify-between p-2 bg-primary/10 rounded font-semibold">
+                      <span>Gold Value:</span>
+                      <span className="text-primary">₹{priceBreakdown.goldValue.toLocaleString("en-IN")}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Diamond Details (if applicable) */}
+                {priceBreakdown.diamondValue > 0 && priceBreakdown.diamondWeight && priceBreakdown.diamondRate && (
+                  <div className="bg-gradient-to-br from-secondary/5 to-secondary/10 border-2 border-secondary/20 rounded-xl p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <Diamond className="h-5 w-5 text-secondary" />
+                        <span className="font-semibold">Diamond Value</span>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between p-2 bg-background/50 rounded">
+                        <span className="text-muted-foreground">Rate:</span>
+                        <span className="font-medium">₹{priceBreakdown.diamondRate.toLocaleString("en-IN")}/ct</span>
+                      </div>
+                      <div className="flex justify-between p-2 bg-background/50 rounded">
+                        <span className="text-muted-foreground">Weight:</span>
+                        <span className="font-medium">{priceBreakdown.diamondWeight.toFixed(3)}ct</span>
+                      </div>
+                      <div className="flex justify-between p-2 bg-secondary/10 rounded font-semibold">
+                        <span>Diamond Value:</span>
+                        <span className="text-secondary">₹{priceBreakdown.diamondValue.toLocaleString("en-IN")}</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Making Charges */}
+                <div className="bg-gradient-to-br from-purple/5 to-purple/10 border-2 border-purple-200 rounded-xl p-4">
+                  <div className="flex justify-between items-center">
+                    <span className="font-semibold">Making Charges:</span>
+                    <span className="text-lg font-bold text-purple-600">
+                      ₹{priceBreakdown.makingCharges.toLocaleString("en-IN")}
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {typeof priceBreakdown.makingChargeRate === 'number' && jewelryType === "gold" 
+                      ? `${priceBreakdown.makingChargeRate}% of gold value`
+                      : `₹${priceBreakdown.makingChargeRate} per gram`
+                    }
+                  </p>
+                </div>
+
+                {/* Sub Total */}
+                <div className="bg-gray-50 border-2 border-gray-200 rounded-xl p-4">
+                  <div className="flex justify-between items-center">
+                    <span className="font-semibold">Sub Total:</span>
+                    <span className="text-lg font-bold">₹{priceBreakdown.subTotal.toLocaleString("en-IN")}</span>
+                  </div>
+                </div>
+
+                {/* GST */}
+                <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 border-2 border-indigo-200 rounded-xl p-4">
+                  <div className="flex justify-between items-center">
+                    <span className="font-semibold">GST (3%):</span>
+                    <span className="text-lg font-bold text-indigo-600">
+                      ₹{priceBreakdown.gst.toLocaleString("en-IN")}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Grand Total */}
+                <div className="bg-gradient-to-r from-emerald-500 to-green-600 rounded-xl p-5 shadow-lg">
+                  <div className="flex justify-between items-center">
+                    <span className="text-xl font-bold text-white">Grand Total:</span>
+                    <span className="text-2xl font-bold text-white">
+                      ₹{priceBreakdown.finalPrice.toLocaleString("en-IN")}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-between pt-4">
+                <Button
+                  variant="outline"
+                  onClick={() => setStep(4)}
+                  className="gap-2"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                  Back
+                </Button>
+                <Button
+                  onClick={handleComplete}
+                  className="gap-2 bg-gradient-to-r from-emerald-500 to-green-600"
+                >
+                  Confirm & Complete
+                  <Check className="h-4 w-4" />
                 </Button>
               </div>
             </div>

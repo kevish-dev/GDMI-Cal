@@ -8,31 +8,43 @@ import { JewelryTagScanner } from "@/components/JewelryTagScanner";
 import { GoldRateMarquee } from "@/components/GoldRateMarquee";
 import { ContactSupportBox } from "@/components/ContactSupportBox";
 import { UserVerificationModal } from "@/components/UserVerificationModal";
+import { PriceBreakdownCard } from "@/components/PriceBreakdownCard";
 import { useToast } from "@/hooks/use-toast";
 import { useRates } from "@/contexts/RatesContext";
 import { Link } from "react-router-dom";
 
 interface PriceBreakdown {
+  goldRate: number;
+  goldWeight: number;
   goldValue: number;
+  diamondRate?: number;
+  diamondWeight?: number;
   diamondValue: number;
+  makingChargeRate: number | string;
   makingCharges: number;
+  subTotal: number;
+  gst: number;
   finalPrice: number;
+}
+
+interface ScanResultData {
+  jewelryType: "gold" | "diamond";
+  extractedData: any;
+  verificationAnswers: any;
+  makingCharges: any;
+  calculatedPrice: number;
+  priceBreakdown: PriceBreakdown;
 }
 
 export default function Home() {
   const [isScannerOpen, setIsScannerOpen] = useState(false);
-  const [priceBreakdown, setPriceBreakdown] = useState<PriceBreakdown | null>(null);
+  const [scanResult, setScanResult] = useState<ScanResultData | null>(null);
   const { toast } = useToast();
   const { addCalculation } = useRates();
 
   const handleScanComplete = async (result: any) => {
-    // Set the calculated price breakdown directly
-    setPriceBreakdown({
-      goldValue: result.priceBreakdown.goldValue,
-      diamondValue: result.priceBreakdown.diamondValue,
-      makingCharges: result.priceBreakdown.makingCharges,
-      finalPrice: result.priceBreakdown.finalPrice,
-    });
+    // Store the complete scan result
+    setScanResult(result);
 
     // Add calculation to analytics
     await addCalculation({
@@ -101,41 +113,27 @@ export default function Home() {
               </div>
 
               {/* Show price breakdown if available */}
-              {priceBreakdown && (
-                <div className="mt-6 space-y-3 p-4 bg-gradient-to-br from-background to-primary/5 rounded-lg border border-primary/20">
-                  <h3 className="font-semibold text-center text-lg mb-3">Scanned Price Result</h3>
+              {scanResult && (
+                <div className="mt-6">
+                  <h3 className="font-semibold text-center text-lg mb-4">Scanned Price Result</h3>
                   
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-center py-2 border-b border-border/50">
-                      <span className="text-sm text-muted-foreground">Gold Value:</span>
-                      <Badge variant="outline" className="text-sm px-3 py-1 font-semibold border-primary/30 text-primary">
-                        ₹{priceBreakdown.goldValue.toLocaleString("en-IN")}
-                      </Badge>
-                    </div>
-
-                    {priceBreakdown.diamondValue > 0 && (
-                      <div className="flex justify-between items-center py-2 border-b border-border/50">
-                        <span className="text-sm text-muted-foreground">Diamond Value:</span>
-                        <Badge variant="outline" className="text-sm px-3 py-1 font-semibold border-secondary/30 text-secondary">
-                          ₹{priceBreakdown.diamondValue.toLocaleString("en-IN")}
-                        </Badge>
-                      </div>
-                    )}
-
-                    <div className="flex justify-between items-center py-2 border-b border-border/50">
-                      <span className="text-sm text-muted-foreground">Making Charges:</span>
-                      <Badge variant="outline" className="text-sm px-3 py-1 font-semibold border-primary/30 text-primary">
-                        ₹{priceBreakdown.makingCharges.toLocaleString("en-IN")}
-                      </Badge>
-                    </div>
-
-                    <div className="flex justify-between items-center py-3 mt-4 rounded-lg px-3 bg-gradient-to-r from-emerald-50/90 to-green-50/90 border border-emerald-200/60">
-                      <span className="text-base font-bold text-emerald-800">Final Price:</span>
-                      <Badge className="text-lg px-4 py-2 font-bold bg-gradient-to-r from-emerald-500 to-green-600 text-white border-0 shadow-lg">
-                        ₹{priceBreakdown.finalPrice.toLocaleString("en-IN")}
-                      </Badge>
-                    </div>
-                  </div>
+                  <PriceBreakdownCard
+                    jewelryType={scanResult.jewelryType}
+                    goldRate={scanResult.priceBreakdown.goldRate}
+                    goldWeight={scanResult.priceBreakdown.goldWeight}
+                    goldValue={scanResult.priceBreakdown.goldValue}
+                    diamondRate={scanResult.priceBreakdown.diamondRate}
+                    diamondWeight={scanResult.priceBreakdown.diamondWeight}
+                    diamondValue={scanResult.priceBreakdown.diamondValue}
+                    makingChargeRate={scanResult.priceBreakdown.makingChargeRate}
+                    makingCharges={scanResult.priceBreakdown.makingCharges}
+                    subTotal={scanResult.priceBreakdown.subTotal}
+                    gst={scanResult.priceBreakdown.gst}
+                    finalPrice={scanResult.priceBreakdown.finalPrice}
+                    goldCarat={scanResult.extractedData.carat}
+                    goldType={scanResult.makingCharges.goldType}
+                    certification={scanResult.verificationAnswers?.certificationType}
+                  />
 
                   <div className="text-center mt-4">
                     <Button

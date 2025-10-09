@@ -23,6 +23,7 @@ import { UserVerificationModal } from "@/components/UserVerificationModal";
 import { LiveGoldRateIndicator } from "@/components/LiveGoldRateIndicator";
 import { GoldRateMarquee } from "@/components/GoldRateMarquee";
 import { ContactSupportBox } from "@/components/ContactSupportBox";
+import { PriceBreakdownCard } from "@/components/PriceBreakdownCard";
 
 type JewelryType = "gold" | "diamond" | null;
 type GoldType = "chains" | "plain" | "temple" | "italian";
@@ -50,9 +51,18 @@ interface DiamondFormData {
 }
 
 interface PriceBreakdown {
+  goldRate: number;
+  goldWeight: number;
   goldValue: number;
+  diamondRate?: number;
+  diamondWeight?: number;
   diamondValue: number;
+  makingChargeRate: number | string;
   makingCharges: number;
+  subTotal: number;
+  discount?: number;
+  subtotalAfterDiscount?: number;
+  gst: number;
   finalPrice: number;
   jewellerQuote?: number;
   priceDifference?: number;
@@ -130,13 +140,19 @@ export default function Calculator() {
       let goldValue = 0;
       let diamondValue = 0;
       let calculatedMakingCharges = 0;
+      let goldRate = 0;
+      let goldWeightValue = 0;
+      let diamondRate = 0;
+      let diamondWeightValue = 0;
+      let makingChargeRateDisplay: number | string = 0;
 
       if (jewelryType === "gold") {
         const weight = parseFloat(goldForm.weight);
+        goldWeightValue = weight;
 
         // Get gold rate from admin-managed rates
         const caratKey = goldForm.carat.toUpperCase();
-        const goldRate =
+        goldRate =
           goldRates.find((rate) => rate.carat === caratKey)?.rate || 0;
 
         // Get making charges from admin-managed rates (now as percentages)
@@ -146,13 +162,16 @@ export default function Calculator() {
 
         goldValue = weight * goldRate;
         calculatedMakingCharges = (goldValue * makingChargePercentage) / 100; // Percentage of gold value
+        makingChargeRateDisplay = makingChargePercentage;
       } else if (jewelryType === "diamond") {
         const goldWeight = parseFloat(diamondForm.goldWeight);
         const diamondWeight = parseFloat(diamondForm.diamondWeight);
+        goldWeightValue = goldWeight;
+        diamondWeightValue = diamondWeight;
 
         // Get gold rate from admin-managed rates
         const caratKey = diamondForm.carat.toUpperCase();
-        const goldRate =
+        goldRate =
           goldRates.find((rate) => rate.carat === caratKey)?.rate || 0;
 
         goldValue = goldWeight * goldRate;
@@ -163,7 +182,7 @@ export default function Calculator() {
           (rate) => rate.certification === diamondForm.certification
         );
         
-        const diamondRate = matchingRate?.rate || 50000; // Fallback rate
+        diamondRate = matchingRate?.rate || 50000; // Fallback rate
         
         // Log for debugging if no matching rate found
         if (!matchingRate) {
@@ -175,9 +194,12 @@ export default function Calculator() {
 
         diamondValue = diamondWeight * diamondRate;
         calculatedMakingCharges = 800 * goldWeight; // ₹800 per gram of gold weight
+        makingChargeRateDisplay = 800;
       }
 
-      const finalPrice = goldValue + diamondValue + calculatedMakingCharges;
+      const subTotal = goldValue + diamondValue + calculatedMakingCharges;
+      const gstAmount = (subTotal * 3) / 100; // 3% GST
+      const finalPrice = subTotal + gstAmount;
 
       // Get jeweller quote if provided
       const jewellerQuoteValue = 
@@ -188,9 +210,16 @@ export default function Calculator() {
       const priceDifference = jewellerQuoteValue > 0 ? finalPrice - jewellerQuoteValue : undefined;
 
       setPriceBreakdown({
+        goldRate,
+        goldWeight: goldWeightValue,
         goldValue,
+        diamondRate: diamondRate > 0 ? diamondRate : undefined,
+        diamondWeight: diamondWeightValue > 0 ? diamondWeightValue : undefined,
         diamondValue,
+        makingChargeRate: makingChargeRateDisplay,
         makingCharges: calculatedMakingCharges,
+        subTotal,
+        gst: gstAmount,
         finalPrice,
         jewellerQuote: jewellerQuoteValue > 0 ? jewellerQuoteValue : undefined,
         priceDifference,
@@ -724,140 +753,25 @@ export default function Calculator() {
             {/* Results Panel - Mobile optimized */}
             <div className="space-y-4 sm:space-y-6">
               {priceBreakdown ? (
-                <Card className={cn(
-                  "shadow-elegant animate-fade-in border-2",
-                  jewelryType === "gold" 
-                    ? "border-primary/30 bg-gradient-to-br from-background via-background to-primary/10" 
-                    : "border-secondary/30 bg-gradient-to-br from-background via-background to-secondary/10"
-                )}>
-                  <CardHeader className="pb-4">
-                    <CardTitle className="flex items-center space-x-2 text-lg sm:text-xl">
-                      {jewelryType === "gold" ? (
-                        <Crown className={cn("h-4 w-4 sm:h-5 sm:w-5 text-primary")} />
-                      ) : (
-                        <Diamond className={cn("h-4 w-4 sm:h-5 sm:w-5 text-secondary")} />
-                      )}
-                      <span className={cn(
-                        jewelryType === "gold" ? "text-primary" : "text-secondary"
-                      )}>Price Breakdown</span>
-                    </CardTitle>
-                    <CardDescription className="text-sm text-black">
-                      Detailed calculation of your {jewelryType} jewelry price
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="space-y-3">
-                      <div className="flex justify-between items-center py-2 border-b border-border/50">
-                        <span className="text-sm sm:text-base text-muted-foreground flex items-center space-x-2">
-                          <Crown className="h-4 w-4 text-primary" />
-                          <span className="text-black">Gold Value:</span>
-                        </span>
-                        <Badge
-                          variant="outline"
-                          className="text-sm sm:text-base px-2 sm:px-3 py-1 font-semibold border-primary/30 text-primary"
-                        >
-                          ₹{priceBreakdown.goldValue.toLocaleString("en-IN")}
-                        </Badge>
-                      </div>
-
-                      {priceBreakdown.diamondValue > 0 && (
-                        <div className="flex justify-between items-center py-2 border-b border-border/50">
-                          <span className="text-sm sm:text-base text-muted-foreground flex items-center space-x-2">
-                            <Diamond className="h-4 w-4 text-secondary" />
-                            <span className="text-black">Diamond Value:</span>
-                          </span>
-                          <Badge
-                            variant="outline"
-                            className="text-sm sm:text-base px-2 sm:px-3 py-1 font-semibold border-secondary/30 text-secondary"
-                          >
-                            ₹{priceBreakdown.diamondValue.toLocaleString("en-IN")}
-                          </Badge>
-                        </div>
-                      )}
-
-                      <div className="flex justify-between items-center py-2 border-b border-border/50">
-                        <span className="text-sm sm:text-base text-muted-foreground flex items-center space-x-2">
-                          <Gem className={cn(
-                            "h-4 w-4",
-                            jewelryType === "gold" ? "text-primary" : "text-secondary"
-                          )} />
-                          <span className="text-black">Making Charges:</span>
-                        </span>
-                        <Badge
-                          variant="outline"
-                          className={cn(
-                            "text-sm sm:text-base px-2 sm:px-3 py-1 font-semibold",
-                            jewelryType === "gold" 
-                              ? "border-primary/30 text-primary" 
-                              : "border-secondary/30 text-secondary"
-                          )}
-                        >
-                          ₹{priceBreakdown.makingCharges.toLocaleString("en-IN")}
-                        </Badge>
-                      </div>
-
-                      <Separator className="my-4" />
-
-                      <div className="flex justify-between items-center py-3 rounded-lg px-3 bg-gradient-to-r from-emerald-50/90 to-green-50/90 border border-emerald-200/60 transition-all duration-450">
-                        <span className="text-base sm:text-lg font-bold text-emerald-800">
-                          Final Price:
-                        </span>
-                        <Badge className="text-lg sm:text-xl px-3 sm:px-4 py-2 font-bold bg-gradient-to-r from-emerald-500 to-green-600 text-white border-0 shadow-lg transition-all duration-450">
-                          ₹{priceBreakdown.finalPrice.toLocaleString("en-IN")}
-                        </Badge>
-                      </div>
-
-                      {/* Jeweller Quote Comparison - Mobile optimized */}
-                      {priceBreakdown.jewellerQuote && (
-                        <>
-                          <Separator className="my-4" />
-                          <div className="space-y-3 bg-muted/50 p-3 sm:p-4 rounded-lg">
-                            <h4 className="font-medium text-center text-sm sm:text-base">Price Comparison</h4>
-                            
-                            <div className="flex justify-between items-center py-2">
-                              <span className="text-xs sm:text-sm text-muted-foreground">
-                                Your Jeweller's Quote:
-                              </span>
-                              <Badge variant="outline" className="text-sm px-2 py-1 font-semibold">
-                                ₹{priceBreakdown.jewellerQuote.toLocaleString("en-IN")}
-                              </Badge>
-                            </div>
-                            
-                            <div className="flex justify-between items-center py-2">
-                              <span className="text-xs sm:text-sm text-muted-foreground">
-                                Price Difference:
-                              </span>
-                              <Badge 
-                                className={cn(
-                                  "text-sm px-2 py-1 font-semibold",
-                                  priceBreakdown.priceDifference! > 0 
-                                    ? "bg-red-100 text-red-800 border-red-200" 
-                                    : "bg-green-100 text-green-800 border-green-200"
-                                )}
-                              >
-                                {priceBreakdown.priceDifference! > 0 ? "+" : ""}
-                                ₹{Math.abs(priceBreakdown.priceDifference!).toLocaleString("en-IN")}
-                                {priceBreakdown.priceDifference! > 0 ? " Higher" : " Lower"}
-                              </Badge>
-                            </div>
-                            
-                            <div className="text-center text-xs sm:text-sm text-muted-foreground mt-2 p-2 bg-background/50 rounded">
-                              {priceBreakdown.priceDifference! > 0 
-                                ? "Market price is higher than jeweller's quote" 
-                                : "Market price is lower than jeweller's quote"}
-                            </div>
-                          </div>
-                        </>
-                      )}
-                    </div>
-
-                    <div className="pt-3 sm:pt-4 border-t text-center">
-                      <p className="text-xs sm:text-sm text-muted-foreground">
-                        Price calculated based on current market rates
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
+                <PriceBreakdownCard
+                  jewelryType={jewelryType as "gold" | "diamond"}
+                  goldRate={priceBreakdown.goldRate}
+                  goldWeight={priceBreakdown.goldWeight}
+                  goldValue={priceBreakdown.goldValue}
+                  diamondRate={priceBreakdown.diamondRate}
+                  diamondWeight={priceBreakdown.diamondWeight}
+                  diamondValue={priceBreakdown.diamondValue}
+                  makingChargeRate={priceBreakdown.makingChargeRate}
+                  makingCharges={priceBreakdown.makingCharges}
+                  subTotal={priceBreakdown.subTotal}
+                  gst={priceBreakdown.gst}
+                  finalPrice={priceBreakdown.finalPrice}
+                  jewellerQuote={priceBreakdown.jewellerQuote}
+                  priceDifference={priceBreakdown.priceDifference}
+                  goldCarat={jewelryType === "gold" ? goldForm.carat : diamondForm.carat}
+                  goldType={jewelryType === "gold" ? goldForm.type : undefined}
+                  certification={jewelryType === "diamond" ? diamondForm.certification : undefined}
+                />
               ) : (
                 <Card className={cn(
                   "shadow-card border-dashed transition-all duration-300",
