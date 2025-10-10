@@ -115,7 +115,7 @@ export default function Admin() {
       
       toast({
         title: "Gold rates updated",
-        description: `All gold rates updated based on 24K price of ₹${rate24K}/g`
+        description: `All gold rates updated based on 24K price of ${rate24K}/g`
       });
     } catch (error) {
       console.error('Error updating gold rates:', error);
@@ -173,11 +173,11 @@ export default function Admin() {
       const clarityIndex = headers.findIndex(h => h.toLowerCase().includes('clarity'));
       const selfPriceIndex = headers.findIndex(h => 
         (h.toLowerCase().includes('non') || h.toLowerCase().includes('self')) && 
-        (h.includes('₹') || h.toLowerCase().includes('per ct'))
+        h.toLowerCase().includes('per ct')
       );
       const igiPriceIndex = headers.findIndex(h => 
         h.toLowerCase().includes('igi') && 
-        (h.includes('₹') || h.toLowerCase().includes('per ct'))
+        h.toLowerCase().includes('per ct')
       );
       
       const parsedRates: DiamondRate[] = [];
@@ -400,7 +400,7 @@ export default function Admin() {
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Avg. Value</p>
-                    <p className="text-2xl font-semibold">₹{(analytics.avgValue / 1000).toFixed(0)}K</p>
+                    <p className="text-2xl font-semibold">{(analytics.avgValue / 1000).toFixed(0)}K</p>
                   </div>
                 </div>
               </CardContent>
@@ -458,7 +458,7 @@ export default function Admin() {
                               </p>
                             </div>
                             <div className="text-right">
-                              <p className="text-lg font-semibold">₹{rate.rate.toLocaleString()}</p>
+                              <p className="text-lg font-semibold">{rate.rate.toLocaleString()}</p>
                               <p className="text-sm text-muted-foreground">per gram</p>
                             </div>
                           </div>
@@ -481,7 +481,7 @@ export default function Admin() {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="rate24k">24K Gold Rate (₹/g)</Label>
+                      <Label htmlFor="rate24k">24K Gold Rate (per g)</Label>
                       <Input
                         id="rate24k"
                         type="number"
@@ -566,8 +566,8 @@ export default function Admin() {
                         <div className="text-xs text-muted-foreground space-y-1">
                           <div>1. Color</div>
                           <div>2. Clarity</div>
-                          <div>3. Non‑Certified / Self (₹ per ct)</div>
-                          <div>4. IGI‑Certified (₹ per ct)</div>
+                          <div>3. Non‑Certified / Self (per ct)</div>
+                          <div>4. IGI‑Certified (per ct)</div>
                         </div>
                       </div>
                       <div>
@@ -581,7 +581,7 @@ export default function Admin() {
                       <div>
                         <p className="font-medium text-sm">Sample Format</p>
                         <p className="text-xs text-muted-foreground font-mono bg-muted/50 p-2 rounded">
-                          Color,Clarity,Non‑Certified / Self (₹ per ct),IGI‑Certified (₹ per ct)<br/>
+                          Color,Clarity,Non‑Certified / Self (per ct),IGI‑Certified (per ct)<br/>
                           GH,VVS1,32333,51332
                         </p>
                       </div>
@@ -606,7 +606,7 @@ export default function Admin() {
                             <p className="text-xs text-muted-foreground">{rate.certification}</p>
                           </div>
                           <Badge variant="secondary" className="text-xs">
-                            ₹{rate.rate.toLocaleString()}
+                            {rate.rate.toLocaleString()}
                           </Badge>
                         </div>
                       </div>
@@ -905,7 +905,7 @@ export default function Admin() {
                               <p className="text-xs text-muted-foreground">Gold</p>
                             </div>
                             <div className="text-right">
-                              <span className="font-semibold text-sm">₹{rate.rate.toLocaleString()}</span>
+                              <span className="font-semibold text-sm">{rate.rate.toLocaleString()}</span>
                               <p className="text-xs text-muted-foreground">per gram</p>
                             </div>
                           </div>
@@ -914,7 +914,7 @@ export default function Admin() {
                       <div className="pt-2 border-t">
                         <div className="flex justify-between text-xs text-muted-foreground">
                           <span>Range:</span>
-                          <span>₹{Math.min(...goldRates.map(r => r.rate)).toLocaleString()} - ₹{Math.max(...goldRates.map(r => r.rate)).toLocaleString()}</span>
+                          <span>{Math.min(...goldRates.map(r => r.rate)).toLocaleString()} - {Math.max(...goldRates.map(r => r.rate)).toLocaleString()}</span>
                         </div>
                       </div>
                     </div>
@@ -977,7 +977,7 @@ export default function Admin() {
                               <p className="text-xs text-muted-foreground">{rate.certification}</p>
                             </div>
                             <div className="text-right">
-                              <span className="font-semibold text-sm">₹{(rate.rate / 1000).toFixed(0)}K</span>
+                              <span className="font-semibold text-sm">{(rate.rate / 1000).toFixed(0)}K</span>
                               <p className="text-xs text-muted-foreground">per carat</p>
                             </div>
                           </div>
@@ -991,7 +991,7 @@ export default function Admin() {
                         {diamondRates.length > 0 && (
                           <div className="flex justify-between text-xs text-muted-foreground mt-1">
                             <span>Price range:</span>
-                            <span>₹{(Math.min(...diamondRates.map(r => r.rate)) / 1000).toFixed(0)}K - ₹{(Math.max(...diamondRates.map(r => r.rate)) / 1000).toFixed(0)}K</span>
+                            <span>{(Math.min(...diamondRates.map(r => r.rate)) / 1000).toFixed(0)}K - {(Math.max(...diamondRates.map(r => r.rate)) / 1000).toFixed(0)}K</span>
                           </div>
                         )}
                       </div>

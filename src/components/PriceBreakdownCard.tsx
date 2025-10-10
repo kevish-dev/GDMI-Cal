@@ -136,7 +136,7 @@ export function PriceBreakdownCard({
               <span className="font-semibold">Formula: Gold Rate × Gold Weight</span>
             </div>
             <div className="flex items-center justify-center text-gray-500">
-              <span className="font-medium">Calculation: ₹{formatCurrency(goldRate)} × {formatWeight(goldWeight)}g = ₹{formatCurrency(goldValue)}</span>
+              <span className="font-medium">Calculation: {formatCurrency(goldRate)} × {formatWeight(goldWeight)}g = {formatCurrency(goldValue)}</span>
             </div>
           </div>
         </div>
@@ -181,7 +181,7 @@ export function PriceBreakdownCard({
                   <span className="font-semibold">Formula: Diamond Rate × Diamond Weight</span>
                 </div>
                 <div className="flex items-center justify-center text-gray-500">
-                  <span className="font-medium">Calculation: ₹{formatCurrency(diamondRate)} × {formatWeight(diamondWeight)}ct = ₹{formatCurrency(diamondValue)}</span>
+                  <span className="font-medium">Calculation: {formatCurrency(diamondRate)} × {formatWeight(diamondWeight)}ct = {formatCurrency(diamondValue)}</span>
                 </div>
               </div>
             </div>
@@ -218,9 +218,9 @@ export function PriceBreakdownCard({
               {typeof makingChargeRate === 'string' ? (
                 <span className="font-medium">Custom calculation</span>
               ) : jewelryType === "gold" ? (
-                <span className="font-medium">Calculation: {makingChargeRate}% of ₹{formatCurrency(goldValue)} = ₹{formatCurrency(makingCharges)}</span>
+                <span className="font-medium">Calculation: {makingChargeRate}% of {formatCurrency(goldValue)} = {formatCurrency(makingCharges)}</span>
               ) : (
-                <span className="font-medium">Calculation: ₹{makingChargeRate} × {formatWeight(goldWeight)}g = ₹{formatCurrency(makingCharges)}</span>
+                <span className="font-medium">Calculation: {makingChargeRate} × {formatWeight(goldWeight)}g = {formatCurrency(makingCharges)}</span>
               )}
             </div>
           </div>
@@ -236,7 +236,7 @@ export function PriceBreakdownCard({
                 {formatWeight(goldWeight)}g Gross Wt.
               </div>
             </div>
-            <span className="text-xl font-bold text-gray-900">₹ {formatCurrency(subTotal)}</span>
+            <span className="text-xl font-bold text-gray-900">{formatCurrency(subTotal)}</span>
           </div>
           
           {/* Subtotal Calculation Formula */}
@@ -251,9 +251,9 @@ export function PriceBreakdownCard({
             </div>
             <div className="flex items-center justify-center text-gray-500">
               <span className="font-medium">
-                Calculation: ₹{formatCurrency(goldValue)} 
-                {diamondValue > 0 && ` + ₹${formatCurrency(diamondValue)}`}
-                {` + ₹${formatCurrency(makingCharges)} = ₹${formatCurrency(subTotal)}`}
+                Calculation: {formatCurrency(goldValue)} 
+                {diamondValue > 0 && ` + ${formatCurrency(diamondValue)}`}
+                {` + ${formatCurrency(makingCharges)} = ${formatCurrency(subTotal)}`}
               </span>
             </div>
           </div>

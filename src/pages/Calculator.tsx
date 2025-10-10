@@ -14,7 +14,7 @@ import { Separator } from "@/components/ui/separator";
 import { Layout } from "@/components/Layout/Layout";
 import { Badge } from "@/components/ui/badge";
 import { RadioButtonGroup } from "@/components/ui/radio-button-group";
-import { Crown, Diamond, Gem, IndianRupee } from "lucide-react";
+import { Crown, Diamond, Gem } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { useRates } from "@/contexts/RatesContext";
@@ -189,11 +189,11 @@ export default function Calculator() {
           console.warn(`No diamond rate found for certification: ${diamondForm.certification}. Using fallback rate.`);
           console.log('Available certifications:', diamondRates.map(r => r.certification));
         } else {
-          console.info(`Using diamond rate for ${diamondForm.certification} certification: ₹${diamondRate.toLocaleString("en-IN")} per carat.`);
+          console.info(`Using diamond rate for ${diamondForm.certification} certification: ${diamondRate.toLocaleString("en-IN")} per carat.`);
         }
 
         diamondValue = diamondWeight * diamondRate;
-        calculatedMakingCharges = 800 * goldWeight; // ₹800 per gram of gold weight
+        calculatedMakingCharges = 800 * goldWeight; // 800 per gram of gold weight
         makingChargeRateDisplay = 800;
       }
 
@@ -531,7 +531,7 @@ export default function Calculator() {
                           <Input
                             id="goldJewellerQuote"
                             type="number"
-                            placeholder="₹ 0"
+                            placeholder="0"
                             value={goldForm.jewellerQuote}
                             onChange={(e) =>
                               setGoldForm({
@@ -721,7 +721,7 @@ export default function Calculator() {
                           <Input
                             id="diamondJewellerQuote"
                             type="number"
-                            placeholder="₹ 0"
+                            placeholder="0"
                             value={diamondForm.jewellerQuote}
                             onChange={(e) =>
                               setDiamondForm({

@@ -61,7 +61,7 @@ export default function Home() {
 
     toast({
       title: "Scan completed successfully!",
-      description: `Price calculated: ₹${result.calculatedPrice.toLocaleString("en-IN")}`,
+      description: `Price calculated: ${result.calculatedPrice.toLocaleString("en-IN")}`,
     });
   };
 

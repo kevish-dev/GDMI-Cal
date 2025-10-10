@@ -638,7 +638,7 @@ export function JewelryTagScanner({
                   
                   {/* Stone Weight - Prominently displayed */}
                   {extractedData.stoneWeight && (
-                    <div className="flex justify-between p-2 bg-amber-100 rounded border border-amber-300">
+                    <div className="flex justify-between p-2 bg-amber-100 rounded">
                       <span className="text-amber-900 font-semibold">Stone Weight:</span>
                       <span className="font-bold text-amber-900">{extractedData.stoneWeight}g</span>
                     </div>
@@ -646,7 +646,7 @@ export function JewelryTagScanner({
                   
                   {/* Kundan Weight - Prominently displayed */}
                   {extractedData.kundWeight && (
-                    <div className="flex justify-between p-2 bg-amber-100 rounded border border-amber-300">
+                    <div className="flex justify-between p-2 bg-amber-100 rounded">
                       <span className="text-amber-900 font-semibold">Kundan Weight:</span>
                       <span className="font-bold text-amber-900">{extractedData.kundWeight}g</span>
                     </div>

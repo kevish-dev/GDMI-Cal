@@ -1,6 +1,6 @@
 import { useRates } from "@/contexts/RatesContext";
 import { Badge } from "@/components/ui/badge";
-import { IndianRupee, TrendingUp, TrendingDown, Activity } from "lucide-react";
+import { TrendingUp, TrendingDown, Activity } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useEffect, useState, useRef } from "react";
 
@@ -225,7 +225,6 @@ export function GoldRateMarquee() {
                     <div className="h-3 sm:h-4 w-px bg-current opacity-30"></div>
                     
                     <div className="flex items-center space-x-0.5 bg-white/20 rounded-md px-1.5 sm:px-2 py-0.5">
-                      <IndianRupee className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                       <span className="font-black text-xs sm:text-sm tracking-tight">
                         {item.price.toLocaleString('en-IN')}
                       </span>
@@ -282,7 +281,6 @@ export function GoldRateMarquee() {
                     <div className="h-3 sm:h-4 w-px bg-current opacity-30"></div>
                     
                     <div className="flex items-center space-x-0.5 bg-white/20 rounded-md px-1.5 sm:px-2 py-0.5">
-                      <IndianRupee className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                       <span className="font-black text-xs sm:text-sm tracking-tight">
                         {item.price.toLocaleString('en-IN')}
                       </span>
