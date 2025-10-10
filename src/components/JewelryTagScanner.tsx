@@ -119,12 +119,12 @@ export function JewelryTagScanner({
   const { toast } = useToast();
   const { goldRates, diamondRates, makingCharges } = useRates();
 
-  // Auto-set making charges for diamond jewelry when reaching step 2
+  // Auto-set making charges for diamond jewelry when diamond type is selected
   useEffect(() => {
-    if (step === 2 && jewelryType === "diamond" && !makingChargesData.percentage) {
+    if (jewelryType === "diamond" && !makingChargesData.percentage) {
       setMakingChargesData({ percentage: 800 });
     }
-  }, [step, jewelryType, makingChargesData.percentage]);
+  }, [jewelryType, makingChargesData.percentage]);
 
   const handleImageUpload = (view: "top" | "bottom", file: File | null) => {
     if (file) {
@@ -183,11 +183,11 @@ export function JewelryTagScanner({
       const normalizedData = normalizeExtractedData(data, jewelryType!);
       
       setExtractedData(normalizedData);
-      setStep(4);
+      setStep(3); // Go to verification step
       toast({
         title: "Text extracted successfully",
         description:
-          "Review the extracted information and answer the questions",
+          "Please verify the extracted information",
       });
     } catch (error) {
       toast({
@@ -271,7 +271,16 @@ export function JewelryTagScanner({
         makingChargeRateDisplay = makingChargePercentage;
       } else if (jewelryType === "diamond") {
         const goldWeight = extractedData.weight || extractedData.netWeight || 0;
-        const diamondWeight = extractedData.diamondWeight || 0;
+        
+        // Calculate diamond weight from multiple sources
+        let diamondWeight = extractedData.diamondWeight || 0;
+        
+        // If diamondWeight is not directly available, calculate from diamonds array
+        if (diamondWeight <= 0 && extractedData.diamonds && Array.isArray(extractedData.diamonds)) {
+          diamondWeight = extractedData.diamonds.reduce((sum, diamond) => {
+            return sum + (diamond.weight || 0);
+          }, 0);
+        }
         
         if (goldWeight <= 0) {
           toast({
@@ -286,7 +295,7 @@ export function JewelryTagScanner({
         if (diamondWeight <= 0) {
           toast({
             title: "Invalid diamond weight",
-            description: "Diamond weight must be greater than 0.",
+            description: "Diamond weight must be greater than 0. Please check the extracted data.",
             variant: "destructive",
           });
           setIsCalculating(false);
@@ -386,12 +395,12 @@ export function JewelryTagScanner({
     }
   };
 
-  const canProceedToStep2 = jewelryType !== null;
-  const canProceedToStep3 =
-    jewelryType === "gold"
+  const canProceedToStep2 = 
+    jewelryType !== null &&
+    (jewelryType === "gold"
       ? makingChargesData.goldType !== undefined && makingChargesData.percentage !== undefined
-      : makingChargesData.percentage !== undefined;
-  const canProceedToStep4 = images.top !== null; // Only top image required
+      : true); // Diamond jewelry auto-sets making charges, no manual input needed
+  const canProceedToStep3 = images.top !== null; // Only top image required
   const canCalculate =
     jewelryType === "gold"
       ? verificationAnswers.buyBackGuarantee !== undefined &&
@@ -399,7 +408,7 @@ export function JewelryTagScanner({
       : verificationAnswers.diamondAppreciation !== undefined &&
         verificationAnswers.certificationType !== undefined;
 
-  const progressPercentage = (step / 4) * 100;
+  const progressPercentage = (step / 3) * 100;
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -415,7 +424,7 @@ export function JewelryTagScanner({
                 <CardTitle className="text-xl sm:text-2xl">
                   Scan Jewelry Tag
                 </CardTitle>
-                <CardDescription>Step {step} of 4</CardDescription>
+                <CardDescription>Step {step} of 3</CardDescription>
               </div>
             </div>
             <Button
@@ -430,7 +439,7 @@ export function JewelryTagScanner({
           
           {/* Custom Stepped Progress Bar */}
           <div className="mt-6 flex items-center justify-center gap-3">
-            {[1, 2, 3, 4].map((stepNumber) => (
+            {[1, 2, 3].map((stepNumber) => (
               <div
                 key={stepNumber}
                 className={cn(
@@ -445,58 +454,225 @@ export function JewelryTagScanner({
         </CardHeader>
 
         <CardContent className="pt-6 space-y-6">
-          {/* Step 1: Select Jewelry Type */}
+          {/* Step 1: Select Type & Making Charges */}
           {step === 1 && (
             <div className="space-y-6 animate-in fade-in duration-500">
               <div className="text-center space-y-2">
-                <h3 className="text-lg font-semibold">Select Jewelry Type</h3>
+                <h3 className="text-lg font-semibold">Select Type & Making Charges</h3>
                 <p className="text-sm text-muted-foreground">
-                  Choose the type of jewelry you want to scan
+                  Choose jewelry type and set making charges
                 </p>
               </div>
 
-              <RadioGroup
-                value={jewelryType || ""}
-                onValueChange={(value) => setJewelryType(value as JewelryType)}
-                className="grid grid-cols-2 gap-4"
-              >
-                <div>
-                  <RadioGroupItem
-                    value="gold"
-                    id="scan-gold"
-                    className="peer sr-only"
-                  />
-                  <Label
-                    htmlFor="scan-gold"
-                    className={cn(
-                      "flex flex-col items-center justify-center rounded-lg border-2 border-muted bg-popover p-6 peer-data-[state=checked]:border-primary cursor-pointer transition-all",
-                      jewelryType === "gold" && "border-primary bg-primary/5"
-                    )}
-                  >
-                    <Crown className="h-10 w-10 mb-3 text-primary" />
-                    <span className="text-base font-semibold">Gold</span>
-                  </Label>
-                </div>
+              {/* Jewelry Type Selection */}
+              <div className="space-y-3">
+                <Label className="text-sm font-semibold">Jewelry Type</Label>
+                <RadioGroup
+                  value={jewelryType || ""}
+                  onValueChange={(value) => setJewelryType(value as JewelryType)}
+                  className="grid grid-cols-2 gap-4"
+                >
+                  <div>
+                    <RadioGroupItem
+                      value="gold"
+                      id="scan-gold"
+                      className="peer sr-only"
+                    />
+                    <Label
+                      htmlFor="scan-gold"
+                      className={cn(
+                        "flex flex-col items-center justify-center rounded-lg border-2 border-muted bg-popover p-4 peer-data-[state=checked]:border-primary cursor-pointer transition-all",
+                        jewelryType === "gold" && "border-primary bg-primary/5"
+                      )}
+                    >
+                      <Crown className="h-8 w-8 mb-2 text-primary" />
+                      <span className="text-sm font-semibold">Gold</span>
+                    </Label>
+                  </div>
 
-                <div>
-                  <RadioGroupItem
-                    value="diamond"
-                    id="scan-diamond"
-                    className="peer sr-only"
-                  />
-                  <Label
-                    htmlFor="scan-diamond"
-                    className={cn(
-                      "flex flex-col items-center justify-center rounded-lg border-2 border-muted bg-popover p-6 peer-data-[state=checked]:border-secondary cursor-pointer transition-all",
-                      jewelryType === "diamond" &&
-                        "border-secondary bg-secondary/5"
-                    )}
-                  >
-                    <Diamond className="h-10 w-10 mb-3 text-secondary" />
-                    <span className="text-base font-semibold">Diamond</span>
-                  </Label>
+                  <div>
+                    <RadioGroupItem
+                      value="diamond"
+                      id="scan-diamond"
+                      className="peer sr-only"
+                    />
+                    <Label
+                      htmlFor="scan-diamond"
+                      className={cn(
+                        "flex flex-col items-center justify-center rounded-lg border-2 border-muted bg-popover p-4 peer-data-[state=checked]:border-secondary cursor-pointer transition-all",
+                        jewelryType === "diamond" &&
+                          "border-secondary bg-secondary/5"
+                      )}
+                    >
+                      <Diamond className="h-8 w-8 mb-2 text-secondary" />
+                      <span className="text-sm font-semibold">Diamond</span>
+                    </Label>
+                  </div>
+                </RadioGroup>
+              </div>
+
+              {/* Making Charges Section */}
+              {jewelryType && (
+                <div className="space-y-4 animate-in fade-in duration-300">
+                  <div className="flex items-center gap-2">
+                    <Label className="text-sm font-semibold">Making Charges</Label>
+                  </div>
+
+                  {jewelryType === "gold" ? (
+                    <div className="space-y-3">
+                      <p className="text-xs text-muted-foreground">
+                        Select jewelry type for making charge percentage
+                      </p>
+                      <RadioGroup
+                        value={makingChargesData.goldType || ""}
+                        onValueChange={(value) =>
+                          setMakingChargesData((prev) => ({
+                            ...prev,
+                            goldType: value as GoldType,
+                            percentage: {
+                              chains: makingCharges.chains || 2,
+                              plain: makingCharges.plain || 3.5,
+                              temple: makingCharges.temple || 7,
+                              italian: makingCharges.italianGold || 18,
+                            }[value as GoldType],
+                          }))
+                        }
+                        className="grid grid-cols-1 sm:grid-cols-2 gap-3"
+                      >
+                        <Label
+                          htmlFor="type-chains"
+                          className={cn(
+                            "flex flex-col gap-1.5 p-4 rounded-lg border-2 cursor-pointer transition-all",
+                            makingChargesData.goldType === "chains"
+                              ? "border-primary bg-primary text-primary-foreground shadow-md"
+                              : "border-muted-foreground/20 bg-background hover:border-primary/50 hover:bg-primary/5"
+                          )}
+                        >
+                          <RadioGroupItem value="chains" id="type-chains" className="sr-only" />
+                          <div className="flex items-center justify-between">
+                            <span className="font-semibold">Chains</span>
+                            <Check className={cn(
+                              "h-5 w-5",
+                              makingChargesData.goldType === "chains" ? "opacity-100" : "opacity-0"
+                            )} />
+                          </div>
+                          <span className={cn(
+                            "text-xs",
+                            makingChargesData.goldType === "chains" 
+                              ? "text-primary-foreground/80" 
+                              : "text-muted-foreground"
+                          )}>
+                            {makingCharges.chains || 2}% making charges
+                          </span>
+                        </Label>
+
+                        <Label
+                          htmlFor="type-plain"
+                          className={cn(
+                            "flex flex-col gap-1.5 p-4 rounded-lg border-2 cursor-pointer transition-all",
+                            makingChargesData.goldType === "plain"
+                              ? "border-primary bg-primary text-primary-foreground shadow-md"
+                              : "border-muted-foreground/20 bg-background hover:border-primary/50 hover:bg-primary/5"
+                          )}
+                        >
+                          <RadioGroupItem value="plain" id="type-plain" className="sr-only" />
+                          <div className="flex items-center justify-between">
+                            <span className="font-semibold">Plain</span>
+                            <Check className={cn(
+                              "h-5 w-5",
+                              makingChargesData.goldType === "plain" ? "opacity-100" : "opacity-0"
+                            )} />
+                          </div>
+                          <span className={cn(
+                            "text-xs",
+                            makingChargesData.goldType === "plain" 
+                              ? "text-primary-foreground/80" 
+                              : "text-muted-foreground"
+                          )}>
+                            {makingCharges.plain || 3.5}% making charges
+                          </span>
+                        </Label>
+
+                        <Label
+                          htmlFor="type-temple"
+                          className={cn(
+                            "flex flex-col gap-1.5 p-4 rounded-lg border-2 cursor-pointer transition-all",
+                            makingChargesData.goldType === "temple"
+                              ? "border-primary bg-primary text-primary-foreground shadow-md"
+                              : "border-muted-foreground/20 bg-background hover:border-primary/50 hover:bg-primary/5"
+                          )}
+                        >
+                          <RadioGroupItem value="temple" id="type-temple" className="sr-only" />
+                          <div className="flex items-center justify-between">
+                            <span className="font-semibold">Temple</span>
+                            <Check className={cn(
+                              "h-5 w-5",
+                              makingChargesData.goldType === "temple" ? "opacity-100" : "opacity-0"
+                            )} />
+                          </div>
+                          <span className={cn(
+                            "text-xs",
+                            makingChargesData.goldType === "temple" 
+                              ? "text-primary-foreground/80" 
+                              : "text-muted-foreground"
+                          )}>
+                            {makingCharges.temple || 7}% making charges
+                          </span>
+                        </Label>
+
+                        <Label
+                          htmlFor="type-italian"
+                          className={cn(
+                            "flex flex-col gap-1.5 p-4 rounded-lg border-2 cursor-pointer transition-all",
+                            makingChargesData.goldType === "italian"
+                              ? "border-primary bg-primary text-primary-foreground shadow-md"
+                              : "border-muted-foreground/20 bg-background hover:border-primary/50 hover:bg-primary/5"
+                          )}
+                        >
+                          <RadioGroupItem value="italian" id="type-italian" className="sr-only" />
+                          <div className="flex items-center justify-between">
+                            <span className="font-semibold">Italian Gold</span>
+                            <Check className={cn(
+                              "h-5 w-5",
+                              makingChargesData.goldType === "italian" ? "opacity-100" : "opacity-0"
+                            )} />
+                          </div>
+                          <span className={cn(
+                            "text-xs",
+                            makingChargesData.goldType === "italian" 
+                              ? "text-primary-foreground/80" 
+                              : "text-muted-foreground"
+                          )}>
+                            {makingCharges.italianGold || 18}% making charges
+                          </span>
+                        </Label>
+                      </RadioGroup>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <p className="text-xs text-muted-foreground">
+                        Fixed making charge rate (automatically applied)
+                      </p>
+                      <div className="flex items-center justify-between p-4 bg-secondary/10 rounded-lg border-2 border-secondary/20">
+                        <div>
+                          <p className="font-semibold text-secondary">Diamond Making Charge</p>
+                          <p className="text-xs text-muted-foreground mt-1">Per gram of gold weight</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-2xl font-bold text-secondary">₹{makingChargesData.percentage || 800}</p>
+                          <p className="text-xs text-muted-foreground">/gram</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                        <div className="h-1.5 w-1.5 rounded-full bg-blue-500 animate-pulse" />
+                        <p className="text-xs text-blue-700 dark:text-blue-300">
+                          This rate is automatically calculated per gram of gold weight in diamond jewelry
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              </RadioGroup>
+              )}
 
               <div className="flex justify-end pt-4">
                 <Button
@@ -511,222 +687,8 @@ export function JewelryTagScanner({
             </div>
           )}
 
-          {/* Step 2: Making Charges */}
+          {/* Step 2: Upload Images & Extract */}
           {step === 2 && (
-            <div className="space-y-6 animate-in fade-in duration-500">
-              <div className="text-center space-y-2">
-                <h3 className="text-lg font-semibold">Making Charges</h3>
-                <p className="text-sm text-muted-foreground">
-                  Select jewelry type and making charge percentage
-                </p>
-              </div>
-
-              {jewelryType === "gold" ? (
-                <div className="space-y-4">
-                  {/* Gold Type Selection */}
-                  <div className="space-y-3">
-                    <Label className="text-sm font-semibold">
-                      Select Jewelry Type
-                    </Label>
-                    <RadioGroup
-                      value={makingChargesData.goldType || ""}
-                      onValueChange={(value) =>
-                        setMakingChargesData((prev) => ({
-                          ...prev,
-                          goldType: value as GoldType,
-                          percentage: {
-                            chains: makingCharges.chains || 2,
-                            plain: makingCharges.plain || 3.5,
-                            temple: makingCharges.temple || 7,
-                            italian: makingCharges.italianGold || 18,
-                          }[value as GoldType],
-                        }))
-                      }
-                      className="grid grid-cols-1 sm:grid-cols-2 gap-3"
-                    >
-                      <Label
-                        htmlFor="type-chains"
-                        className={cn(
-                          "flex flex-col gap-1.5 p-4 rounded-lg border-2 cursor-pointer transition-all",
-                          makingChargesData.goldType === "chains"
-                            ? "border-primary bg-primary text-primary-foreground shadow-md"
-                            : "border-muted-foreground/20 bg-background hover:border-primary/50 hover:bg-primary/5"
-                        )}
-                      >
-                        <RadioGroupItem value="chains" id="type-chains" className="sr-only" />
-                        <div className="flex items-center justify-between">
-                          <span className="font-semibold">Chains</span>
-                          <Check className={cn(
-                            "h-5 w-5",
-                            makingChargesData.goldType === "chains" ? "opacity-100" : "opacity-0"
-                          )} />
-                        </div>
-                        <span className={cn(
-                          "text-xs",
-                          makingChargesData.goldType === "chains" 
-                            ? "text-primary-foreground/80" 
-                            : "text-muted-foreground"
-                        )}>
-                          {makingCharges.chains || 2}% making charges
-                        </span>
-                      </Label>
-
-                      <Label
-                        htmlFor="type-plain"
-                        className={cn(
-                          "flex flex-col gap-1.5 p-4 rounded-lg border-2 cursor-pointer transition-all",
-                          makingChargesData.goldType === "plain"
-                            ? "border-primary bg-primary text-primary-foreground shadow-md"
-                            : "border-muted-foreground/20 bg-background hover:border-primary/50 hover:bg-primary/5"
-                        )}
-                      >
-                        <RadioGroupItem value="plain" id="type-plain" className="sr-only" />
-                        <div className="flex items-center justify-between">
-                          <span className="font-semibold">Plain</span>
-                          <Check className={cn(
-                            "h-5 w-5",
-                            makingChargesData.goldType === "plain" ? "opacity-100" : "opacity-0"
-                          )} />
-                        </div>
-                        <span className={cn(
-                          "text-xs",
-                          makingChargesData.goldType === "plain" 
-                            ? "text-primary-foreground/80" 
-                            : "text-muted-foreground"
-                        )}>
-                          {makingCharges.plain || 3.5}% making charges
-                        </span>
-                      </Label>
-
-                      <Label
-                        htmlFor="type-temple"
-                        className={cn(
-                          "flex flex-col gap-1.5 p-4 rounded-lg border-2 cursor-pointer transition-all",
-                          makingChargesData.goldType === "temple"
-                            ? "border-primary bg-primary text-primary-foreground shadow-md"
-                            : "border-muted-foreground/20 bg-background hover:border-primary/50 hover:bg-primary/5"
-                        )}
-                      >
-                        <RadioGroupItem value="temple" id="type-temple" className="sr-only" />
-                        <div className="flex items-center justify-between">
-                          <span className="font-semibold">Temple</span>
-                          <Check className={cn(
-                            "h-5 w-5",
-                            makingChargesData.goldType === "temple" ? "opacity-100" : "opacity-0"
-                          )} />
-                        </div>
-                        <span className={cn(
-                          "text-xs",
-                          makingChargesData.goldType === "temple" 
-                            ? "text-primary-foreground/80" 
-                            : "text-muted-foreground"
-                        )}>
-                          {makingCharges.temple || 7}% making charges
-                        </span>
-                      </Label>
-
-                      <Label
-                        htmlFor="type-italian"
-                        className={cn(
-                          "flex flex-col gap-1.5 p-4 rounded-lg border-2 cursor-pointer transition-all",
-                          makingChargesData.goldType === "italian"
-                            ? "border-primary bg-primary text-primary-foreground shadow-md"
-                            : "border-muted-foreground/20 bg-background hover:border-primary/50 hover:bg-primary/5"
-                        )}
-                      >
-                        <RadioGroupItem value="italian" id="type-italian" className="sr-only" />
-                        <div className="flex items-center justify-between">
-                          <span className="font-semibold">Italian Gold</span>
-                          <Check className={cn(
-                            "h-5 w-5",
-                            makingChargesData.goldType === "italian" ? "opacity-100" : "opacity-0"
-                          )} />
-                        </div>
-                        <span className={cn(
-                          "text-xs",
-                          makingChargesData.goldType === "italian" 
-                            ? "text-primary-foreground/80" 
-                            : "text-muted-foreground"
-                        )}>
-                          {makingCharges.italianGold || 18}% making charges
-                        </span>
-                      </Label>
-                    </RadioGroup>
-                  </div>
-
-                  {/* Display selected percentage */}
-                  {makingChargesData.goldType && (
-                    <div className="bg-gradient-to-r from-primary/10 to-primary/5 border-2 border-primary/30 rounded-xl p-4 shadow-sm">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <div className="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
-                          <span className="text-sm font-semibold text-foreground">Selected Making Charges:</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <span className="text-2xl font-bold text-primary">
-                            {makingChargesData.percentage}
-                          </span>
-                          <span className="text-sm font-medium text-primary">%</span>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {/* Diamond Making Charges Info */}
-                  <div className="bg-gradient-to-br from-secondary/5 to-secondary/10 border-2 border-secondary/20 rounded-xl p-5 shadow-sm space-y-4">
-                    <div className="flex items-start gap-3">
-                      <div className="flex-shrink-0 w-10 h-10 rounded-full bg-secondary/20 flex items-center justify-center">
-                        <Diamond className="h-5 w-5 text-secondary" />
-                      </div>
-                      <div className="flex-1">
-                        <h4 className="font-semibold text-base mb-2">Diamond Jewelry Making Charges</h4>
-                        <p className="text-sm text-muted-foreground leading-relaxed">
-                          For diamond jewelry, making charges are calculated at a fixed rate of 800 per gram of gold weight.
-                        </p>
-                      </div>
-                    </div>
-                    
-                    <div className="bg-gradient-to-r from-secondary/10 to-secondary/5 border-2 border-secondary/30 rounded-lg p-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <div className="w-2 h-2 rounded-full bg-secondary animate-pulse"></div>
-                          <span className="text-sm font-semibold text-foreground">Fixed Rate:</span>
-                        </div>
-                        <div className="flex items-baseline gap-1">
-                          <span className="text-2xl font-bold text-secondary">800</span>
-                          <span className="text-xs font-medium text-muted-foreground">/gram</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              <div className="flex justify-between pt-4">
-                <Button
-                  variant="outline"
-                  onClick={() => setStep(1)}
-                  className="gap-2"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                  Back
-                </Button>
-                <Button
-                  onClick={() => setStep(3)}
-                  disabled={!canProceedToStep3}
-                  className="gap-2"
-                >
-                  Continue
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {/* Step 3: Upload Images */}
-          {step === 3 && (
             <div className="space-y-6 animate-in fade-in duration-500">
               <div className="text-center space-y-2">
                 <div className="flex items-center justify-center gap-2 mb-4">
@@ -734,19 +696,19 @@ export function JewelryTagScanner({
                   <h3 className="text-lg font-semibold">Upload Tag Images</h3>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  Upload at least one clear image of the jewelry tag (top view
-                  and bottom view)
+                  Upload clear images of the jewelry tag for scanning
                 </p>
                 <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full text-xs font-medium text-primary">
                   <ScanLine className="h-4 w-4 animate-pulse" />
                   Scanning Mode Active
                 </div>
-              </div>{" "}
+              </div>
+
               <div className="grid sm:grid-cols-2 gap-4">
                 {/* Top View Upload */}
                 <div className="space-y-2">
                   <Label className="text-sm font-medium flex items-center gap-2">
-                    Top View
+                    Top View <span className="text-destructive">*</span>
                   </Label>
                   {imagePreviews.top ? (
                     <div className="space-y-2">
@@ -773,9 +735,9 @@ export function JewelryTagScanner({
                   ) : (
                     <Label
                       htmlFor="top-image"
-                      className="flex flex-col items-center justify-center h-48 border-2 border-dashed border-muted-foreground/25 rounded-lg cursor-pointer transition-all group"
+                      className="flex flex-col items-center justify-center h-48 border-2 border-dashed border-muted-foreground/25 rounded-lg cursor-pointer hover:border-primary/50 hover:bg-primary/5 transition-all"
                     >
-                      <Upload className="h-8 w-8 text-muted-foreground transition-colors" />
+                      <Upload className="h-8 w-8 text-muted-foreground" />
                       <span className="text-sm text-muted-foreground mt-2">
                         Click to upload
                       </span>
@@ -822,9 +784,9 @@ export function JewelryTagScanner({
                   ) : (
                     <Label
                       htmlFor="bottom-image"
-                      className="flex flex-col items-center justify-center h-48 border-2 border-dashed border-muted-foreground/25 rounded-lg cursor-pointer transition-all group"
+                      className="flex flex-col items-center justify-center h-48 border-2 border-dashed border-muted-foreground/25 rounded-lg cursor-pointer hover:border-primary/50 hover:bg-primary/5 transition-all"
                     >
-                      <Upload className="h-8 w-8 text-muted-foreground transition-colors" />
+                      <Upload className="h-8 w-8 text-muted-foreground" />
                       <span className="text-sm text-muted-foreground mt-2">
                         Click to upload
                       </span>
@@ -844,6 +806,7 @@ export function JewelryTagScanner({
                   )}
                 </div>
               </div>
+
               {isExtracting && (
                 <div className="bg-primary/5 border border-primary/20 rounded-lg p-6 text-center">
                   <div className="flex flex-col items-center gap-3">
@@ -862,10 +825,11 @@ export function JewelryTagScanner({
                   </div>
                 </div>
               )}
+
               <div className="flex justify-between pt-4">
                 <Button
                   variant="outline"
-                  onClick={() => setStep(2)}
+                  onClick={() => setStep(1)}
                   className="gap-2"
                 >
                   <ChevronLeft className="h-4 w-4" />
@@ -873,7 +837,7 @@ export function JewelryTagScanner({
                 </Button>
                 <Button
                   onClick={handleExtractText}
-                  disabled={!canProceedToStep4 || isExtracting}
+                  disabled={!canProceedToStep3 || isExtracting}
                   className="gap-2"
                 >
                   {isExtracting ? (
@@ -892,8 +856,8 @@ export function JewelryTagScanner({
             </div>
           )}
 
-          {/* Step 4: Verification Questions */}
-          {step === 4 && extractedData && (
+          {/* Step 3: Verification Questions */}
+          {step === 3 && extractedData && (
             <div className="space-y-6 animate-in fade-in duration-500">
               <div className="text-center space-y-2">
                 <h3 className="text-lg font-semibold">
@@ -952,10 +916,13 @@ export function JewelryTagScanner({
                   )}
                   
                   {/* Diamond Weight (for diamond jewelry) */}
-                  {extractedData.diamondWeight && (
-                    <div className="flex justify-between p-2 bg-background rounded">
-                      <span className="text-muted-foreground">Diamond Weight:</span>
-                      <span className="font-medium">{extractedData.diamondWeight} ct</span>
+                  {(extractedData.diamondWeight || (extractedData.diamonds && Array.isArray(extractedData.diamonds) && extractedData.diamonds.length > 0)) && (
+                    <div className="flex justify-between p-2 bg-secondary/10 rounded border border-secondary/20">
+                      <span className="text-muted-foreground font-semibold">Diamond Weight:</span>
+                      <span className="font-bold text-secondary">
+                        {extractedData.diamondWeight || 
+                          extractedData.diamonds?.reduce((sum, d) => sum + (d.weight || 0), 0) || 0} ct
+                      </span>
                     </div>
                   )}
                   
@@ -1320,7 +1287,7 @@ export function JewelryTagScanner({
               <div className="flex justify-between pt-4">
                 <Button
                   variant="outline"
-                  onClick={() => setStep(3)}
+                  onClick={() => setStep(2)}
                   className="gap-2"
                 >
                   <ChevronLeft className="h-4 w-4" />
