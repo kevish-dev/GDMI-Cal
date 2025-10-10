@@ -27,7 +27,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
-import { extractTextFromImages } from "@/utils/getText";
+import { extractTextFromImages, normalizeExtractedData } from "@/utils/getText";
 import { useRates } from "@/contexts/RatesContext";
 
 type JewelryType = "gold" | "diamond" | null;
@@ -178,7 +178,11 @@ export function JewelryTagScanner({
         images.bottom,
         jewelryType!
       );
-      setExtractedData(data);
+      
+      // Normalize the extracted data to handle various tag formats
+      const normalizedData = normalizeExtractedData(data, jewelryType!);
+      
+      setExtractedData(normalizedData);
       setStep(4);
       toast({
         title: "Text extracted successfully",
@@ -198,7 +202,14 @@ export function JewelryTagScanner({
   };
 
   const handleCalculatePreview = async () => {
-    if (!jewelryType || !extractedData) return;
+    if (!jewelryType || !extractedData) {
+      toast({
+        title: "Missing data",
+        description: "Please ensure all required information is available.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     setIsCalculating(true);
 
@@ -215,11 +226,43 @@ export function JewelryTagScanner({
 
       if (jewelryType === "gold") {
         const weight = extractedData.weight || extractedData.netWeight || 0;
+        
+        if (weight <= 0) {
+          toast({
+            title: "Invalid weight",
+            description: "Gold weight must be greater than 0.",
+            variant: "destructive",
+          });
+          setIsCalculating(false);
+          return;
+        }
+        
         goldWeightValue = weight;
         const caratKey = extractedData.carat?.toUpperCase();
 
+        if (!caratKey) {
+          toast({
+            title: "Missing purity",
+            description: "Gold purity (carat) information is required.",
+            variant: "destructive",
+          });
+          setIsCalculating(false);
+          return;
+        }
+
         goldRate =
           goldRates.find((rate) => rate.carat === caratKey)?.rate || 0;
+        
+        if (goldRate <= 0) {
+          toast({
+            title: "Rate not found",
+            description: `Gold rate for ${caratKey} not found. Please check the rates.`,
+            variant: "destructive",
+          });
+          setIsCalculating(false);
+          return;
+        }
+        
         goldValue = weight * goldRate;
         
         // Calculate making charges as percentage of gold value
@@ -229,12 +272,54 @@ export function JewelryTagScanner({
       } else if (jewelryType === "diamond") {
         const goldWeight = extractedData.weight || extractedData.netWeight || 0;
         const diamondWeight = extractedData.diamondWeight || 0;
+        
+        if (goldWeight <= 0) {
+          toast({
+            title: "Invalid gold weight",
+            description: "Gold weight must be greater than 0.",
+            variant: "destructive",
+          });
+          setIsCalculating(false);
+          return;
+        }
+        
+        if (diamondWeight <= 0) {
+          toast({
+            title: "Invalid diamond weight",
+            description: "Diamond weight must be greater than 0.",
+            variant: "destructive",
+          });
+          setIsCalculating(false);
+          return;
+        }
+        
         goldWeightValue = goldWeight;
         diamondWeightValue = diamondWeight;
         const caratKey = extractedData.carat?.toUpperCase();
 
+        if (!caratKey) {
+          toast({
+            title: "Missing purity",
+            description: "Gold purity (carat) information is required.",
+            variant: "destructive",
+          });
+          setIsCalculating(false);
+          return;
+        }
+
         goldRate =
           goldRates.find((rate) => rate.carat === caratKey)?.rate || 0;
+        
+        if (goldRate <= 0) {
+          toast({
+            title: "Rate not found",
+            description: `Gold rate for ${caratKey} not found. Please check the rates.`,
+            variant: "destructive",
+          });
+          setIsCalculating(false);
+          return;
+        }
+        
         goldValue = goldWeight * goldRate;
 
         // Get diamond rate based on certification from verification answers
@@ -906,22 +991,89 @@ export function JewelryTagScanner({
                     </div>
                   )}
                   
-                  {/* Display all other fields dynamically */}
-                  {Object.entries(extractedData).map(([key, value]) => {
-                    // Skip already displayed fields
-                    const displayedFields = ['totalWeight', 'grossWeight', 'weight', 'netWeight', 'carat', 
-                      'stoneWeight', 'kundWeight', 'diamondWeight', 'color', 'clarity', 'certification', 'itemCode'];
-                    
-                    if (displayedFields.includes(key) || !value) return null;
-                    
-                    return (
-                      <div key={key} className="flex justify-between p-2 bg-background rounded">
-                        <span className="text-muted-foreground capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}:</span>
-                        <span className="font-medium">{value.toString()}</span>
-                      </div>
-                    );
-                  })}
+                  {/* Diameter */}
+                  {extractedData.diameter && (
+                    <div className="flex justify-between p-2 bg-background rounded">
+                      <span className="text-muted-foreground">Diameter:</span>
+                      <span className="font-medium">{extractedData.diameter}</span>
+                    </div>
+                  )}
+                  
+                  {/* Jewelry Type */}
+                  {extractedData.type && (
+                    <div className="flex justify-between p-2 bg-background rounded">
+                      <span className="text-muted-foreground">Type:</span>
+                      <span className="font-medium capitalize">{extractedData.type}</span>
+                    </div>
+                  )}
                 </div>
+                
+                {/* Detailed Stones Information */}
+                {extractedData.stones && Array.isArray(extractedData.stones) && extractedData.stones.length > 0 && (
+                  <div className="mt-3 p-3 bg-background rounded-lg border">
+                    <h5 className="font-semibold text-xs text-muted-foreground mb-2">Stone Details:</h5>
+                    <div className="space-y-2">
+                      {extractedData.stones.map((stone: any, idx: number) => (
+                        <div key={idx} className="flex justify-between text-xs p-2 bg-muted/50 rounded">
+                          <span className="font-medium">{stone.type || 'Stone'}</span>
+                          <span>
+                            {stone.weight}g
+                            {stone.count && ` (${stone.count} pcs)`}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                {/* Detailed Diamond Information */}
+                {extractedData.diamonds && Array.isArray(extractedData.diamonds) && extractedData.diamonds.length > 0 && (
+                  <div className="mt-3 p-3 bg-background rounded-lg border">
+                    <h5 className="font-semibold text-xs text-muted-foreground mb-2">Diamond Details:</h5>
+                    <div className="space-y-2">
+                      {extractedData.diamonds.map((diamond: any, idx: number) => (
+                        <div key={idx} className="flex justify-between text-xs p-2 bg-muted/50 rounded">
+                          <span className="font-medium">
+                            {diamond.type || 'Diamond'}
+                            {diamond.color && ` (${diamond.color}`}
+                            {diamond.clarity && `/${diamond.clarity}`}
+                            {(diamond.color || diamond.clarity) && ')'}
+                          </span>
+                          <span>
+                            {diamond.weight} ct
+                            {diamond.count && ` (${diamond.count} pcs)`}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                {/* Other Stones Information */}
+                {extractedData.otherStones && Array.isArray(extractedData.otherStones) && extractedData.otherStones.length > 0 && (
+                  <div className="mt-3 p-3 bg-background rounded-lg border">
+                    <h5 className="font-semibold text-xs text-muted-foreground mb-2">Other Stones:</h5>
+                    <div className="space-y-2">
+                      {extractedData.otherStones.map((stone: any, idx: number) => (
+                        <div key={idx} className="flex justify-between text-xs p-2 bg-muted/50 rounded">
+                          <span className="font-medium capitalize">{stone.type || 'Stone'}</span>
+                          <span>
+                            {stone.weight}g
+                            {stone.count && ` (${stone.count} pcs)`}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                {/* Raw Text if available */}
+                {extractedData.rawText && (
+                  <div className="mt-3 p-3 bg-muted/30 rounded-lg border text-xs">
+                    <h5 className="font-semibold text-muted-foreground mb-1">Additional Info:</h5>
+                    <p className="text-muted-foreground">{extractedData.rawText}</p>
+                  </div>
+                )}
               </div>
 
               {/* Questions based on jewelry type */}
@@ -1168,19 +1320,28 @@ export function JewelryTagScanner({
               <div className="flex justify-between pt-4">
                 <Button
                   variant="outline"
-                  onClick={() => setStep(2)}
+                  onClick={() => setStep(3)}
                   className="gap-2"
                 >
                   <ChevronLeft className="h-4 w-4" />
                   Back
                 </Button>
                 <Button
-                  onClick={() => setStep(4)}
-                  disabled={!canProceedToStep4}
+                  onClick={handleCalculatePreview}
+                  disabled={!canCalculate || isCalculating}
                   className="gap-2"
                 >
-                  Continue
-                  <ChevronRight className="h-4 w-4" />
+                  {isCalculating ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Calculating...
+                    </>
+                  ) : (
+                    <>
+                      <Calculator className="h-4 w-4" />
+                      Calculate & Finish
+                    </>
+                  )}
                 </Button>
               </div>
             </div>
