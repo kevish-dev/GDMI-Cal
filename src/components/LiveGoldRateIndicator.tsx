@@ -1,6 +1,6 @@
 import { useRates } from "@/contexts/RatesContext";
 import { Badge } from "@/components/ui/badge";
-import { IndianRupee, TrendingUp, TrendingDown } from "lucide-react";
+import { TrendingUp, TrendingDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface LiveGoldRateIndicatorProps {
@@ -62,7 +62,6 @@ export function LiveGoldRateIndicator({ className }: LiveGoldRateIndicatorProps)
             </div>
             
             <div className="flex items-center space-x-0.5 bg-emerald-100/50 rounded-md px-2 py-0.5">
-              <IndianRupee className="h-3.5 w-3.5 text-emerald-700" />
               <span className="font-black text-emerald-900 text-sm tracking-tight">
                 {currentRate.toLocaleString('en-IN')}
               </span>
@@ -87,7 +86,7 @@ export function LiveGoldRateIndicator({ className }: LiveGoldRateIndicatorProps)
         {/* Last rate indicator */}
         {lastRate !== currentRate && (
           <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 bg-slate-100/90 backdrop-blur-sm px-2 py-1 rounded text-xs text-slate-600 whitespace-nowrap">
-            Last: ₹{lastRate.toLocaleString('en-IN')}/g
+            Last: {lastRate.toLocaleString('en-IN')}/g
           </div>
         )}
       </div>

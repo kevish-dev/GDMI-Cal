@@ -49,10 +49,7 @@ export function PriceBreakdownCard({
 }: PriceBreakdownProps) {
   
   const formatCurrency = (value: number) => {
-    return value.toLocaleString("en-IN", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    });
+    return Math.round(value).toLocaleString("en-IN");
   };
 
   const formatWeight = (value: number) => {
@@ -118,7 +115,7 @@ export function PriceBreakdownCard({
               <span className="text-sm text-gray-600">Rate</span>
             </div>
             <span className="font-semibold text-gray-900">
-              ₹ {formatCurrency(goldRate)}/g
+               {formatCurrency(goldRate)}/g
             </span>
           </div>
 
@@ -129,13 +126,18 @@ export function PriceBreakdownCard({
 
           <div className="flex items-center justify-between py-2 bg-gray-50 -mx-4 px-4 rounded">
             <span className="text-sm text-gray-600 pl-6">Final Value</span>
-            <span className="font-bold text-gray-900">₹ {formatCurrency(goldValue)}</span>
+            <span className="font-bold text-gray-900"> {formatCurrency(goldValue)}</span>
           </div>
 
           {/* Calculation Formula */}
-          <div className="flex items-center justify-center py-2 text-xs text-gray-500 bg-amber-50/50 -mx-4 px-4">
-            <Calculator className="h-3 w-3 mr-1" />
-            <span>₹{formatCurrency(goldRate)} × {formatWeight(goldWeight)}g = ₹{formatCurrency(goldValue)}</span>
+          <div className="space-y-1 py-2 text-xs bg-amber-50/50 -mx-4 px-4">
+            <div className="flex items-center justify-center text-gray-600">
+              <Calculator className="h-3 w-3 mr-1" />
+              <span className="font-semibold">Formula: Gold Rate × Gold Weight</span>
+            </div>
+            <div className="flex items-center justify-center text-gray-500">
+              <span className="font-medium">Calculation: ₹{formatCurrency(goldRate)} × {formatWeight(goldWeight)}g = ₹{formatCurrency(goldValue)}</span>
+            </div>
           </div>
         </div>
 
@@ -150,7 +152,7 @@ export function PriceBreakdownCard({
                   <span className="text-sm text-gray-600">Diamond Rate</span>
                 </div>
                 <span className="font-semibold text-gray-900">
-                  ₹ {formatCurrency(diamondRate)}/ct
+                   {formatCurrency(diamondRate)}/ct
                 </span>
               </div>
 
@@ -161,7 +163,7 @@ export function PriceBreakdownCard({
 
               <div className="flex items-center justify-between py-2 bg-white -mx-4 px-4 rounded">
                 <span className="text-sm text-gray-600 pl-6">Final Value</span>
-                <span className="font-bold text-gray-900">₹ {formatCurrency(diamondValue)}</span>
+                <span className="font-bold text-gray-900"> {formatCurrency(diamondValue)}</span>
               </div>
 
               {certification && (
@@ -173,9 +175,14 @@ export function PriceBreakdownCard({
               )}
 
               {/* Calculation Formula */}
-              <div className="flex items-center justify-center py-2 text-xs text-gray-500 bg-blue-50 -mx-4 px-4">
-                <Calculator className="h-3 w-3 mr-1" />
-                <span>₹{formatCurrency(diamondRate)} × {formatWeight(diamondWeight)}ct = ₹{formatCurrency(diamondValue)}</span>
+              <div className="space-y-1 py-2 text-xs bg-blue-50 -mx-4 px-4">
+                <div className="flex items-center justify-center text-gray-600">
+                  <Calculator className="h-3 w-3 mr-1" />
+                  <span className="font-semibold">Formula: Diamond Rate × Diamond Weight</span>
+                </div>
+                <div className="flex items-center justify-center text-gray-500">
+                  <span className="font-medium">Calculation: ₹{formatCurrency(diamondRate)} × {formatWeight(diamondWeight)}ct = ₹{formatCurrency(diamondValue)}</span>
+                </div>
               </div>
             </div>
           </>
@@ -192,19 +199,30 @@ export function PriceBreakdownCard({
               )} />
               <span className="text-sm text-gray-600">Making Charges</span>
             </div>
-            <span className="font-bold text-gray-900">₹ {formatCurrency(makingCharges)}</span>
+            <span className="font-bold text-gray-900"> {formatCurrency(makingCharges)}</span>
           </div>
 
           {/* Making Charge Calculation */}
-          <div className="flex items-center justify-center py-2 text-xs text-gray-500 bg-purple-50/50 -mx-4 px-4">
-            <Calculator className="h-3 w-3 mr-1" />
-            {typeof makingChargeRate === 'string' ? (
-              <span>{makingChargeRate}</span>
-            ) : jewelryType === "gold" ? (
-              <span>{makingChargeRate}% of ₹{formatCurrency(goldValue)} = ₹{formatCurrency(makingCharges)}</span>
-            ) : (
-              <span>₹{makingChargeRate} × {formatWeight(goldWeight)}g = ₹{formatCurrency(makingCharges)}</span>
-            )}
+          <div className="space-y-1 py-2 text-xs bg-purple-50/50 -mx-4 px-4">
+            <div className="flex items-center justify-center text-gray-600">
+              <Calculator className="h-3 w-3 mr-1" />
+              {typeof makingChargeRate === 'string' ? (
+                <span className="font-semibold">Formula: {makingChargeRate}</span>
+              ) : jewelryType === "gold" ? (
+                <span className="font-semibold">Formula: Making Charge % × Gold Value</span>
+              ) : (
+                <span className="font-semibold">Formula: Making Charge Rate × Gold Weight</span>
+              )}
+            </div>
+            <div className="flex items-center justify-center text-gray-500">
+              {typeof makingChargeRate === 'string' ? (
+                <span className="font-medium">Custom calculation</span>
+              ) : jewelryType === "gold" ? (
+                <span className="font-medium">Calculation: {makingChargeRate}% of ₹{formatCurrency(goldValue)} = ₹{formatCurrency(makingCharges)}</span>
+              ) : (
+                <span className="font-medium">Calculation: ₹{makingChargeRate} × {formatWeight(goldWeight)}g = ₹{formatCurrency(makingCharges)}</span>
+              )}
+            </div>
           </div>
         </div>
 
@@ -220,6 +238,25 @@ export function PriceBreakdownCard({
             </div>
             <span className="text-xl font-bold text-gray-900">₹ {formatCurrency(subTotal)}</span>
           </div>
+          
+          {/* Subtotal Calculation Formula */}
+          <div className="space-y-1 py-2 text-xs bg-gray-100 -mx-4 px-4 mt-2">
+            <div className="flex items-center justify-center text-gray-600">
+              <Calculator className="h-3 w-3 mr-1" />
+              <span className="font-semibold">
+                Formula: Gold Value 
+                {diamondValue > 0 && ' + Diamond Value'}
+                {' + Making Charges'}
+              </span>
+            </div>
+            <div className="flex items-center justify-center text-gray-500">
+              <span className="font-medium">
+                Calculation: ₹{formatCurrency(goldValue)} 
+                {diamondValue > 0 && ` + ₹${formatCurrency(diamondValue)}`}
+                {` + ₹${formatCurrency(makingCharges)} = ₹${formatCurrency(subTotal)}`}
+              </span>
+            </div>
+          </div>
         </div>
 
         {/* Discount (if applicable) */}
@@ -229,41 +266,13 @@ export function PriceBreakdownCard({
             <div className="p-4">
               <div className="flex items-center justify-between py-2">
                 <span className="text-sm text-gray-600">Discount</span>
-                <span className="font-bold text-green-600">-₹ {formatCurrency(discount)}</span>
+                <span className="font-bold text-green-600">- {formatCurrency(discount)}</span>
               </div>
             </div>
           </>
         )}
 
-        {/* Subtotal After Discount */}
-        {subtotalAfterDiscount && subtotalAfterDiscount !== subTotal && (
-          <>
-            <Separator className="my-0" />
-            <div className="p-4 bg-green-50/50">
-              <div className="flex items-center justify-between py-2">
-                <span className="text-base font-semibold text-gray-700">Subtotal after Discount</span>
-                <span className="text-xl font-bold text-gray-900">₹ {formatCurrency(subtotalAfterDiscount)}</span>
-              </div>
-            </div>
-          </>
-        )}
-
-        {/* GST */}
-        <Separator className="my-0" />
-        <div className="p-4">
-          <div className="flex items-center justify-between py-2">
-            <span className="text-sm text-gray-600">GST (3%)</span>
-            <span className="font-bold text-gray-900">₹ {formatCurrency(gst)}</span>
-          </div>
-          
-          {/* GST Calculation */}
-          <div className="flex items-center justify-center py-2 text-xs text-gray-500 bg-indigo-50/50 -mx-4 px-4 mt-2">
-            <Calculator className="h-3 w-3 mr-1" />
-            <span>3% of ₹{formatCurrency(subtotalAfterDiscount || subTotal)} = ₹{formatCurrency(gst)}</span>
-          </div>
-        </div>
-
-        {/* Grand Total */}
+        {/* Grand Total (using subtotalAfterDiscount if discount exists, otherwise subTotal) */}
         <Separator className="my-0 border-t-2 border-gray-300" />
         <div className={cn(
           "p-5",
@@ -273,7 +282,7 @@ export function PriceBreakdownCard({
         )}>
           <div className="flex items-center justify-between">
             <span className="text-xl font-bold text-white">Grand Total</span>
-            <span className="text-2xl font-bold text-white">₹ {formatCurrency(finalPrice)}</span>
+            <span className="text-2xl font-bold text-white"> {formatCurrency(subtotalAfterDiscount || subTotal)}</span>
           </div>
         </div>
 
@@ -286,7 +295,7 @@ export function PriceBreakdownCard({
               
               <div className="flex items-center justify-between py-2">
                 <span className="text-sm text-gray-600">Jeweller's Quote</span>
-                <span className="font-semibold text-gray-900">₹ {formatCurrency(jewellerQuote)}</span>
+                <span className="font-semibold text-gray-900"> {formatCurrency(jewellerQuote)}</span>
               </div>
 
               <div className="flex items-center justify-between py-2">
@@ -297,7 +306,7 @@ export function PriceBreakdownCard({
                     ? "bg-red-100 text-red-700 hover:bg-red-100 border-red-200" 
                     : "bg-green-100 text-green-700 hover:bg-green-100 border-green-200"
                 )}>
-                  {(priceDifference || 0) > 0 ? "+" : ""}₹ {formatCurrency(Math.abs(priceDifference || 0))}
+                  {(priceDifference || 0) > 0 ? "+" : ""} {formatCurrency(Math.abs(priceDifference || 0))}
                   {(priceDifference || 0) > 0 ? " Higher" : " Lower"}
                 </Badge>
               </div>
