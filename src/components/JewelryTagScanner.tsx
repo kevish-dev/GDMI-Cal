@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -24,6 +24,7 @@ import {
   Diamond,
   ArrowRight,
   Calculator,
+  Image as ImageIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
@@ -106,6 +107,13 @@ export function JewelryTagScanner({
     top: "",
     bottom: "",
   });
+  const [showUploadOption, setShowUploadOption] = useState<{
+    top: boolean;
+    bottom: boolean;
+  }>({
+    top: false,
+    bottom: false,
+  });
   const [isExtracting, setIsExtracting] = useState(false);
   const [isCalculating, setIsCalculating] = useState(false);
   const [extractedData, setExtractedData] = useState<ExtractedData | null>(
@@ -116,8 +124,16 @@ export function JewelryTagScanner({
   const [makingChargesData, setMakingChargesData] = useState<MakingCharges>({});
   const [calculatedPrice, setCalculatedPrice] = useState<number | null>(null);
   const [priceBreakdown, setPriceBreakdown] = useState<PriceBreakdown | null>(null);
+  const [activeCamera, setActiveCamera] = useState<"top" | "bottom" | null>(null);
+  const [stream, setStream] = useState<MediaStream | null>(null);
   const { toast } = useToast();
   const { goldRates, diamondRates, makingCharges } = useRates();
+  
+  // Refs for camera inputs and video
+  const topCameraInputRef = useRef<HTMLInputElement>(null);
+  const bottomCameraInputRef = useRef<HTMLInputElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   // Auto-set making charges for diamond jewelry when diamond type is selected
   useEffect(() => {
@@ -125,6 +141,15 @@ export function JewelryTagScanner({
       setMakingChargesData({ percentage: 800 });
     }
   }, [jewelryType, makingChargesData.percentage]);
+
+  // Cleanup camera stream on unmount or when camera closes
+  useEffect(() => {
+    return () => {
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+      }
+    };
+  }, [stream]);
 
   const handleImageUpload = (view: "top" | "bottom", file: File | null) => {
     if (file) {
@@ -153,6 +178,98 @@ export function JewelryTagScanner({
       setImages((prev) => ({ ...prev, [view]: null }));
       setImagePreviews((prev) => ({ ...prev, [view]: "" }));
     }
+  };
+
+  const startCamera = async (view: "top" | "bottom") => {
+    try {
+      // Check if browser supports getUserMedia
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        toast({
+          title: "Camera not supported",
+          description: "Your browser doesn't support camera access. Please use the upload option.",
+          variant: "destructive",
+        });
+        toggleUploadOption(view);
+        return;
+      }
+
+      const mediaStream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: "environment", // Use back camera on mobile
+          width: { ideal: 1920 },
+          height: { ideal: 1080 },
+        },
+        audio: false,
+      });
+
+      setStream(mediaStream);
+      setActiveCamera(view);
+
+      // Wait for video element to be ready
+      setTimeout(() => {
+        if (videoRef.current) {
+          videoRef.current.srcObject = mediaStream;
+        }
+      }, 100);
+    } catch (error) {
+      console.error("Camera access error:", error);
+      toast({
+        title: "Camera access denied",
+        description: "Please allow camera access or use the upload option.",
+        variant: "destructive",
+      });
+      // Fallback to upload option
+      toggleUploadOption(view);
+    }
+  };
+
+  const capturePhoto = () => {
+    if (!videoRef.current || !canvasRef.current || !activeCamera) return;
+
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    const context = canvas.getContext("2d");
+
+    if (!context) return;
+
+    // Set canvas dimensions to match video
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    // Draw the video frame to canvas
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    // Convert canvas to blob
+    canvas.toBlob((blob) => {
+      if (blob) {
+        // Create a File from the blob
+        const file = new File([blob], `${activeCamera}-view-${Date.now()}.jpg`, {
+          type: "image/jpeg",
+        });
+
+        handleImageUpload(activeCamera, file);
+        closeCamera();
+      }
+    }, "image/jpeg", 0.9);
+  };
+
+  const closeCamera = () => {
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+      setStream(null);
+    }
+    setActiveCamera(null);
+  };
+
+  const handleCameraCapture = (view: "top" | "bottom") => {
+    startCamera(view);
+  };
+
+  const toggleUploadOption = (view: "top" | "bottom") => {
+    setShowUploadOption((prev) => ({
+      ...prev,
+      [view]: !prev[view],
+    }));
   };
 
   const handleRemoveImage = (view: "top" | "bottom") => {
@@ -690,13 +807,119 @@ export function JewelryTagScanner({
           {/* Step 2: Upload Images & Extract */}
           {step === 2 && (
             <div className="space-y-6 animate-in fade-in duration-500">
+              {/* Camera Modal - Full Screen */}
+              {activeCamera && (
+                <div className="fixed inset-0 bg-black z-[60] flex flex-col">
+                  {/* Camera Header */}
+                  <div className="absolute top-0 left-0 right-0 z-10 bg-gradient-to-b from-black/80 to-transparent p-4 sm:p-6">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="bg-white/10 backdrop-blur-sm p-2 rounded-lg">
+                          <Camera className="h-5 w-5 text-white" />
+                        </div>
+                        <div>
+                          <h3 className="text-white font-semibold text-base sm:text-lg">
+                            Capture {activeCamera === "top" ? "Top" : "Bottom"} View
+                          </h3>
+                          <p className="text-white/70 text-xs sm:text-sm">
+                            Position the tag within the frame
+                          </p>
+                        </div>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={closeCamera}
+                        className="text-white hover:bg-white/20 rounded-full"
+                      >
+                        <X className="h-6 w-6" />
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Camera Preview */}
+                  <div className="flex-1 relative bg-black flex items-center justify-center overflow-hidden">
+                    <video
+                      ref={videoRef}
+                      autoPlay
+                      playsInline
+                      muted
+                      className="w-full h-full object-cover"
+                    />
+                    
+                    {/* Framing Guide */}
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                      <div className="relative w-[80%] max-w-md aspect-[3/4] sm:aspect-[4/3]">
+                        {/* Corner Borders */}
+                        <div className="absolute top-0 left-0 w-12 h-12 border-t-4 border-l-4 border-white rounded-tl-lg"></div>
+                        <div className="absolute top-0 right-0 w-12 h-12 border-t-4 border-r-4 border-white rounded-tr-lg"></div>
+                        <div className="absolute bottom-0 left-0 w-12 h-12 border-b-4 border-l-4 border-white rounded-bl-lg"></div>
+                        <div className="absolute bottom-0 right-0 w-12 h-12 border-b-4 border-r-4 border-white rounded-br-lg"></div>
+                        
+                        {/* Center Text */}
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <div className="bg-black/50 backdrop-blur-sm px-4 py-2 rounded-full">
+                            <p className="text-white text-xs sm:text-sm font-medium">
+                              Align tag here
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <canvas ref={canvasRef} className="hidden" />
+                  </div>
+
+                  {/* Camera Controls */}
+                  <div className="absolute bottom-0 left-0 right-0 z-10 bg-gradient-to-t from-black/80 to-transparent p-6 sm:p-8">
+                    <div className="flex items-center justify-center gap-6 sm:gap-8">
+                      {/* Cancel Button */}
+                      <Button
+                        variant="ghost"
+                        size="lg"
+                        onClick={closeCamera}
+                        className="text-white hover:bg-white/20 rounded-full px-6"
+                      >
+                        <X className="h-5 w-5 mr-2" />
+                        Cancel
+                      </Button>
+                      
+                      {/* Capture Button */}
+                      <button
+                        onClick={capturePhoto}
+                        className="relative group"
+                      >
+                        {/* Outer Ring */}
+                        <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full border-4 border-white flex items-center justify-center group-hover:scale-105 transition-transform">
+                          {/* Inner Circle */}
+                          <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white group-hover:bg-white/90 transition-colors shadow-xl">
+                          </div>
+                        </div>
+                        {/* Pulse Effect */}
+                        <div className="absolute inset-0 rounded-full border-4 border-white animate-ping opacity-20"></div>
+                      </button>
+                      
+                      {/* Spacer for symmetry */}
+                      <div className="w-[100px] sm:w-[116px]"></div>
+                    </div>
+                    
+                    {/* Instruction Text */}
+                    <div className="mt-4 text-center">
+                      <p className="text-white/80 text-xs sm:text-sm">
+                        Tap the button to capture photo
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <div className="text-center space-y-2">
                 <div className="flex items-center justify-center gap-2 mb-4">
                   <Camera className="h-6 w-6 text-primary" />
-                  <h3 className="text-lg font-semibold">Upload Tag Images</h3>
+                  <h3 className="text-lg font-semibold">Capture Tag Images</h3>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  Upload clear images of the jewelry tag for scanning
+                  Take clear photos of the jewelry tag for scanning
                 </p>
                 <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full text-xs font-medium text-primary">
                   <ScanLine className="h-4 w-4 animate-pulse" />
@@ -705,7 +928,7 @@ export function JewelryTagScanner({
               </div>
 
               <div className="grid sm:grid-cols-2 gap-4">
-                {/* Top View Upload */}
+                {/* Top View Capture */}
                 <div className="space-y-2">
                   <Label className="text-sm font-medium flex items-center gap-2">
                     Top View <span className="text-destructive">*</span>
@@ -733,31 +956,61 @@ export function JewelryTagScanner({
                       </Button>
                     </div>
                   ) : (
-                    <Label
-                      htmlFor="top-image"
-                      className="flex flex-col items-center justify-center h-48 border-2 border-dashed border-muted-foreground/25 rounded-lg cursor-pointer hover:border-primary/50 hover:bg-primary/5 transition-all"
-                    >
-                      <Upload className="h-8 w-8 text-muted-foreground" />
-                      <span className="text-sm text-muted-foreground mt-2">
-                        Click to upload
-                      </span>
-                      <input
-                        id="top-image"
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={(e) =>
-                          handleImageUpload("top", e.target.files?.[0] || null)
-                        }
-                      />
-                    </Label>
+                    <div className="space-y-3">
+                      {/* Primary: Camera Capture Button */}
+                      <Button
+                        type="button"
+                        onClick={() => handleCameraCapture("top")}
+                        className="w-full h-48 flex flex-col items-center justify-center gap-3 bg-primary hover:bg-primary/90 text-primary-foreground border-2 border-primary shadow-lg"
+                      >
+                        <Camera className="h-12 w-12" />
+                        <div className="text-center">
+                          <p className="font-semibold text-base">Open Camera</p>
+                          <p className="text-xs opacity-90 mt-1">Take a photo of the tag</p>
+                        </div>
+                      </Button>
+                      
+                      {/* Secondary: Upload Option (Toggle) */}
+                      <div className="text-center">
+                        <button
+                          type="button"
+                          onClick={() => toggleUploadOption("top")}
+                          className="text-xs text-muted-foreground hover:text-primary underline-offset-2 hover:underline transition-colors"
+                        >
+                          {showUploadOption.top ? "Hide upload option" : "Or upload from gallery"}
+                        </button>
+                        
+                        {showUploadOption.top && (
+                          <div className="mt-3 animate-in fade-in duration-300">
+                            <Label
+                              htmlFor="top-image-upload"
+                              className="flex flex-col items-center justify-center h-32 border-2 border-dashed border-muted-foreground/25 rounded-lg cursor-pointer hover:border-primary/50 hover:bg-primary/5 transition-all"
+                            >
+                              <ImageIcon className="h-6 w-6 text-muted-foreground" />
+                              <span className="text-xs text-muted-foreground mt-2">
+                                Click to upload from gallery
+                              </span>
+                              <input
+                                id="top-image-upload"
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={(e) =>
+                                  handleImageUpload("top", e.target.files?.[0] || null)
+                                }
+                              />
+                            </Label>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   )}
                 </div>
 
-                {/* Bottom View Upload */}
+                {/* Bottom View Capture */}
                 <div className="space-y-2">
                   <Label className="text-sm font-medium flex items-center gap-2">
-                    Bottom View
+                    Bottom View <span className="text-xs text-muted-foreground">(Optional)</span>
                   </Label>
                   {imagePreviews.bottom ? (
                     <div className="space-y-2">
@@ -782,27 +1035,54 @@ export function JewelryTagScanner({
                       </Button>
                     </div>
                   ) : (
-                    <Label
-                      htmlFor="bottom-image"
-                      className="flex flex-col items-center justify-center h-48 border-2 border-dashed border-muted-foreground/25 rounded-lg cursor-pointer hover:border-primary/50 hover:bg-primary/5 transition-all"
-                    >
-                      <Upload className="h-8 w-8 text-muted-foreground" />
-                      <span className="text-sm text-muted-foreground mt-2">
-                        Click to upload
-                      </span>
-                      <input
-                        id="bottom-image"
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={(e) =>
-                          handleImageUpload(
-                            "bottom",
-                            e.target.files?.[0] || null
-                          )
-                        }
-                      />
-                    </Label>
+                    <div className="space-y-3">
+                      {/* Primary: Camera Capture Button */}
+                      <Button
+                        type="button"
+                        onClick={() => handleCameraCapture("bottom")}
+                        className="w-full h-48 flex flex-col items-center justify-center gap-3 bg-secondary hover:bg-secondary/90 text-secondary-foreground border-2 border-secondary shadow-lg"
+                      >
+                        <Camera className="h-12 w-12" />
+                        <div className="text-center">
+                          <p className="font-semibold text-base">Open Camera</p>
+                          <p className="text-xs opacity-90 mt-1">Take a photo of the tag</p>
+                        </div>
+                      </Button>
+                      
+                      {/* Secondary: Upload Option (Toggle) */}
+                      <div className="text-center">
+                        <button
+                          type="button"
+                          onClick={() => toggleUploadOption("bottom")}
+                          className="text-xs text-muted-foreground hover:text-primary underline-offset-2 hover:underline transition-colors"
+                        >
+                          {showUploadOption.bottom ? "Hide upload option" : "Or upload from gallery"}
+                        </button>
+                        
+                        {showUploadOption.bottom && (
+                          <div className="mt-3 animate-in fade-in duration-300">
+                            <Label
+                              htmlFor="bottom-image-upload"
+                              className="flex flex-col items-center justify-center h-32 border-2 border-dashed border-muted-foreground/25 rounded-lg cursor-pointer hover:border-primary/50 hover:bg-primary/5 transition-all"
+                            >
+                              <ImageIcon className="h-6 w-6 text-muted-foreground" />
+                              <span className="text-xs text-muted-foreground mt-2">
+                                Click to upload from gallery
+                              </span>
+                              <input
+                                id="bottom-image-upload"
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={(e) =>
+                                  handleImageUpload("bottom", e.target.files?.[0] || null)
+                                }
+                              />
+                            </Label>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   )}
                 </div>
               </div>
