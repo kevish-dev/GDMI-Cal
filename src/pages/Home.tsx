@@ -83,34 +83,88 @@ export default function Home() {
           </div>
 
           {/* Quick Scan Card */}
-          <Card className="shadow-card border-2 border-primary/30 bg-gradient-to-br from-primary/5 via-background to-primary/10">
+          <Card className="shadow-card border-2 border-primary/30 bg-gradient-to-br from-primary/5 via-background to-primary/10 overflow-hidden">
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center justify-center space-x-2 text-xl sm:text-2xl">
                 <ScanLine className="h-6 w-6 text-primary animate-pulse" />
                 <span className="text-primary">Quick Scan</span>
               </CardTitle>
               <CardDescription className="text-center text-sm sm:text-base">
-                Upload images of your jewelry tag for instant price calculation
+                Scan your jewelry tag - Results in seconds
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <Button
-                onClick={() => setIsScannerOpen(true)}
-                className="w-full gap-2 h-14 sm:h-16 text-lg font-semibold bg-gradient-to-r from-primary to-primary/80 shadow-lg"
-              >
-                <ScanLine className="h-6 w-6" />
-                Scan Jewelry Tag
-              </Button>
+              {/* Show Quick Scan UI only if no result yet */}
+              {!scanResult && (
+                <>
+                  {/* Scanning Frame Visual */}
+                  <div className="relative group">
+                    {/* Main Scanning Area */}
+                    <div 
+                      onClick={() => setIsScannerOpen(true)}
+                      className="relative w-full aspect-[4/3] bg-gradient-to-br from-primary/10 via-primary/5 to-background border-2 border-dashed border-primary/40 rounded-xl cursor-pointer overflow-hidden transition-all duration-300 hover:border-primary hover:shadow-lg hover:shadow-primary/20"
+                    >
+                      {/* Animated Scanning Line */}
+                      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent animate-pulse" />
+                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent animate-pulse" style={{ animationDelay: '0.5s' }} />
+                      </div>
 
-              {/* Link to manual calculation */}
-              <div className="text-center">
-                <Link
-                  to="/calculator"
-                  className="text-sm text-primary underline underline-offset-4 transition-colors"
-                >
-                  Need manual calculation? Click here
-                </Link>
-              </div>
+                      {/* Corner Brackets - Scanning Frame */}
+                      <div className="absolute top-3 left-3 w-8 h-8 border-t-4 border-l-4 border-primary rounded-tl-lg" />
+                      <div className="absolute top-3 right-3 w-8 h-8 border-t-4 border-r-4 border-primary rounded-tr-lg" />
+                      <div className="absolute bottom-3 left-3 w-8 h-8 border-b-4 border-l-4 border-primary rounded-bl-lg" />
+                      <div className="absolute bottom-3 right-3 w-8 h-8 border-b-4 border-r-4 border-primary rounded-br-lg" />
+
+                      {/* Center Content */}
+                      <div className="absolute inset-0 flex flex-col items-center justify-center space-y-4 p-6">
+                        {/* Scan Icon with Pulse Effect */}
+                        <div className="relative">
+                          <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full animate-pulse" />
+                          <div className="relative bg-primary/10 p-6 rounded-full border-2 border-primary/30 group-hover:border-primary transition-colors">
+                            <ScanLine className="h-12 w-12 text-primary animate-pulse" />
+                          </div>
+                        </div>
+
+                        {/* Text Content */}
+                        <div className="text-center space-y-2">
+                          <h3 className="text-lg font-bold text-primary">
+                            Tap to Scan Jewelry Tag
+                          </h3>
+                          <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                            <div className="flex items-center gap-1">
+                              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                              <span className="font-medium">Ready</span>
+                            </div>
+                            <span>•</span>
+                            <span>Results in seconds</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Hover Overlay */}
+                      <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    </div>
+
+                    {/* Info Badge */}
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
+                      <Badge className="bg-primary text-primary-foreground shadow-lg px-4 py-1 text-xs font-semibold">
+                        ⚡ Instant Results
+                      </Badge>
+                    </div>
+                  </div>
+
+                  {/* Link to manual calculation */}
+                  <div className="text-center pt-2">
+                    <Link
+                      to="/calculator"
+                      className="text-sm text-primary underline underline-offset-4 transition-colors hover:text-primary/80"
+                    >
+                      Need manual calculation? Click here
+                    </Link>
+                  </div>
+                </>
+              )}
 
               {/* Show price breakdown if available */}
               {scanResult && (
@@ -149,10 +203,6 @@ export default function Home() {
                 </div>
               )}
 
-              <p className="text-xs text-muted-foreground text-center mt-4 px-4">
-                Our advanced AI technology extracts all jewelry details from your tag photos 
-                and calculates accurate market prices based on current rates
-              </p>
             </CardContent>
           </Card>
 
