@@ -57,6 +57,8 @@ interface PriceBreakdown {
   diamondRate?: number;
   diamondWeight?: number;
   diamondValue: number;
+  diamondColor?: string;
+  diamondClarity?: string;
   makingChargeRate: number | string;
   makingCharges: number;
   subTotal: number;

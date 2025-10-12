@@ -12,6 +12,8 @@ interface PriceBreakdownProps {
   diamondRate?: number;
   diamondWeight?: number;
   diamondValue?: number;
+  diamondColor?: string;
+  diamondClarity?: string;
   makingChargeRate: number | string;
   makingCharges: number;
   subTotal: number;
@@ -34,6 +36,8 @@ export function PriceBreakdownCard({
   diamondRate,
   diamondWeight,
   diamondValue = 0,
+  diamondColor,
+  diamondClarity,
   makingChargeRate,
   makingCharges,
   subTotal,
@@ -92,14 +96,22 @@ export function PriceBreakdownCard({
               </>
             )}
           </CardTitle>
-          {goldCarat && (
-            <Badge variant="outline" className={cn(
-              "font-semibold",
-              jewelryType === "gold" ? "border-amber-300 text-amber-700" : "border-blue-300 text-blue-700"
-            )}>
-              {goldCarat.toUpperCase()}
-            </Badge>
-          )}
+          <div className="flex items-center gap-2">
+            {goldCarat && (
+              <Badge variant="outline" className={cn(
+                "font-semibold",
+                jewelryType === "gold" ? "border-amber-300 text-amber-700" : "border-blue-300 text-blue-700"
+              )}>
+                {goldCarat.toUpperCase()}
+              </Badge>
+            )}
+            {/* Diamond Color & Clarity Badges */}
+            {jewelryType === "diamond" && (diamondColor || diamondClarity) && (
+              <Badge variant="outline" className="border-blue-400 text-blue-700 font-semibold bg-blue-50">
+                {diamondColor || "H-I"} • {diamondClarity || "SI"}
+              </Badge>
+            )}
+          </div>
         </div>
       </CardHeader>
 
@@ -146,6 +158,32 @@ export function PriceBreakdownCard({
           <>
             <Separator className="my-0" />
             <div className="p-4 space-y-3 bg-blue-50/30">
+              {/* Diamond Specifications Header */}
+              <div className="bg-blue-100/50 -mx-4 px-4 py-3 mb-2">
+                <div className="flex items-center justify-center gap-2">
+                  <Diamond className="h-5 w-5 text-blue-600" />
+                  <span className="font-bold text-blue-800 text-sm">Diamond Specifications</span>
+                </div>
+              </div>
+
+              {/* Diamond Color & Clarity - Prominent Display */}
+              {(diamondColor || diamondClarity) && (
+                <div className="bg-gradient-to-r from-blue-100 to-blue-50 -mx-4 px-4 py-3 border-y border-blue-200">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-semibold text-gray-700">Color & Clarity</span>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="secondary" className="bg-blue-600 text-white font-bold text-base px-3 py-1">
+                        {diamondColor || "H-I"}
+                      </Badge>
+                      <span className="text-blue-600 font-bold">•</span>
+                      <Badge variant="secondary" className="bg-blue-600 text-white font-bold text-base px-3 py-1">
+                        {diamondClarity || "SI"}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <div className="flex items-center justify-between py-2">
                 <div className="flex items-center space-x-2">
                   <Diamond className="h-4 w-4 text-blue-500" />

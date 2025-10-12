@@ -67,6 +67,8 @@ interface PriceBreakdown {
   diamondRate?: number;
   diamondWeight?: number;
   diamondValue: number;
+  diamondColor?: string;
+  diamondClarity?: string;
   makingChargeRate: number | string;
   makingCharges: number;
   subTotal: number;
@@ -127,6 +129,15 @@ export function JewelryTagScanner({
   const [priceBreakdown, setPriceBreakdown] = useState<PriceBreakdown | null>(null);
   const [activeCamera, setActiveCamera] = useState<"top" | "bottom" | null>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
+  
+  // State for missing compulsory details
+  const [missingDetails, setMissingDetails] = useState<{
+    carat?: string;
+    netWeight?: number;
+    color?: string;
+    clarity?: string;
+  }>({});
+  
   const { toast } = useToast();
   const { goldRates, diamondRates, makingCharges } = useRates();
   
@@ -332,6 +343,28 @@ export function JewelryTagScanner({
     setIsCalculating(true);
 
     try {
+      // Merge missing details with extracted data
+      const completeData: ExtractedData = {
+        ...extractedData,
+        carat: extractedData.carat || missingDetails.carat,
+        weight: extractedData.weight || missingDetails.netWeight,
+        netWeight: extractedData.netWeight || missingDetails.netWeight,
+        color: extractedData.color || missingDetails.color,
+        clarity: extractedData.clarity || missingDetails.clarity,
+      };
+
+      // Calculate Net Weight from Gross Weight - Diamond Weight if net weight is missing
+      if (!completeData.netWeight && !completeData.weight) {
+        const grossWeight = completeData.totalWeight || completeData.grossWeight || 0;
+        const diamondWeight = completeData.diamondWeight || 0;
+        
+        if (grossWeight > 0 && diamondWeight > 0) {
+          const calculatedNetWeight = grossWeight - diamondWeight;
+          completeData.netWeight = calculatedNetWeight;
+          completeData.weight = calculatedNetWeight;
+        }
+      }
+
       // Calculate price based on extracted data with making charges
       let goldValue = 0;
       let diamondValue = 0;
@@ -343,7 +376,7 @@ export function JewelryTagScanner({
       let makingChargeRateDisplay: number | string = 0;
 
       if (jewelryType === "gold") {
-        const weight = extractedData.weight || extractedData.netWeight || 0;
+        const weight = completeData.weight || completeData.netWeight || 0;
         
         if (weight <= 0) {
           toast({
@@ -356,7 +389,7 @@ export function JewelryTagScanner({
         }
         
         goldWeightValue = weight;
-        const caratKey = extractedData.carat?.toUpperCase();
+        const caratKey = completeData.carat?.toUpperCase();
 
         if (!caratKey) {
           toast({
@@ -388,14 +421,14 @@ export function JewelryTagScanner({
         calculatedMakingCharges = (goldValue * makingChargePercentage) / 100;
         makingChargeRateDisplay = makingChargePercentage;
       } else if (jewelryType === "diamond") {
-        const goldWeight = extractedData.weight || extractedData.netWeight || 0;
+        const goldWeight = completeData.weight || completeData.netWeight || 0;
         
         // Calculate diamond weight from multiple sources
-        let diamondWeight = extractedData.diamondWeight || 0;
+        let diamondWeight = completeData.diamondWeight || 0;
         
         // If diamondWeight is not directly available, calculate from diamonds array
-        if (diamondWeight <= 0 && extractedData.diamonds && Array.isArray(extractedData.diamonds)) {
-          diamondWeight = extractedData.diamonds.reduce((sum, diamond) => {
+        if (diamondWeight <= 0 && completeData.diamonds && Array.isArray(completeData.diamonds)) {
+          diamondWeight = completeData.diamonds.reduce((sum, diamond) => {
             return sum + (diamond.weight || 0);
           }, 0);
         }
@@ -422,7 +455,7 @@ export function JewelryTagScanner({
         
         goldWeightValue = goldWeight;
         diamondWeightValue = diamondWeight;
-        const caratKey = extractedData.carat?.toUpperCase();
+        const caratKey = completeData.carat?.toUpperCase();
 
         if (!caratKey) {
           toast({
@@ -449,13 +482,13 @@ export function JewelryTagScanner({
         
         goldValue = goldWeight * goldRate;
 
-        // Get diamond rate based on certification from verification answers
-        const certification =
-          verificationAnswers.certificationType === "IGI" ? "IGI" : "Self";
-        const matchingRate = diamondRates.find(
-          (rate) => rate.certification === certification
-        );
-        diamondRate = matchingRate?.rate || 50000;
+        // Get diamond rate based on certification type - use fixed rates
+        const certification = verificationAnswers.certificationType;
+        if (certification === "IGI") {
+          diamondRate = 35000; // Fixed rate for IGI certified
+        } else {
+          diamondRate = 25000; // Fixed rate for Non-IGI (Self Certified)
+        }
 
         diamondValue = diamondWeight * diamondRate;
         
@@ -467,6 +500,10 @@ export function JewelryTagScanner({
       const subTotal = goldValue + diamondValue + calculatedMakingCharges;
       const finalPrice = subTotal; // No GST - final price is same as subtotal
 
+      // Determine display values for diamond color and clarity
+      const displayColor = completeData.color || (jewelryType === "diamond" ? "H-I" : undefined);
+      const displayClarity = completeData.clarity || (jewelryType === "diamond" ? "SI" : undefined);
+
       const breakdown: PriceBreakdown = {
         goldRate,
         goldWeight: goldWeightValue,
@@ -474,6 +511,8 @@ export function JewelryTagScanner({
         diamondRate: diamondRate > 0 ? diamondRate : undefined,
         diamondWeight: diamondWeightValue > 0 ? diamondWeightValue : undefined,
         diamondValue,
+        diamondColor: displayColor,
+        diamondClarity: displayClarity,
         makingChargeRate: makingChargeRateDisplay,
         makingCharges: calculatedMakingCharges,
         subTotal,
@@ -519,12 +558,31 @@ export function JewelryTagScanner({
       ? makingChargesData.goldType !== undefined && makingChargesData.percentage !== undefined
       : true); // Diamond jewelry auto-sets making charges, no manual input needed
   const canProceedToStep3 = images.top !== null; // Only top image required
+  
+  // Check if all compulsory details are available
+  // Net weight can be calculated from Gross Weight - Diamond Weight
+  const hasNetWeight = !!(
+    extractedData?.weight || 
+    extractedData?.netWeight ||
+    (
+      (extractedData?.totalWeight || extractedData?.grossWeight) &&
+      (extractedData?.diamondWeight || 
+       (extractedData?.diamonds && Array.isArray(extractedData.diamonds) && extractedData.diamonds.length > 0))
+    )
+  );
+  
+  const hasMissingDetails = !extractedData?.carat || !hasNetWeight;
+  const missingDetailsFilled = 
+    (!extractedData?.carat ? !!missingDetails.carat : true) &&
+    (!hasNetWeight ? !!missingDetails.netWeight : true);
+  
   const canCalculate =
-    jewelryType === "gold"
+    (!hasMissingDetails || missingDetailsFilled) &&
+    (jewelryType === "gold"
       ? verificationAnswers.buyBackGuarantee !== undefined &&
         verificationAnswers.showsRawForm !== undefined
       : verificationAnswers.diamondAppreciation !== undefined &&
-        verificationAnswers.certificationType !== undefined;
+        verificationAnswers.certificationType !== undefined);
 
   const progressPercentage = (step / 3) * 100;
 
@@ -1144,13 +1202,33 @@ export function JewelryTagScanner({
                     </div>
                   )}
                   
-                  {/* Weight / Net Weight */}
-                  {(extractedData.weight || extractedData.netWeight) && (
-                    <div className="flex justify-between p-2 bg-background rounded">
-                      <span className="text-muted-foreground">Net Weight:</span>
-                      <span className="font-medium">{extractedData.weight || extractedData.netWeight}g</span>
-                    </div>
-                  )}
+                  {/* Weight / Net Weight - Show calculated if available */}
+                  {(() => {
+                    const netWeight = extractedData.weight || extractedData.netWeight;
+                    const grossWeight = extractedData.totalWeight || extractedData.grossWeight;
+                    const diamondWeight = extractedData.diamondWeight || 
+                      (extractedData.diamonds && Array.isArray(extractedData.diamonds) 
+                        ? extractedData.diamonds.reduce((sum, d) => sum + (d.weight || 0), 0) 
+                        : 0);
+                    
+                    const calculatedNetWeight = !netWeight && grossWeight && diamondWeight 
+                      ? grossWeight - diamondWeight 
+                      : null;
+                    
+                    const displayWeight = netWeight || calculatedNetWeight;
+                    
+                    return displayWeight ? (
+                      <div className="flex justify-between p-2 bg-background rounded">
+                        <span className="text-muted-foreground">Net Weight:</span>
+                        <span className="font-medium">
+                          {displayWeight.toFixed(3)}g
+                          {calculatedNetWeight && (
+                            <span className="text-xs text-muted-foreground ml-1">(calculated)</span>
+                          )}
+                        </span>
+                      </div>
+                    ) : null;
+                  })()}
                   
                   {/* Purity (shown as Carat) */}
                   {extractedData.carat && (
@@ -1188,18 +1266,24 @@ export function JewelryTagScanner({
                   )}
                   
                   {/* Diamond Color */}
-                  {extractedData.color && (
+                  {(extractedData.color || (jewelryType === "diamond" && !extractedData.color)) && (
                     <div className="flex justify-between p-2 bg-background rounded">
                       <span className="text-muted-foreground">Color:</span>
-                      <span className="font-medium">{extractedData.color}</span>
+                      <span className="font-medium">
+                        {extractedData.color || "H-I"}
+                        {!extractedData.color && <span className="text-xs text-muted-foreground ml-1">(default)</span>}
+                      </span>
                     </div>
                   )}
                   
                   {/* Diamond Clarity */}
-                  {extractedData.clarity && (
+                  {(extractedData.clarity || (jewelryType === "diamond" && !extractedData.clarity)) && (
                     <div className="flex justify-between p-2 bg-background rounded">
                       <span className="text-muted-foreground">Clarity:</span>
-                      <span className="font-medium">{extractedData.clarity}</span>
+                      <span className="font-medium">
+                        {extractedData.clarity || "SI"}
+                        {!extractedData.clarity && <span className="text-xs text-muted-foreground ml-1">(default)</span>}
+                      </span>
                     </div>
                   )}
                   
@@ -1303,6 +1387,203 @@ export function JewelryTagScanner({
                   </div>
                 )}
               </div>
+
+              {/* Questions for Missing Compulsory Details */}
+              {(() => {
+                // Check if net weight can be calculated from gross weight - diamond weight
+                const canCalculateNetWeight = !!(
+                  (extractedData.totalWeight || extractedData.grossWeight) &&
+                  (extractedData.diamondWeight || 
+                   (extractedData.diamonds && Array.isArray(extractedData.diamonds) && extractedData.diamonds.length > 0))
+                );
+                
+                const needsNetWeightInput = !(extractedData.weight || extractedData.netWeight) && !canCalculateNetWeight;
+                const showMissingDetails = !extractedData.carat || needsNetWeightInput;
+                
+                return showMissingDetails ? (
+                  <div className="space-y-4">
+                    <div className="text-center">
+                      <h4 className="font-semibold text-base text-orange-600">Missing Information</h4>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Please provide the following details to continue
+                      </p>
+                    </div>
+
+                    {/* Missing Purity/Carat */}
+                    {!extractedData.carat && (
+                    <div className="space-y-3 p-4 sm:p-5 bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-950/20 dark:to-orange-900/20 border-2 border-orange-200 dark:border-orange-800 rounded-xl shadow-sm">
+                      <div className="flex items-start gap-3">
+                        <div className="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-orange-500 flex items-center justify-center mt-0.5">
+                          <span className="text-xs sm:text-sm font-bold text-white">!</span>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <Label className="text-sm sm:text-base font-semibold leading-relaxed text-foreground block mb-3">
+                            Select Purity of Jewelry
+                          </Label>
+                          <RadioGroup
+                            value={missingDetails.carat || ""}
+                            onValueChange={(value) =>
+                              setMissingDetails((prev) => ({
+                                ...prev,
+                                carat: value,
+                              }))
+                            }
+                            className="grid grid-cols-3 gap-2 sm:gap-3"
+                          >
+                            {["22K", "18K", "14K"].map((purity) => (
+                              <div key={purity}>
+                                <RadioGroupItem value={purity} id={`purity-${purity}`} className="sr-only peer" />
+                                <Label
+                                  htmlFor={`purity-${purity}`}
+                                  className={cn(
+                                    "flex items-center justify-center gap-2 p-3 sm:p-4 rounded-lg border-2 cursor-pointer transition-all",
+                                    "peer-data-[state=checked]:border-orange-500 peer-data-[state=checked]:bg-orange-500 peer-data-[state=checked]:text-white peer-data-[state=checked]:shadow-md",
+                                    "hover:border-orange-400 hover:bg-orange-50 dark:hover:bg-orange-950/30"
+                                  )}
+                                >
+                                  <div className={cn(
+                                    "w-4 h-4 sm:w-5 sm:h-5 rounded-full border-2 flex items-center justify-center transition-all",
+                                    missingDetails.carat === purity
+                                      ? "border-white bg-white"
+                                      : "border-muted-foreground"
+                                  )}>
+                                    {missingDetails.carat === purity && (
+                                      <div className="w-2 h-2 rounded-full bg-orange-500" />
+                                    )}
+                                  </div>
+                                  <span className="font-bold text-sm sm:text-base">{purity}</span>
+                                </Label>
+                              </div>
+                            ))}
+                          </RadioGroup>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Missing Net Weight - Only show if it can't be calculated */}
+                  {needsNetWeightInput && (
+                    <div className="space-y-3 p-4 sm:p-5 bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-950/20 dark:to-orange-900/20 border-2 border-orange-200 dark:border-orange-800 rounded-xl shadow-sm">
+                      <div className="flex items-start gap-3">
+                        <div className="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-orange-500 flex items-center justify-center mt-0.5">
+                          <span className="text-xs sm:text-sm font-bold text-white">!</span>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <Label className="text-sm sm:text-base font-semibold leading-relaxed text-foreground block mb-3">
+                            Enter Net Weight (in grams)
+                          </Label>
+                          <div className="relative">
+                            <input
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              placeholder="e.g., 10.5"
+                              value={missingDetails.netWeight || ""}
+                              onChange={(e) =>
+                                setMissingDetails((prev) => ({
+                                  ...prev,
+                                  netWeight: parseFloat(e.target.value) || undefined,
+                                }))
+                              }
+                              className="w-full p-3 sm:p-4 pr-12 rounded-lg border-2 border-orange-300 dark:border-orange-700 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 outline-none transition-all bg-background text-foreground font-medium"
+                            />
+                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">
+                              g
+                            </span>
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-2">
+                            Enter the net weight of gold/diamond in the jewelry
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Missing Diamond Color - Only for Diamond Jewelry */}
+                  {jewelryType === "diamond" && !extractedData.color && (
+                    <div className="space-y-3 p-4 sm:p-5 bg-gradient-to-br from-secondary/5 to-secondary/10 border-2 border-secondary/20 rounded-xl shadow-sm">
+                      <div className="flex items-start gap-3">
+                        <div className="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-secondary flex items-center justify-center mt-0.5">
+                          <Diamond className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <Label className="text-sm sm:text-base font-semibold leading-relaxed text-foreground block mb-3">
+                            Select Diamond Color
+                          </Label>
+                          <select
+                            value={missingDetails.color || ""}
+                            onChange={(e) =>
+                              setMissingDetails((prev) => ({
+                                ...prev,
+                                color: e.target.value,
+                              }))
+                            }
+                            className="w-full p-3 sm:p-4 rounded-lg border-2 border-secondary/30 focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none transition-all bg-background text-foreground font-medium"
+                          >
+                            <option value="">Select color...</option>
+                            <option value="D">D (Colorless)</option>
+                            <option value="E">E (Colorless)</option>
+                            <option value="F">F (Colorless)</option>
+                            <option value="G">G (Near Colorless)</option>
+                            <option value="H">H (Near Colorless)</option>
+                            <option value="I">I (Near Colorless)</option>
+                            <option value="J">J (Near Colorless)</option>
+                            <option value="K">K (Faint Yellow)</option>
+                            <option value="L">L (Faint Yellow)</option>
+                            <option value="M">M (Faint Yellow)</option>
+                          </select>
+                          <p className="text-xs text-muted-foreground mt-2">
+                            If unsure, color will default to "H-I" for pricing
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Missing Diamond Clarity - Only for Diamond Jewelry */}
+                  {jewelryType === "diamond" && !extractedData.clarity && (
+                    <div className="space-y-3 p-4 sm:p-5 bg-gradient-to-br from-secondary/5 to-secondary/10 border-2 border-secondary/20 rounded-xl shadow-sm">
+                      <div className="flex items-start gap-3">
+                        <div className="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-secondary flex items-center justify-center mt-0.5">
+                          <Diamond className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <Label className="text-sm sm:text-base font-semibold leading-relaxed text-foreground block mb-3">
+                            Select Diamond Clarity
+                          </Label>
+                          <select
+                            value={missingDetails.clarity || ""}
+                            onChange={(e) =>
+                              setMissingDetails((prev) => ({
+                                ...prev,
+                                clarity: e.target.value,
+                              }))
+                            }
+                            className="w-full p-3 sm:p-4 rounded-lg border-2 border-secondary/30 focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none transition-all bg-background text-foreground font-medium"
+                          >
+                            <option value="">Select clarity...</option>
+                            <option value="FL">FL (Flawless)</option>
+                            <option value="IF">IF (Internally Flawless)</option>
+                            <option value="VVS1">VVS1 (Very Very Slightly Included)</option>
+                            <option value="VVS2">VVS2 (Very Very Slightly Included)</option>
+                            <option value="VS1">VS1 (Very Slightly Included)</option>
+                            <option value="VS2">VS2 (Very Slightly Included)</option>
+                            <option value="SI1">SI1 (Slightly Included)</option>
+                            <option value="SI2">SI2 (Slightly Included)</option>
+                            <option value="I1">I1 (Included)</option>
+                            <option value="I2">I2 (Included)</option>
+                            <option value="I3">I3 (Included)</option>
+                          </select>
+                          <p className="text-xs text-muted-foreground mt-2">
+                            If unsure, clarity will default to "SI" for pricing
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : null;
+              })()}
 
               {/* Questions based on jewelry type */}
               {jewelryType === "gold" ? (

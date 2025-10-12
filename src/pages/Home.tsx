@@ -20,6 +20,8 @@ interface PriceBreakdown {
   diamondRate?: number;
   diamondWeight?: number;
   diamondValue: number;
+  diamondColor?: string;
+  diamondClarity?: string;
   makingChargeRate: number | string;
   makingCharges: number;
   subTotal: number;
@@ -179,6 +181,8 @@ export default function Home() {
                     diamondRate={scanResult.priceBreakdown.diamondRate}
                     diamondWeight={scanResult.priceBreakdown.diamondWeight}
                     diamondValue={scanResult.priceBreakdown.diamondValue}
+                    diamondColor={scanResult.priceBreakdown.diamondColor}
+                    diamondClarity={scanResult.priceBreakdown.diamondClarity}
                     makingChargeRate={scanResult.priceBreakdown.makingChargeRate}
                     makingCharges={scanResult.priceBreakdown.makingCharges}
                     subTotal={scanResult.priceBreakdown.subTotal}
