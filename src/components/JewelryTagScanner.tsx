@@ -536,7 +536,11 @@ export function JewelleryTagScanner({
       };
 
       onScanComplete(result);
-      onClose();
+      
+      // Only close if not embedded (modal mode)
+      if (!embedded) {
+        onClose();
+      }
 
       toast({
         title: "Scan complete!",
@@ -941,20 +945,6 @@ export function JewelleryTagScanner({
                 </div>
               )}
 
-              <div className="text-center space-y-2">
-                <div className="flex items-center justify-center gap-2 mb-4">
-                  <Camera className="h-6 w-6 text-primary" />
-                  <h3 className="text-lg font-semibold">Capture Tag Images</h3>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Take clear photos of the Jewellery tag for scanning
-                </p>
-                <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full text-xs font-medium text-primary">
-                  <ScanLine className="h-4 w-4 animate-pulse" />
-                  Scanning Mode Active
-                </div>
-              </div>
-
               <div className="grid sm:grid-cols-2 gap-4">
                 {/* Top View Capture */}
                 <div className="space-y-2">
@@ -1038,7 +1028,7 @@ export function JewelleryTagScanner({
                 {/* Bottom View Capture */}
                 <div className="space-y-2">
                   <Label className="text-sm font-medium flex items-center gap-2">
-                    Bottom View <span className="text-xs text-muted-foreground">(Optional)</span>
+                    Bottom View
                   </Label>
                   {imagePreviews.bottom ? (
                     <div className="relative group">
@@ -1115,7 +1105,7 @@ export function JewelleryTagScanner({
                 </div>
               </div>
 
-              {isExtracting && (
+              {isExtracting && 
                 <div className="bg-primary/5 border border-primary/20 rounded-lg p-6 text-center">
                   <div className="flex flex-col items-center gap-3">
                     <div className="relative">
@@ -1126,13 +1116,10 @@ export function JewelleryTagScanner({
                       <p className="font-semibold text-primary">
                         Extracting Text...
                       </p>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        Analyzing Jewellery tag images
-                      </p>
                     </div>
                   </div>
                 </div>
-              )}
+              }
 
               <div className="flex justify-between pt-4">
                 <Button
@@ -1171,9 +1158,6 @@ export function JewelleryTagScanner({
                 <h3 className="text-lg font-semibold">
                   Verification Questions
                 </h3>
-                <p className="text-sm text-muted-foreground">
-                  Answer these questions to get accurate pricing
-                </p>
               </div>
 
               {/* Display Extracted Data */}
