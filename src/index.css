@@ -180,12 +180,12 @@ Elegant luxury design with sophisticated color palette and modern aesthetics
     transition: var(--transition-bounce);
   }
 
-  /* Jewelry type specific styles */
-  .jewelry-gold {
+  /* Jewellery type specific styles */
+  .Jewellery-gold {
     @apply border-primary/20 bg-gradient-to-br from-primary/5 to-primary-glow/5;
   }
   
-  .jewelry-diamond {
+  .Jewellery-diamond {
     @apply border-secondary/20 bg-gradient-to-br from-secondary/5 to-secondary-glow/5;
   }
 

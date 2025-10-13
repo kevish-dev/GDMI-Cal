@@ -161,7 +161,7 @@ export const getUserCalculations = (userId) => getDocuments("calculations", [
   orderBy("createdAt", "desc")
 ]);
 
-// Rates data functions (comprehensive for jewelry calculator)
+// Rates data functions (comprehensive for Jewellery calculator)
 
 // Gold Rates Functions
 export const createGoldRates = async (goldRates) => {

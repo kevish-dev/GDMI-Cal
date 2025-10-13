@@ -32,7 +32,7 @@ import { useToast } from "@/hooks/use-toast";
 import { extractTextFromImages, normalizeExtractedData } from "@/utils/getText";
 import { useRates } from "@/contexts/RatesContext";
 
-type JewelryType = "gold" | "diamond" | null;
+type JewelleryType = "gold" | "diamond" | null;
 type Certification = "IGI" | "Non-IGI";
 type GoldType = "chains" | "plain" | "temple" | "italian";
 
@@ -77,7 +77,7 @@ interface PriceBreakdown {
 }
 
 interface ScanResult {
-  jewelryType: JewelryType;
+  JewelleryType: JewelleryType;
   extractedData: ExtractedData;
   verificationAnswers: VerificationAnswers;
   makingCharges: MakingCharges;
@@ -85,17 +85,19 @@ interface ScanResult {
   priceBreakdown: PriceBreakdown;
 }
 
-interface JewelryTagScannerProps {
+interface JewelleryTagScannerProps {
   onScanComplete: (result: ScanResult) => void;
   onClose: () => void;
+  embedded?: boolean; // New prop to control if it's embedded or modal
 }
 
-export function JewelryTagScanner({
+export function JewelleryTagScanner({
   onScanComplete,
   onClose,
-}: JewelryTagScannerProps) {
+  embedded = false,
+}: JewelleryTagScannerProps) {
   const [step, setStep] = useState(1);
-  const [jewelryType, setJewelryType] = useState<JewelryType>(null);
+  const [JewelleryType, setJewelleryType] = useState<JewelleryType>(null);
   const [images, setImages] = useState<{
     top: File | null;
     bottom: File | null;
@@ -147,12 +149,12 @@ export function JewelryTagScanner({
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  // Auto-set making charges for diamond jewelry when diamond type is selected
+  // Auto-set making charges for diamond Jewellery when diamond type is selected
   useEffect(() => {
-    if (jewelryType === "diamond" && !makingChargesData.percentage) {
+    if (JewelleryType === "diamond" && !makingChargesData.percentage) {
       setMakingChargesData({ percentage: 800 });
     }
-  }, [jewelryType, makingChargesData.percentage]);
+  }, [JewelleryType, makingChargesData.percentage]);
 
   // Cleanup camera stream on unmount or when camera closes
   useEffect(() => {
@@ -305,11 +307,11 @@ export function JewelryTagScanner({
       const data = await extractTextFromImages(
         images.top,
         images.bottom,
-        jewelryType!
+        JewelleryType!
       );
       
       // Normalize the extracted data to handle various tag formats
-      const normalizedData = normalizeExtractedData(data, jewelryType!);
+      const normalizedData = normalizeExtractedData(data, JewelleryType!);
       
       setExtractedData(normalizedData);
       setStep(3); // Go to verification step
@@ -331,7 +333,7 @@ export function JewelryTagScanner({
   };
 
   const handleCalculatePreview = async () => {
-    if (!jewelryType || !extractedData) {
+    if (!JewelleryType || !extractedData) {
       toast({
         title: "Missing data",
         description: "Please ensure all required information is available.",
@@ -375,7 +377,7 @@ export function JewelryTagScanner({
       let diamondWeightValue = 0;
       let makingChargeRateDisplay: number | string = 0;
 
-      if (jewelryType === "gold") {
+      if (JewelleryType === "gold") {
         const weight = completeData.weight || completeData.netWeight || 0;
         
         if (weight <= 0) {
@@ -420,7 +422,7 @@ export function JewelryTagScanner({
         const makingChargePercentage = makingChargesData.percentage || 0;
         calculatedMakingCharges = (goldValue * makingChargePercentage) / 100;
         makingChargeRateDisplay = makingChargePercentage;
-      } else if (jewelryType === "diamond") {
+      } else if (JewelleryType === "diamond") {
         const goldWeight = completeData.weight || completeData.netWeight || 0;
         
         // Calculate diamond weight from multiple sources
@@ -501,8 +503,8 @@ export function JewelryTagScanner({
       const finalPrice = subTotal; // No GST - final price is same as subtotal
 
       // Determine display values for diamond color and clarity
-      const displayColor = completeData.color || (jewelryType === "diamond" ? "H-I" : undefined);
-      const displayClarity = completeData.clarity || (jewelryType === "diamond" ? "SI" : undefined);
+      const displayColor = completeData.color || (JewelleryType === "diamond" ? "H-I" : undefined);
+      const displayClarity = completeData.clarity || (JewelleryType === "diamond" ? "SI" : undefined);
 
       const breakdown: PriceBreakdown = {
         goldRate,
@@ -525,7 +527,7 @@ export function JewelryTagScanner({
       
       // Complete directly without showing step 5
       const result: ScanResult = {
-        jewelryType,
+        JewelleryType,
         extractedData,
         verificationAnswers,
         makingCharges: makingChargesData,
@@ -538,7 +540,7 @@ export function JewelryTagScanner({
 
       toast({
         title: "Scan complete!",
-        description: "Jewelry tag scanned and price calculated successfully.",
+        description: "Jewellery tag scanned and price calculated successfully.",
       });
     } catch (error) {
       toast({
@@ -553,10 +555,10 @@ export function JewelryTagScanner({
   };
 
   const canProceedToStep2 = 
-    jewelryType !== null &&
-    (jewelryType === "gold"
+    JewelleryType !== null &&
+    (JewelleryType === "gold"
       ? makingChargesData.goldType !== undefined && makingChargesData.percentage !== undefined
-      : true); // Diamond jewelry auto-sets making charges, no manual input needed
+      : true); // Diamond Jewellery auto-sets making charges, no manual input needed
   const canProceedToStep3 = images.top !== null; // Only top image required
   
   // Check if all compulsory details are available
@@ -578,7 +580,7 @@ export function JewelryTagScanner({
   
   const canCalculate =
     (!hasMissingDetails || missingDetailsFilled) &&
-    (jewelryType === "gold"
+    (JewelleryType === "gold"
       ? verificationAnswers.buyBackGuarantee !== undefined &&
         verificationAnswers.showsRawForm !== undefined
       : verificationAnswers.diamondAppreciation !== undefined &&
@@ -586,23 +588,24 @@ export function JewelryTagScanner({
 
   const progressPercentage = (step / 3) * 100;
 
-  return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
-        <CardHeader className="relative border-b">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="relative">
-                <ScanLine className="h-8 w-8 text-primary animate-pulse" />
-                <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full" />
-              </div>
-              <div>
-                <CardTitle className="text-xl sm:text-2xl">
-                  Scan Jewelry Tag
-                </CardTitle>
-                <CardDescription>Step {step} of 3</CardDescription>
-              </div>
+  // Scanner content component
+  const scannerContent = (
+    <Card className="w-full shadow-2xl">
+      <CardHeader className="relative border-b">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <ScanLine className="h-8 w-8 text-primary animate-pulse" />
+              <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full" />
             </div>
+            <div>
+              <CardTitle className="text-xl sm:text-2xl">
+                Scan Jewellery Tag
+              </CardTitle>
+              <CardDescription>Step {step} of 3</CardDescription>
+            </div>
+          </div>
+          {!embedded && (
             <Button
               variant="ghost"
               size="icon"
@@ -611,23 +614,24 @@ export function JewelryTagScanner({
             >
               <X className="h-5 w-5" />
             </Button>
-          </div>
-          
-          {/* Custom Stepped Progress Bar */}
-          <div className="mt-6 flex items-center justify-center gap-3">
-            {[1, 2, 3].map((stepNumber) => (
-              <div
-                key={stepNumber}
-                className={cn(
-                  "flex-1 h-2 rounded-full transition-all duration-300",
-                  stepNumber <= step
-                    ? "bg-primary"
-                    : "bg-muted"
-                )}
-              />
-            ))}
-          </div>
-        </CardHeader>
+          )}
+        </div>
+        
+        {/* Custom Stepped Progress Bar */}
+        <div className="mt-6 flex items-center justify-center gap-3">
+          {[1, 2, 3].map((stepNumber) => (
+            <div
+              key={stepNumber}
+              className={cn(
+                "flex-1 h-2 rounded-full transition-all duration-300",
+                stepNumber <= step
+                  ? "bg-primary"
+                  : "bg-muted"
+              )}
+            />
+          ))}
+        </div>
+      </CardHeader>
 
         <CardContent className="pt-6 space-y-6">
           {/* Step 1: Select Type & Making Charges */}
@@ -639,28 +643,24 @@ export function JewelryTagScanner({
                 </h3>
               </div>
 
-              {/* Jewelry Type Selection with Making Charges */}
+              {/* Jewellery Type Selection with Making Charges */}
               <div className="space-y-4">
                 {/* Option A: Gold with Making Charges */}
                 <div 
                   className={cn(
                     "group transition-all duration-300",
-                    jewelryType === "gold" && "scale-[1.01]"
+                    JewelleryType === "gold" && "scale-[1.01]"
                   )}
                 >
                   <div className={cn(
                     "relative rounded-2xl border-2 transition-all duration-300",
-                    jewelryType === "gold" 
+                    JewelleryType === "gold" 
                       ? "border-primary bg-primary/5 shadow-lg shadow-primary/20" 
                       : "border-muted-foreground/20 bg-background"
                   )}>
-                    {/* Letter Badge */}
-                    <div className="absolute -top-3 -left-3 w-10 h-10 bg-primary rounded-full flex items-center justify-center font-bold text-white shadow-lg z-10">
-                      A
-                    </div>
                     
                     {/* Selection Indicator */}
-                    {jewelryType === "gold" && (
+                    {JewelleryType === "gold" && (
                       <div className="absolute -top-3 -right-3 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center shadow-lg animate-in zoom-in duration-300 z-10">
                         <Check className="h-5 w-5 text-white" />
                       </div>
@@ -668,18 +668,18 @@ export function JewelryTagScanner({
 
                     {/* Main Gold Header - Clickable */}
                     <div 
-                      onClick={() => setJewelryType("gold")}
+                      onClick={() => setJewelleryType("gold")}
                       className="p-4 sm:p-6 cursor-pointer hover:bg-primary/5 transition-colors rounded-t-2xl"
                     >
                       <div className="flex items-center gap-3 sm:gap-6">
                         {/* Icon */}
                         <div className={cn(
                           "p-3 sm:p-4 rounded-xl transition-colors flex-shrink-0",
-                          jewelryType === "gold" ? "bg-primary/10" : "bg-muted"
+                          JewelleryType === "gold" ? "bg-primary/10" : "bg-muted"
                         )}>
                           <Crown className={cn(
                             "h-8 w-8 sm:h-10 sm:w-10 transition-colors",
-                            jewelryType === "gold" ? "text-primary" : "text-muted-foreground"
+                            JewelleryType === "gold" ? "text-primary" : "text-muted-foreground"
                           )} />
                         </div>
 
@@ -694,9 +694,9 @@ export function JewelryTagScanner({
                     <div className="px-4 sm:px-6 pb-4 sm:pb-6 pt-2 border-t border-muted">
                       <p className="text-xs text-muted-foreground mb-3">Select making charge type:</p>
                       <RadioGroup
-                        value={jewelryType === "gold" ? (makingChargesData.goldType || "") : ""}
+                        value={JewelleryType === "gold" ? (makingChargesData.goldType || "") : ""}
                         onValueChange={(value) => {
-                          setJewelryType("gold");
+                          setJewelleryType("gold");
                           const type = value as GoldType;
                           const rates = {
                             chains: makingCharges.chains || 2,
@@ -736,11 +736,11 @@ export function JewelryTagScanner({
                                 <span className="font-semibold text-sm sm:text-base">{type.label}</span>
                                 <div className={cn(
                                   "w-4 h-4 sm:w-5 sm:h-5 rounded-full border-2 flex items-center justify-center transition-all",
-                                  jewelryType === "gold" && makingChargesData.goldType === type.value
+                                  JewelleryType === "gold" && makingChargesData.goldType === type.value
                                     ? "border-primary-foreground bg-primary-foreground"
                                     : "border-muted-foreground"
                                 )}>
-                                  {jewelryType === "gold" && makingChargesData.goldType === type.value && (
+                                  {JewelleryType === "gold" && makingChargesData.goldType === type.value && (
                                     <div className="w-2 h-2 rounded-full bg-primary" />
                                   )}
                                 </div>
@@ -760,22 +760,18 @@ export function JewelryTagScanner({
                 <div 
                   className={cn(
                     "group transition-all duration-300",
-                    jewelryType === "diamond" && "scale-[1.01]"
+                    JewelleryType === "diamond" && "scale-[1.01]"
                   )}
                 >
                   <div className={cn(
                     "relative rounded-2xl border-2 transition-all duration-300",
-                    jewelryType === "diamond" 
+                    JewelleryType === "diamond" 
                       ? "border-secondary bg-secondary/5 shadow-lg shadow-secondary/20" 
                       : "border-muted-foreground/20 bg-background"
                   )}>
-                    {/* Letter Badge */}
-                    <div className="absolute -top-3 -left-3 w-10 h-10 bg-secondary rounded-full flex items-center justify-center font-bold text-white shadow-lg z-10">
-                      B
-                    </div>
                     
                     {/* Selection Indicator */}
-                    {jewelryType === "diamond" && (
+                    {JewelleryType === "diamond" && (
                       <div className="absolute -top-3 -right-3 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center shadow-lg animate-in zoom-in duration-300 z-10">
                         <Check className="h-5 w-5 text-white" />
                       </div>
@@ -784,7 +780,7 @@ export function JewelryTagScanner({
                     {/* Main Diamond Header - Clickable */}
                     <div 
                       onClick={() => {
-                        setJewelryType("diamond");
+                        setJewelleryType("diamond");
                         setMakingChargesData((prev) => ({
                           ...prev,
                           goldType: null,
@@ -797,11 +793,11 @@ export function JewelryTagScanner({
                         {/* Icon */}
                         <div className={cn(
                           "p-3 sm:p-4 rounded-xl transition-colors flex-shrink-0",
-                          jewelryType === "diamond" ? "bg-secondary/10" : "bg-muted"
+                          JewelleryType === "diamond" ? "bg-secondary/10" : "bg-muted"
                         )}>
                           <Diamond className={cn(
                             "h-8 w-8 sm:h-10 sm:w-10 transition-colors",
-                            jewelryType === "diamond" ? "text-secondary" : "text-muted-foreground"
+                            JewelleryType === "diamond" ? "text-secondary" : "text-muted-foreground"
                           )} />
                         </div>
 
@@ -813,17 +809,10 @@ export function JewelryTagScanner({
                     </div>
 
                     {/* Diamond Making Charges Info */}
-                    <div className="px-4 sm:px-6 pb-4 sm:pb-6 pt-2 border-t border-muted">
-                      <p className="text-xs text-muted-foreground mb-3">Fixed making charge (per gram):</p>
+                    <div className="px-4 sm:px-6 pb-4 sm:pb-6 pt-2 border-t border-muted w-fit">
                       <div className="flex items-center justify-between p-3 sm:p-4 bg-secondary/10 rounded-lg border-2 border-secondary/20">
-                        <div className="flex-1 min-w-0">
-                          <p className="font-semibold text-sm sm:text-base text-secondary">Making Charge</p>
-                          <p className="text-xs text-muted-foreground mt-1">Auto-applied</p>
-                        </div>
-                        <div className="text-right flex-shrink-0 ml-3">
-                          <p className="text-lg sm:text-xl font-bold text-secondary">₹800</p>
+                          <p className="text-xs font-bold text-secondary">₹800</p>
                           <p className="text-xs text-muted-foreground">/gram</p>
-                        </div>
                       </div>
                     </div>
                   </div>
@@ -958,7 +947,7 @@ export function JewelryTagScanner({
                   <h3 className="text-lg font-semibold">Capture Tag Images</h3>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  Take clear photos of the jewelry tag for scanning
+                  Take clear photos of the Jewellery tag for scanning
                 </p>
                 <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full text-xs font-medium text-primary">
                   <ScanLine className="h-4 w-4 animate-pulse" />
@@ -1138,7 +1127,7 @@ export function JewelryTagScanner({
                         Extracting Text...
                       </p>
                       <p className="text-sm text-muted-foreground mt-1">
-                        Analyzing jewelry tag images
+                        Analyzing Jewellery tag images
                       </p>
                     </div>
                   </div>
@@ -1254,7 +1243,7 @@ export function JewelryTagScanner({
                     </div>
                   )}
                   
-                  {/* Diamond Weight (for diamond jewelry) */}
+                  {/* Diamond Weight (for diamond Jewellery) */}
                   {(extractedData.diamondWeight || (extractedData.diamonds && Array.isArray(extractedData.diamonds) && extractedData.diamonds.length > 0)) && (
                     <div className="flex justify-between p-2 bg-secondary/10 rounded border border-secondary/20">
                       <span className="text-muted-foreground font-semibold">Diamond Weight:</span>
@@ -1266,7 +1255,7 @@ export function JewelryTagScanner({
                   )}
                   
                   {/* Diamond Color */}
-                  {(extractedData.color || (jewelryType === "diamond" && !extractedData.color)) && (
+                  {(extractedData.color || (JewelleryType === "diamond" && !extractedData.color)) && (
                     <div className="flex justify-between p-2 bg-background rounded">
                       <span className="text-muted-foreground">Color:</span>
                       <span className="font-medium">
@@ -1277,7 +1266,7 @@ export function JewelryTagScanner({
                   )}
                   
                   {/* Diamond Clarity */}
-                  {(extractedData.clarity || (jewelryType === "diamond" && !extractedData.clarity)) && (
+                  {(extractedData.clarity || (JewelleryType === "diamond" && !extractedData.clarity)) && (
                     <div className="flex justify-between p-2 bg-background rounded">
                       <span className="text-muted-foreground">Clarity:</span>
                       <span className="font-medium">
@@ -1311,7 +1300,7 @@ export function JewelryTagScanner({
                     </div>
                   )}
                   
-                  {/* Jewelry Type */}
+                  {/* Jewellery Type */}
                   {extractedData.type && (
                     <div className="flex justify-between p-2 bg-background rounded">
                       <span className="text-muted-foreground">Type:</span>
@@ -1418,7 +1407,7 @@ export function JewelryTagScanner({
                         </div>
                         <div className="flex-1 min-w-0">
                           <Label className="text-sm sm:text-base font-semibold leading-relaxed text-foreground block mb-3">
-                            Select Purity of Jewelry
+                            Select Purity of Jewellery
                           </Label>
                           <RadioGroup
                             value={missingDetails.carat || ""}
@@ -1492,15 +1481,15 @@ export function JewelryTagScanner({
                             </span>
                           </div>
                           <p className="text-xs text-muted-foreground mt-2">
-                            Enter the net weight of gold/diamond in the jewelry
+                            Enter the net weight of gold/diamond in the Jewellery
                           </p>
                         </div>
                       </div>
                     </div>
                   )}
 
-                  {/* Missing Diamond Color - Only for Diamond Jewelry */}
-                  {jewelryType === "diamond" && !extractedData.color && (
+                  {/* Missing Diamond Color - Only for Diamond Jewellery */}
+                  {JewelleryType === "diamond" && !extractedData.color && (
                     <div className="space-y-3 p-4 sm:p-5 bg-gradient-to-br from-secondary/5 to-secondary/10 border-2 border-secondary/20 rounded-xl shadow-sm">
                       <div className="flex items-start gap-3">
                         <div className="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-secondary flex items-center justify-center mt-0.5">
@@ -1540,8 +1529,8 @@ export function JewelryTagScanner({
                     </div>
                   )}
 
-                  {/* Missing Diamond Clarity - Only for Diamond Jewelry */}
-                  {jewelryType === "diamond" && !extractedData.clarity && (
+                  {/* Missing Diamond Clarity - Only for Diamond Jewellery */}
+                  {JewelleryType === "diamond" && !extractedData.clarity && (
                     <div className="space-y-3 p-4 sm:p-5 bg-gradient-to-br from-secondary/5 to-secondary/10 border-2 border-secondary/20 rounded-xl shadow-sm">
                       <div className="flex items-start gap-3">
                         <div className="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-secondary flex items-center justify-center mt-0.5">
@@ -1585,8 +1574,8 @@ export function JewelryTagScanner({
               ) : null;
               })()}
 
-              {/* Questions based on jewelry type */}
-              {jewelryType === "gold" ? (
+              {/* Questions based on Jewellery type */}
+              {JewelleryType === "gold" ? (
                 <div className="space-y-4">
                   {/* Question 1: Buy Back Guarantee */}
                   <div className="space-y-3 p-4 sm:p-5 bg-gradient-to-br from-primary/5 to-primary/10 border-2 border-primary/20 rounded-xl shadow-sm">
@@ -1669,7 +1658,7 @@ export function JewelryTagScanner({
                       </div>
                       <div className="flex-1 min-w-0">
                         <Label className="text-sm sm:text-base font-semibold leading-relaxed text-foreground block mb-3">
-                          Does your jeweller show you the raw form of jewelry
+                          Does your jeweller show you the raw form of Jewellery
                           (without stone/kundan)?
                         </Label>
                         <RadioGroup
@@ -1913,6 +1902,18 @@ export function JewelryTagScanner({
           )}
         </CardContent>
       </Card>
+    );
+
+  // Return with or without modal wrapper based on embedded prop
+  if (embedded) {
+    return scannerContent;
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        {scannerContent}
+      </div>
     </div>
   );
 }

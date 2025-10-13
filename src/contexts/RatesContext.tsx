@@ -48,7 +48,7 @@ interface CalculationRecord {
   goldWeight?: number;
   diamondWeight?: number;
   carat?: string;
-  jewelryType?: string;
+  JewelleryType?: string;
   jewellerQuote?: number;
   priceDifference?: number;
   diamondColor?: string; // Optional diamond color
@@ -196,7 +196,7 @@ export function RatesProvider({ children }: { children: ReactNode }) {
     initializeData();
 
     // Load calculations from localStorage (keeping this local for now)
-    const savedCalculations = localStorage.getItem('jewelry_calculations');
+    const savedCalculations = localStorage.getItem('Jewellery_calculations');
     if (savedCalculations) {
       setCalculations(JSON.parse(savedCalculations));
     }
@@ -257,7 +257,7 @@ export function RatesProvider({ children }: { children: ReactNode }) {
       await logActivity({
         type: 'rates',
         action: 'Making charges updated',
-        description: 'Updated making charges for all jewelry types',
+        description: 'Updated making charges for all Jewellery types',
         icon: 'Settings'
       });
       
@@ -282,7 +282,7 @@ export function RatesProvider({ children }: { children: ReactNode }) {
       
       const updatedCalculations = [...calculations, newCalculation];
       setCalculations(updatedCalculations);
-      localStorage.setItem('jewelry_calculations', JSON.stringify(updatedCalculations));
+      localStorage.setItem('Jewellery_calculations', JSON.stringify(updatedCalculations));
     } catch (error) {
       console.error('Error adding calculation:', error);
       // Fallback to local storage only
@@ -294,7 +294,7 @@ export function RatesProvider({ children }: { children: ReactNode }) {
       
       const updatedCalculations = [...calculations, newCalculation];
       setCalculations(updatedCalculations);
-      localStorage.setItem('jewelry_calculations', JSON.stringify(updatedCalculations));
+      localStorage.setItem('Jewellery_calculations', JSON.stringify(updatedCalculations));
     }
   };
 

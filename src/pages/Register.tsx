@@ -90,7 +90,7 @@ export default function Register() {
             </div>
             <h1 className="text-2xl sm:text-3xl font-bold mb-2">Create Account</h1>
             <p className="text-muted-foreground text-sm sm:text-base px-2">
-              Join JewelCalc for professional jewelry pricing
+              Join JewelCalc for professional Jewellery pricing
             </p>
           </div>
 
@@ -215,7 +215,7 @@ export default function Register() {
             <CardContent className="pt-6">
               <div className="text-center text-sm text-muted-foreground space-y-2">
                 <p>By creating an account, you agree to our terms of service and privacy policy.</p>
-                <p>Start calculating jewelry prices with professional accuracy.</p>
+                <p>Start calculating Jewellery prices with professional accuracy.</p>
               </div>
             </CardContent>
           </Card>

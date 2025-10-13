@@ -20,13 +20,13 @@ async function fileToBase64(file) {
 }
 
 /**
- * Extract text from jewelry tag images using Google Gemini
- * @param {File} topImage - Top view of jewelry tag
- * @param {File|null} bottomImage - Bottom view of jewelry tag (optional)
- * @param {string} jewelryType - Type of jewelry: "gold" or "diamond"
+ * Extract text from Jewellery tag images using Google Gemini
+ * @param {File} topImage - Top view of Jewellery tag
+ * @param {File|null} bottomImage - Bottom view of Jewellery tag (optional)
+ * @param {string} JewelleryType - Type of Jewellery: "gold" or "diamond"
  * @returns {Promise<Object>} Extracted data as JSON
  */
-export async function extractTextFromImages(topImage, bottomImage, jewelryType) {
+export async function extractTextFromImages(topImage, bottomImage, JewelleryType) {
   try {
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
@@ -34,12 +34,12 @@ export async function extractTextFromImages(topImage, bottomImage, jewelryType) 
     const topImageBase64 = await fileToBase64(topImage);
     const bottomImageBase64 = bottomImage ? await fileToBase64(bottomImage) : null;
 
-    // Create jewelry-specific prompt
+    // Create Jewellery-specific prompt
     const imageCount = bottomImageBase64 ? "two images" : "one image";
     const viewText = bottomImageBase64 ? "(top view and bottom view)" : "(top view)";
     
-    const prompt = jewelryType === "gold" 
-      ? `You are analyzing ${imageCount} of a gold jewelry tag ${viewText}. These tags can be in various formats including:
+    const prompt = JewelleryType === "gold" 
+      ? `You are analyzing ${imageCount} of a gold Jewellery tag ${viewText}. These tags can be in various formats including:
 - Green/mint colored tags with QR codes
 - Blue/light colored tags with barcode
 - Pink/purple tags with printed text
@@ -85,7 +85,7 @@ IMPORTANT parsing rules:
 6. If multiple stone types (STN, KUN, ICS), list each separately in stones array
 
 Only include fields with actual values. Use null for fields that cannot be determined. Return ONLY valid JSON, no additional text or markdown.`
-      : `You are analyzing ${imageCount} of a diamond jewelry tag ${viewText}. These tags can be in various formats including:
+      : `You are analyzing ${imageCount} of a diamond Jewellery tag ${viewText}. These tags can be in various formats including:
 - Green/mint colored tags with QR codes
 - Pink/purple tags with printed text
 - White tags with printed information
@@ -193,10 +193,10 @@ Only include fields with actual values. Use null for fields that cannot be deter
 }
 
 /**
- * Validate extracted data based on jewelry type
+ * Validate extracted data based on Jewellery type
  */
-export function validateExtractedData(data, jewelryType) {
-  if (jewelryType === "gold") {
+export function validateExtractedData(data, JewelleryType) {
+  if (JewelleryType === "gold") {
     return !!(data.weight || data.netWeight || data.grossWeight);
   } else {
     return !!(data.weight || data.netWeight) && !!data.diamondWeight;
@@ -207,10 +207,10 @@ export function validateExtractedData(data, jewelryType) {
  * Normalize extracted data to ensure consistent format
  * Handles various tag formats and calculates derived values
  */
-export function normalizeExtractedData(data, jewelryType) {
+export function normalizeExtractedData(data, JewelleryType) {
   const normalized = { ...data };
 
-  if (jewelryType === "gold") {
+  if (JewelleryType === "gold") {
     // Calculate total stone weight from stones array if not provided
     if (!normalized.stoneWeight && normalized.stones && Array.isArray(normalized.stones)) {
       normalized.stoneWeight = normalized.stones.reduce((sum, stone) => {
@@ -233,7 +233,7 @@ export function normalizeExtractedData(data, jewelryType) {
       normalized.grossWeight = normalized.netWeight + normalized.stoneWeight;
     }
 
-  } else if (jewelryType === "diamond") {
+  } else if (JewelleryType === "diamond") {
     // Calculate total diamond weight from diamonds array if not provided
     if (!normalized.diamondWeight && normalized.diamonds && Array.isArray(normalized.diamonds)) {
       normalized.diamondWeight = normalized.diamonds.reduce((sum, diamond) => {

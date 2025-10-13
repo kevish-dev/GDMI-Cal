@@ -5,7 +5,7 @@ import { Crown, Diamond, Gem, Calculator } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface PriceBreakdownProps {
-  jewelryType: "gold" | "diamond";
+  JewelleryType: "gold" | "diamond";
   goldRate: number;
   goldWeight: number;
   goldValue: number;
@@ -29,7 +29,7 @@ interface PriceBreakdownProps {
 }
 
 export function PriceBreakdownCard({
-  jewelryType,
+  JewelleryType,
   goldRate,
   goldWeight,
   goldValue,
@@ -63,14 +63,14 @@ export function PriceBreakdownCard({
   return (
     <Card className={cn(
       "shadow-lg border-2 overflow-hidden",
-      jewelryType === "gold" 
+      JewelleryType === "gold" 
         ? "border-amber-200 bg-gradient-to-br from-amber-50/30 via-white to-amber-50/20" 
         : "border-blue-200 bg-gradient-to-br from-blue-50/30 via-white to-blue-50/20"
     )}>
       <CardHeader className="pb-4 bg-gradient-to-r from-gray-50 to-white border-b">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center space-x-2 text-xl">
-            {jewelryType === "gold" ? (
+            {JewelleryType === "gold" ? (
               <>
                 <div className="p-2 rounded-full bg-amber-100">
                   <Crown className="h-5 w-5 text-amber-600" />
@@ -89,8 +89,8 @@ export function PriceBreakdownCard({
                 </div>
                 <span className="text-blue-700">
                   {goldCarat 
-                    ? `${goldCarat.toUpperCase()} Diamond Jewelry`
-                    : "Diamond Jewelry"
+                    ? `${goldCarat.toUpperCase()} Diamond Jewellery`
+                    : "Diamond Jewellery"
                   }
                 </span>
               </>
@@ -100,13 +100,13 @@ export function PriceBreakdownCard({
             {goldCarat && (
               <Badge variant="outline" className={cn(
                 "font-semibold",
-                jewelryType === "gold" ? "border-amber-300 text-amber-700" : "border-blue-300 text-blue-700"
+                JewelleryType === "gold" ? "border-amber-300 text-amber-700" : "border-blue-300 text-blue-700"
               )}>
                 {goldCarat.toUpperCase()}
               </Badge>
             )}
             {/* Diamond Color & Clarity Badges */}
-            {jewelryType === "diamond" && (diamondColor || diamondClarity) && (
+            {JewelleryType === "diamond" && (diamondColor || diamondClarity) && (
               <Badge variant="outline" className="border-blue-400 text-blue-700 font-semibold bg-blue-50">
                 {diamondColor || "H-I"} • {diamondClarity || "SI"}
               </Badge>
@@ -122,7 +122,7 @@ export function PriceBreakdownCard({
             <div className="flex items-center space-x-2">
               <Crown className={cn(
                 "h-4 w-4",
-                jewelryType === "gold" ? "text-amber-500" : "text-blue-500"
+                JewelleryType === "gold" ? "text-amber-500" : "text-blue-500"
               )} />
               <span className="text-sm text-gray-600">Rate</span>
             </div>
@@ -233,7 +233,7 @@ export function PriceBreakdownCard({
             <div className="flex items-center space-x-2">
               <Gem className={cn(
                 "h-4 w-4",
-                jewelryType === "gold" ? "text-amber-500" : "text-blue-500"
+                JewelleryType === "gold" ? "text-amber-500" : "text-blue-500"
               )} />
               <span className="text-sm text-gray-600">Making Charges</span>
             </div>
@@ -246,7 +246,7 @@ export function PriceBreakdownCard({
               <Calculator className="h-3 w-3 mr-1" />
               {typeof makingChargeRate === 'string' ? (
                 <span className="font-semibold">Formula: {makingChargeRate}</span>
-              ) : jewelryType === "gold" ? (
+              ) : JewelleryType === "gold" ? (
                 <span className="font-semibold">Formula: Making Charge % × Gold Value</span>
               ) : (
                 <span className="font-semibold">Formula: Making Charge Rate × Gold Weight</span>
@@ -255,7 +255,7 @@ export function PriceBreakdownCard({
             <div className="flex items-center justify-center text-gray-500">
               {typeof makingChargeRate === 'string' ? (
                 <span className="font-medium">Custom calculation</span>
-              ) : jewelryType === "gold" ? (
+              ) : JewelleryType === "gold" ? (
                 <span className="font-medium">Calculation: {makingChargeRate}% of {formatCurrency(goldValue)} = {formatCurrency(makingCharges)}</span>
               ) : (
                 <span className="font-medium">Calculation: {makingChargeRate} × {formatWeight(goldWeight)}g = {formatCurrency(makingCharges)}</span>
@@ -314,7 +314,7 @@ export function PriceBreakdownCard({
         <Separator className="my-0 border-t-2 border-gray-300" />
         <div className={cn(
           "p-5",
-          jewelryType === "gold" 
+          JewelleryType === "gold" 
             ? "bg-gradient-to-r from-amber-500 to-yellow-500" 
             : "bg-gradient-to-r from-blue-500 to-indigo-500"
         )}>

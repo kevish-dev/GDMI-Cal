@@ -24,7 +24,7 @@ export function Layout({ children }: LayoutProps) {
           
           <div className="text-center text-xs sm:text-sm text-muted-foreground space-y-1">
             <p>&copy; 2024 JewelCalc. All rights reserved.</p>
-            <p className="hidden sm:block">Elegant jewelry price calculations made simple.</p>
+            <p className="hidden sm:block">Elegant Jewellery price calculations made simple.</p>
           </div>
         </div>
       </footer>

@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScanLine } from "lucide-react";
-import { JewelryTagScanner } from "@/components/JewelryTagScanner";
+import { JewelleryTagScanner } from "@/components/JewelryTagScanner";
 import { GoldRateMarquee } from "@/components/GoldRateMarquee";
 import { ContactSupportBox } from "@/components/ContactSupportBox";
 import { UserVerificationModal } from "@/components/UserVerificationModal";
@@ -30,7 +30,7 @@ interface PriceBreakdown {
 }
 
 interface ScanResultData {
-  jewelryType: "gold" | "diamond";
+  JewelleryType: "gold" | "diamond";
   extractedData: any;
   verificationAnswers: any;
   makingCharges: any;
@@ -39,7 +39,6 @@ interface ScanResultData {
 }
 
 export default function Home() {
-  const [isScannerOpen, setIsScannerOpen] = useState(false);
   const [scanResult, setScanResult] = useState<ScanResultData | null>(null);
   const { toast } = useToast();
   const { addCalculation } = useRates();
@@ -50,12 +49,12 @@ export default function Home() {
 
     // Add calculation to analytics
     await addCalculation({
-      type: result.jewelryType as "gold" | "diamond",
+      type: result.JewelleryType as "gold" | "diamond",
       totalValue: result.calculatedPrice,
       goldWeight: result.extractedData.weight || result.extractedData.netWeight || 0,
       diamondWeight: result.extractedData.diamondWeight,
       carat: result.extractedData.carat?.toLowerCase(),
-      jewelryType: result.jewelryType === "gold" ? result.extractedData.type : "diamond",
+      JewelleryType: result.JewelleryType === "gold" ? result.extractedData.type : "diamond",
       diamondColor: result.extractedData.color,
       diamondClarity: result.extractedData.clarity,
       certification: result.verificationAnswers?.certificationType,
@@ -65,6 +64,10 @@ export default function Home() {
       title: "Scan completed successfully!",
       description: `Price calculated: ${result.calculatedPrice.toLocaleString("en-IN")}`,
     });
+  };
+
+  const handleResetScan = () => {
+    setScanResult(null);
   };
 
   return (
@@ -77,87 +80,128 @@ export default function Home() {
           {/* Header */}
           <div className="text-center mb-8 sm:mb-12">
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-3 sm:mb-4 bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent">
-              Quick Jewelry Price Check
+              Jewellery Price Calculator
             </h1>
             <p className="text-base sm:text-lg text-muted-foreground max-w-xl mx-auto">
-              Scan your jewelry tag and get instant accurate pricing in seconds
+              Scan your jewellery tag and get instant accurate pricing
             </p>
           </div>
 
-          {/* Quick Scan Card */}
-          <Card className="shadow-card border-2 border-primary/30 bg-gradient-to-br from-primary/5 via-background to-primary/10 overflow-hidden">
-            <CardHeader className="pb-4">
-              <CardTitle className="flex items-center justify-center space-x-2 text-xl sm:text-2xl">
-                <ScanLine className="h-6 w-6 text-primary animate-pulse" />
-                <span className="text-primary">Quick Scan</span>
-              </CardTitle>
-              <CardDescription className="text-center text-sm sm:text-base">
-                Scan your jewelry tag - Results in seconds
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {/* Show Quick Scan UI only if no result yet */}
-              {!scanResult && (
-                <>
-                  {/* Scanning Frame Visual */}
-                  <div className="relative group">
-                    {/* Main Scanning Area */}
-                    <div 
-                      onClick={() => setIsScannerOpen(true)}
-                      className="relative w-full aspect-[4/3] bg-gradient-to-br from-primary/10 via-primary/5 to-background border-2 border-dashed border-primary/40 rounded-xl cursor-pointer overflow-hidden transition-all duration-300 hover:border-primary hover:shadow-lg hover:shadow-primary/20"
-                    >
-                      {/* Animated Scanning Line */}
-                      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent animate-pulse" />
-                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent animate-pulse" style={{ animationDelay: '0.5s' }} />
+          {/* Show price breakdown and extracted info if scan result is available */}
+          {scanResult ? (
+            <div className="space-y-6">
+              {/* Extracted Information Card */}
+              <Card className="shadow-lg border-2 border-primary/30">
+                <CardHeader className="pb-4 bg-gradient-to-r from-primary/5 to-primary/10">
+                  <CardTitle className="flex items-center space-x-2 text-lg">
+                    <ScanLine className="h-5 w-5 text-primary" />
+                    <span>Extracted Information</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {scanResult.extractedData.itemCode && (
+                      <div className="flex justify-between items-center py-2 px-3 bg-gray-50 rounded">
+                        <span className="text-sm text-gray-600 font-medium">Item Code:</span>
+                        <span className="text-sm font-semibold">{scanResult.extractedData.itemCode}</span>
                       </div>
-
-                      {/* Corner Brackets - Scanning Frame */}
-                      <div className="absolute top-3 left-3 w-8 h-8 border-t-4 border-l-4 border-primary rounded-tl-lg" />
-                      <div className="absolute top-3 right-3 w-8 h-8 border-t-4 border-r-4 border-primary rounded-tr-lg" />
-                      <div className="absolute bottom-3 left-3 w-8 h-8 border-b-4 border-l-4 border-primary rounded-bl-lg" />
-                      <div className="absolute bottom-3 right-3 w-8 h-8 border-b-4 border-r-4 border-primary rounded-br-lg" />
-
-                      {/* Center Content */}
-                      <div className="absolute inset-0 flex flex-col items-center justify-center space-y-4 p-6">
-                        {/* Scan Icon with Pulse Effect */}
-                        <div className="relative">
-                          <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full animate-pulse" />
-                          <div className="relative bg-primary/10 p-6 rounded-full border-2 border-primary/30 group-hover:border-primary transition-colors">
-                            <ScanLine className="h-12 w-12 text-primary animate-pulse" />
-                          </div>
-                        </div>
-
-                        {/* Text Content */}
-                        <div className="text-center space-y-2">
-                          <h3 className="text-lg font-bold text-primary">
-                            Tap to Scan Jewelry Tag
-                          </h3>
-                          <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-                            <div className="flex items-center gap-1">
-                              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                              <span className="font-medium">Ready</span>
-                            </div>
-                            <span>•</span>
-                            <span>Results in seconds</span>
-                          </div>
-                        </div>
+                    )}
+                    {scanResult.extractedData.carat && (
+                      <div className="flex justify-between items-center py-2 px-3 bg-gray-50 rounded">
+                        <span className="text-sm text-gray-600 font-medium">Carat/Purity:</span>
+                        <span className="text-sm font-semibold">{scanResult.extractedData.carat.toUpperCase()}</span>
                       </div>
-
-                      {/* Hover Overlay */}
-                      <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    </div>
-
-                    {/* Info Badge */}
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
-                      <Badge className="bg-primary text-primary-foreground shadow-lg px-4 py-1 text-xs font-semibold">
-                        ⚡ Instant Results
-                      </Badge>
-                    </div>
+                    )}
+                    {(scanResult.extractedData.weight || scanResult.extractedData.netWeight) && (
+                      <div className="flex justify-between items-center py-2 px-3 bg-gray-50 rounded">
+                        <span className="text-sm text-gray-600 font-medium">Weight:</span>
+                        <span className="text-sm font-semibold">
+                          {(scanResult.extractedData.weight || scanResult.extractedData.netWeight)?.toFixed(3)}g
+                        </span>
+                      </div>
+                    )}
+                    {scanResult.extractedData.grossWeight && (
+                      <div className="flex justify-between items-center py-2 px-3 bg-gray-50 rounded">
+                        <span className="text-sm text-gray-600 font-medium">Gross Weight:</span>
+                        <span className="text-sm font-semibold">{scanResult.extractedData.grossWeight.toFixed(3)}g</span>
+                      </div>
+                    )}
+                    {scanResult.extractedData.stoneWeight && (
+                      <div className="flex justify-between items-center py-2 px-3 bg-gray-50 rounded">
+                        <span className="text-sm text-gray-600 font-medium">Stone Weight:</span>
+                        <span className="text-sm font-semibold">{scanResult.extractedData.stoneWeight.toFixed(3)}g</span>
+                      </div>
+                    )}
+                    {scanResult.extractedData.diamondWeight && (
+                      <div className="flex justify-between items-center py-2 px-3 bg-gray-50 rounded">
+                        <span className="text-sm text-gray-600 font-medium">Diamond Weight:</span>
+                        <span className="text-sm font-semibold">{scanResult.extractedData.diamondWeight.toFixed(3)}ct</span>
+                      </div>
+                    )}
+                    {scanResult.extractedData.color && (
+                      <div className="flex justify-between items-center py-2 px-3 bg-gray-50 rounded">
+                        <span className="text-sm text-gray-600 font-medium">Diamond Color:</span>
+                        <span className="text-sm font-semibold">{scanResult.extractedData.color}</span>
+                      </div>
+                    )}
+                    {scanResult.extractedData.clarity && (
+                      <div className="flex justify-between items-center py-2 px-3 bg-gray-50 rounded">
+                        <span className="text-sm text-gray-600 font-medium">Diamond Clarity:</span>
+                        <span className="text-sm font-semibold">{scanResult.extractedData.clarity}</span>
+                      </div>
+                    )}
+                    {scanResult.extractedData.type && (
+                      <div className="flex justify-between items-center py-2 px-3 bg-gray-50 rounded">
+                        <span className="text-sm text-gray-600 font-medium">Jewellery Type:</span>
+                        <span className="text-sm font-semibold capitalize">{scanResult.extractedData.type}</span>
+                      </div>
+                    )}
+                    {scanResult.makingCharges.goldType && (
+                      <div className="flex justify-between items-center py-2 px-3 bg-gray-50 rounded">
+                        <span className="text-sm text-gray-600 font-medium">Gold Type:</span>
+                        <span className="text-sm font-semibold capitalize">{scanResult.makingCharges.goldType}</span>
+                      </div>
+                    )}
                   </div>
+                </CardContent>
+              </Card>
 
-                  {/* Link to manual calculation */}
-                  <div className="text-center pt-2">
+              {/* Price Breakdown */}
+              <div>
+                <h3 className="font-semibold text-center text-lg mb-4">Price Calculation</h3>
+                
+                <PriceBreakdownCard
+                  JewelleryType={scanResult.JewelleryType}
+                  goldRate={scanResult.priceBreakdown.goldRate}
+                  goldWeight={scanResult.priceBreakdown.goldWeight}
+                  goldValue={scanResult.priceBreakdown.goldValue}
+                  diamondRate={scanResult.priceBreakdown.diamondRate}
+                  diamondWeight={scanResult.priceBreakdown.diamondWeight}
+                  diamondValue={scanResult.priceBreakdown.diamondValue}
+                  diamondColor={scanResult.priceBreakdown.diamondColor}
+                  diamondClarity={scanResult.priceBreakdown.diamondClarity}
+                  makingChargeRate={scanResult.priceBreakdown.makingChargeRate}
+                  makingCharges={scanResult.priceBreakdown.makingCharges}
+                  subTotal={scanResult.priceBreakdown.subTotal}
+                  gst={scanResult.priceBreakdown.gst}
+                  finalPrice={scanResult.priceBreakdown.finalPrice}
+                  goldCarat={scanResult.extractedData.carat}
+                  goldType={scanResult.makingCharges.goldType}
+                  certification={scanResult.verificationAnswers?.certificationType}
+                />
+
+                <div className="text-center mt-4 space-y-2">
+                  <Button
+                    variant="default"
+                    size="lg"
+                    onClick={handleResetScan}
+                    className="gap-2"
+                  >
+                    <ScanLine className="h-5 w-5" />
+                    Scan Another Tag
+                  </Button>
+                  
+                  <div>
                     <Link
                       to="/calculator"
                       className="text-sm text-primary underline underline-offset-4 transition-colors hover:text-primary/80"
@@ -165,50 +209,28 @@ export default function Home() {
                       Need manual calculation? Click here
                     </Link>
                   </div>
-                </>
-              )}
-
-              {/* Show price breakdown if available */}
-              {scanResult && (
-                <div className="mt-6">
-                  <h3 className="font-semibold text-center text-lg mb-4">Scanned Price Result</h3>
-                  
-                  <PriceBreakdownCard
-                    jewelryType={scanResult.jewelryType}
-                    goldRate={scanResult.priceBreakdown.goldRate}
-                    goldWeight={scanResult.priceBreakdown.goldWeight}
-                    goldValue={scanResult.priceBreakdown.goldValue}
-                    diamondRate={scanResult.priceBreakdown.diamondRate}
-                    diamondWeight={scanResult.priceBreakdown.diamondWeight}
-                    diamondValue={scanResult.priceBreakdown.diamondValue}
-                    diamondColor={scanResult.priceBreakdown.diamondColor}
-                    diamondClarity={scanResult.priceBreakdown.diamondClarity}
-                    makingChargeRate={scanResult.priceBreakdown.makingChargeRate}
-                    makingCharges={scanResult.priceBreakdown.makingCharges}
-                    subTotal={scanResult.priceBreakdown.subTotal}
-                    gst={scanResult.priceBreakdown.gst}
-                    finalPrice={scanResult.priceBreakdown.finalPrice}
-                    goldCarat={scanResult.extractedData.carat}
-                    goldType={scanResult.makingCharges.goldType}
-                    certification={scanResult.verificationAnswers?.certificationType}
-                  />
-
-                  <div className="text-center mt-4">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setIsScannerOpen(true)}
-                      className="gap-2"
-                    >
-                      <ScanLine className="h-4 w-4" />
-                      Scan Another Tag
-                    </Button>
-                  </div>
                 </div>
-              )}
-
-            </CardContent>
-          </Card>
+              </div>
+            </div>
+          ) : (
+            /* Show the scanner component directly embedded on the page */
+            <div className="space-y-6">
+              <JewelleryTagScanner
+                onScanComplete={handleScanComplete}
+                onClose={handleResetScan}
+                embedded={true}
+              />
+              
+              <div className="text-center">
+                <Link
+                  to="/calculator"
+                  className="text-sm text-primary underline underline-offset-4 transition-colors hover:text-primary/80"
+                >
+                  Need manual calculation? Click here
+                </Link>
+              </div>
+            </div>
+          )}
 
           {/* Contact Support Box */}
           <div className="mt-8">
@@ -219,14 +241,6 @@ export default function Home() {
 
       {/* User Verification Modal */}
       <UserVerificationModal />
-
-      {/* Jewelry Tag Scanner Modal */}
-      {isScannerOpen && (
-        <JewelryTagScanner
-          onScanComplete={handleScanComplete}
-          onClose={() => setIsScannerOpen(false)}
-        />
-      )}
     </Layout>
   );
 }

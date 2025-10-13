@@ -634,7 +634,7 @@ export default function Admin() {
                         <span>Current Making Charges</span>
                       </CardTitle>
                       <CardDescription>
-                        Making charges by jewelry type (% of gold value)
+                        Making charges by Jewellery type (% of gold value)
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -642,7 +642,7 @@ export default function Admin() {
                         <div className="flex items-center justify-between p-4 border rounded-lg">
                           <div>
                             <p className="font-medium">Chains</p>
-                            <p className="text-sm text-muted-foreground">Basic chain jewelry</p>
+                            <p className="text-sm text-muted-foreground">Basic chain Jewellery</p>
                           </div>
                           <div className="text-right">
                             <p className="text-lg font-semibold">{makingCharges.chains}%</p>
@@ -650,7 +650,7 @@ export default function Admin() {
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg">
                           <div>
-                            <p className="font-medium">Plain Jewelry</p>
+                            <p className="font-medium">Plain Jewellery</p>
                             <p className="text-sm text-muted-foreground">Simple designs</p>
                           </div>
                           <div className="text-right">
@@ -659,7 +659,7 @@ export default function Admin() {
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg">
                           <div>
-                            <p className="font-medium">Temple Jewelry</p>
+                            <p className="font-medium">Temple Jewellery</p>
                             <p className="text-sm text-muted-foreground">Traditional designs</p>
                           </div>
                           <div className="text-right">
@@ -809,7 +809,7 @@ export default function Admin() {
                         <div className="flex justify-between items-center mb-1">
                           <div className="flex items-center space-x-2">
                             <Crown className="h-4 w-4 text-amber-500" />
-                            <span className="text-sm">Gold Jewelry</span>
+                            <span className="text-sm">Gold Jewellery</span>
                           </div>
                           <span className="text-sm font-medium">{analytics.goldCalculations}</span>
                         </div>
@@ -825,7 +825,7 @@ export default function Admin() {
                         <div className="flex justify-between items-center mb-1">
                           <div className="flex items-center space-x-2">
                             <Diamond className="h-4 w-4 text-blue-500" />
-                            <span className="text-sm">Diamond Jewelry</span>
+                            <span className="text-sm">Diamond Jewellery</span>
                           </div>
                           <span className="text-sm font-medium">{analytics.diamondCalculations}</span>
                         </div>

@@ -69,7 +69,7 @@ export default function Login() {
             </div>
             <h1 className="text-2xl sm:text-3xl font-bold mb-2">Welcome Back</h1>
             <p className="text-muted-foreground text-sm sm:text-base px-2">
-              Sign in to access your jewelry calculator
+              Sign in to access your Jewellery calculator
             </p>
           </div>
 

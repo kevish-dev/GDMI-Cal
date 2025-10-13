@@ -25,7 +25,7 @@ import { GoldRateMarquee } from "@/components/GoldRateMarquee";
 import { ContactSupportBox } from "@/components/ContactSupportBox";
 import { PriceBreakdownCard } from "@/components/PriceBreakdownCard";
 
-type JewelryType = "gold" | "diamond" | null;
+type JewelleryType = "gold" | "diamond" | null;
 type GoldType = "chains" | "plain" | "temple" | "italian";
 type Carat = "14k" | "18k" | "22k";
 type DiamondColor = "KL" | "JK" | "IJ" | "HI" | "GH";
@@ -71,7 +71,7 @@ interface PriceBreakdown {
 }
 
 export default function Calculator() {
-  const [jewelryType, setJewelryType] = useState<JewelryType>(null);
+  const [JewelleryType, setJewelleryType] = useState<JewelleryType>(null);
   const [goldForm, setGoldForm] = useState<GoldFormData>({
     weight: "",
     carat: "",
@@ -98,11 +98,11 @@ export default function Calculator() {
   const { goldRates, diamondRates, makingCharges, addCalculation, loading } = useRates();
   const { isVerifiedUser, openVerificationModal } = useUserVerification();
 
-  const handleJewelryTypeSelect = (type: JewelryType) => {
-    setJewelryType(type);
+  const handleJewelleryTypeSelect = (type: JewelleryType) => {
+    setJewelleryType(type);
     setPriceBreakdown(null);
     // Reset forms when switching types
-    if (type !== jewelryType) {
+    if (type !== JewelleryType) {
       setGoldForm({ weight: "", carat: "", type: "", jewellerQuote: "" });
       setDiamondForm({
         goldWeight: "",
@@ -148,7 +148,7 @@ export default function Calculator() {
       let diamondWeightValue = 0;
       let makingChargeRateDisplay: number | string = 0;
 
-      if (jewelryType === "gold") {
+      if (JewelleryType === "gold") {
         const weight = parseFloat(goldForm.weight);
         goldWeightValue = weight;
 
@@ -165,7 +165,7 @@ export default function Calculator() {
         goldValue = weight * goldRate;
         calculatedMakingCharges = (goldValue * makingChargePercentage) / 100; // Percentage of gold value
         makingChargeRateDisplay = makingChargePercentage;
-      } else if (jewelryType === "diamond") {
+      } else if (JewelleryType === "diamond") {
         const goldWeight = parseFloat(diamondForm.goldWeight);
         const diamondWeight = parseFloat(diamondForm.diamondWeight);
         goldWeightValue = goldWeight;
@@ -205,7 +205,7 @@ export default function Calculator() {
 
       // Get jeweller quote if provided
       const jewellerQuoteValue = 
-        jewelryType === "gold" 
+        JewelleryType === "gold" 
           ? parseFloat(goldForm.jewellerQuote) || 0
           : parseFloat(diamondForm.jewellerQuote) || 0;
 
@@ -229,29 +229,29 @@ export default function Calculator() {
 
       // Add calculation to analytics
       await addCalculation({
-        type: jewelryType as "gold" | "diamond",
+        type: JewelleryType as "gold" | "diamond",
         totalValue: finalPrice,
         goldWeight:
-          jewelryType === "gold"
+          JewelleryType === "gold"
             ? parseFloat(goldForm.weight)
             : parseFloat(diamondForm.goldWeight),
         diamondWeight:
-          jewelryType === "diamond"
+          JewelleryType === "diamond"
             ? parseFloat(diamondForm.diamondWeight)
             : undefined,
-        carat: jewelryType === "gold" ? goldForm.carat : diamondForm.carat,
-        jewelryType: jewelryType === "gold" ? goldForm.type : "diamond",
+        carat: JewelleryType === "gold" ? goldForm.carat : diamondForm.carat,
+        JewelleryType: JewelleryType === "gold" ? goldForm.type : "diamond",
         jewellerQuote: jewellerQuoteValue > 0 ? jewellerQuoteValue : undefined,
         priceDifference: priceDifference,
         // Include optional diamond fields for saving to database
-        diamondColor: jewelryType === "diamond" ? diamondForm.color || undefined : undefined,
-        diamondClarity: jewelryType === "diamond" ? diamondForm.clarity || undefined : undefined,
-        certification: jewelryType === "diamond" ? diamondForm.certification || undefined : undefined,
+        diamondColor: JewelleryType === "diamond" ? diamondForm.color || undefined : undefined,
+        diamondClarity: JewelleryType === "diamond" ? diamondForm.clarity || undefined : undefined,
+        certification: JewelleryType === "diamond" ? diamondForm.certification || undefined : undefined,
       });
 
       toast({
         title: "Calculation complete!",
-        description: "Your jewelry price has been calculated successfully.",
+        description: "Your Jewellery price has been calculated successfully.",
       });
     } catch (error) {
       toast({
@@ -267,11 +267,11 @@ export default function Calculator() {
   const validateForm = () => {
     const errors: {[key: string]: boolean} = {};
     
-    if (jewelryType === "gold") {
+    if (JewelleryType === "gold") {
       if (!goldForm.weight) errors.weight = true;
       if (!goldForm.carat) errors.carat = true;
       if (!goldForm.type) errors.type = true;
-    } else if (jewelryType === "diamond") {
+    } else if (JewelleryType === "diamond") {
       if (!diamondForm.goldWeight) errors.goldWeight = true;
       if (!diamondForm.carat) errors.diamondCarat = true;
       if (!diamondForm.diamondWeight) errors.diamondWeight = true;
@@ -283,9 +283,9 @@ export default function Calculator() {
   };
 
   const isFormValid = () => {
-    if (jewelryType === "gold") {
+    if (JewelleryType === "gold") {
       return goldForm.weight && goldForm.carat && goldForm.type;
-    } else if (jewelryType === "diamond") {
+    } else if (JewelleryType === "diamond") {
       return (
         diamondForm.goldWeight &&
         diamondForm.carat &&
@@ -305,7 +305,7 @@ export default function Calculator() {
             <div className="text-center">
               <div className="flex justify-center items-center space-x-2 mb-4">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                <p className="text-lg text-muted-foreground">Loading jewelry rates...</p>
+                <p className="text-lg text-muted-foreground">Loading Jewellery rates...</p>
               </div>
             </div>
           </div>
@@ -327,30 +327,30 @@ export default function Calculator() {
               Manual Price Calculator
             </h1>
             <p className="text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto">
-              Enter jewelry details manually for accurate pricing calculation
+              Enter Jewellery details manually for accurate pricing calculation
             </p>
           </div>
 
           <div className="grid lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
             {/* Input Panel */}
             <div className="space-y-4 sm:space-y-6">
-              {/* Jewelry Type Selection */}
+              {/* Jewellery Type Selection */}
               <Card className="shadow-card">
                 <CardHeader className="pb-4">
                   <CardTitle className="flex items-center space-x-2 text-lg sm:text-xl">
                     <Gem className={cn(
                       "h-4 w-4 sm:h-5 sm:w-5 transition-colors",
-                      jewelryType === "gold" ? "text-primary" : 
-                      jewelryType === "diamond" ? "text-secondary" : "text-muted-foreground"
+                      JewelleryType === "gold" ? "text-primary" : 
+                      JewelleryType === "diamond" ? "text-secondary" : "text-muted-foreground"
                     )} />
                     <span className={cn(
                       "transition-colors",
-                      jewelryType === "gold" ? "text-primary" : 
-                      jewelryType === "diamond" ? "text-secondary" : ""
-                    )}>Select Jewelry Type</span>
+                      JewelleryType === "gold" ? "text-primary" : 
+                      JewelleryType === "diamond" ? "text-secondary" : ""
+                    )}>Select Jewellery Type</span>
                   </CardTitle>
                   <CardDescription className="text-sm">
-                    Choose the type of jewelry to calculate
+                    Choose the type of Jewellery to calculate
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -358,20 +358,20 @@ export default function Calculator() {
                     <div
                       className={cn(
                         "relative h-16 sm:h-20 flex items-center p-4 rounded-lg border-2 cursor-pointer transition-all duration-200",
-                        jewelryType === "gold" 
+                        JewelleryType === "gold" 
                           ? "border-primary bg-primary/10 text-primary" 
                           : "border-gray-200 bg-background text-gray-600"
                       )}
-                      onClick={() => handleJewelryTypeSelect("gold")}
+                      onClick={() => handleJewelleryTypeSelect("gold")}
                     >
                       {/* Radio button indicator */}
                       <div className={cn(
                         "absolute left-3 w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all duration-200",
-                        jewelryType === "gold" 
+                        JewelleryType === "gold" 
                           ? "border-primary bg-primary" 
                           : "border-gray-300 bg-white"
                       )}>
-                        {jewelryType === "gold" && (
+                        {JewelleryType === "gold" && (
                           <div className="w-2 h-2 rounded-full bg-white"></div>
                         )}
                       </div>
@@ -379,27 +379,27 @@ export default function Calculator() {
                       {/* Content */}
                       <div className="flex items-center space-x-3 ml-6">
                         <Crown className="h-5 w-5 sm:h-6 sm:w-6" />
-                        <span className="font-medium text-sm sm:text-base">Gold Jewelry</span>
+                        <span className="font-medium text-sm sm:text-base">Gold Jewellery</span>
                       </div>
                     </div>
 
                     <div
                       className={cn(
                         "relative h-16 sm:h-20 flex items-center p-4 rounded-lg border-2 cursor-pointer transition-all duration-200",
-                        jewelryType === "diamond" 
+                        JewelleryType === "diamond" 
                           ? "border-secondary bg-secondary/10 text-secondary" 
                           : "border-gray-200 bg-background text-gray-600"
                       )}
-                      onClick={() => handleJewelryTypeSelect("diamond")}
+                      onClick={() => handleJewelleryTypeSelect("diamond")}
                     >
                       {/* Radio button indicator */}
                       <div className={cn(
                         "absolute left-3 w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all duration-200",
-                        jewelryType === "diamond" 
+                        JewelleryType === "diamond" 
                           ? "border-secondary bg-secondary" 
                           : "border-gray-300 bg-white"
                       )}>
-                        {jewelryType === "diamond" && (
+                        {JewelleryType === "diamond" && (
                           <div className="w-2 h-2 rounded-full bg-white"></div>
                         )}
                       </div>
@@ -407,7 +407,7 @@ export default function Calculator() {
                       {/* Content */}
                       <div className="flex items-center space-x-3 ml-6">
                         <Diamond className="h-5 w-5 sm:h-6 sm:w-6" />
-                        <span className="font-medium text-sm sm:text-base">Diamond Jewelry</span>
+                        <span className="font-medium text-sm sm:text-base">Diamond Jewellery</span>
                       </div>
                     </div>
                   </div>
@@ -415,11 +415,11 @@ export default function Calculator() {
               </Card>
 
               {/* Dynamic Form - Mobile optimized */}
-              {jewelryType && (
+              {JewelleryType && (
                 <Card
                   className={cn(
                     "shadow-card transition-smooth animate-fade-in border-2",
-                    jewelryType === "gold" 
+                    JewelleryType === "gold" 
                       ? "border-primary/20 bg-gradient-to-br from-background via-background to-primary/5" 
                       : "border-secondary/20 bg-gradient-to-br from-background via-background to-secondary/5"
                   )}
@@ -427,15 +427,15 @@ export default function Calculator() {
                   <CardHeader className="pb-4">
                     <div className="flex items-center justify-between flex-wrap gap-2">
                       <CardTitle className="flex items-center space-x-2 text-lg sm:text-xl">
-                        {jewelryType === "gold" ? (
+                        {JewelleryType === "gold" ? (
                           <>
                             <Crown className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-                            <span className="text-primary">Gold Jewelry Details</span>
+                            <span className="text-primary">Gold Jewellery Details</span>
                           </>
                         ) : (
                           <>
                             <Diamond className="h-4 w-4 sm:h-5 sm:w-5 text-secondary" />
-                            <span className="text-secondary">Diamond Jewelry Details</span>
+                            <span className="text-secondary">Diamond Jewellery Details</span>
                           </>
                         )}
                       </CardTitle>
@@ -445,7 +445,7 @@ export default function Calculator() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    {jewelryType === "gold" ? (
+                    {JewelleryType === "gold" ? (
                       <>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div className="space-y-2">
@@ -742,7 +742,7 @@ export default function Calculator() {
                       disabled={!isFormValid() || isCalculating}
                       className={cn(
                         "w-full hover-glow text-base h-12 sm:h-14 mt-6 font-semibold transition-smooth",
-                        jewelryType === "gold" ? "gradient-gold" : "gradient-diamond"
+                        JewelleryType === "gold" ? "gradient-gold" : "gradient-diamond"
                       )}
                     >
                       {isCalculating ? "Calculating..." : "Calculate Price"}
@@ -756,7 +756,7 @@ export default function Calculator() {
             <div className="space-y-4 sm:space-y-6">
               {priceBreakdown ? (
                 <PriceBreakdownCard
-                  jewelryType={jewelryType as "gold" | "diamond"}
+                  JewelleryType={JewelleryType as "gold" | "diamond"}
                   goldRate={priceBreakdown.goldRate}
                   goldWeight={priceBreakdown.goldWeight}
                   goldValue={priceBreakdown.goldValue}
@@ -770,38 +770,38 @@ export default function Calculator() {
                   finalPrice={priceBreakdown.finalPrice}
                   jewellerQuote={priceBreakdown.jewellerQuote}
                   priceDifference={priceBreakdown.priceDifference}
-                  goldCarat={jewelryType === "gold" ? goldForm.carat : diamondForm.carat}
-                  goldType={jewelryType === "gold" ? goldForm.type : undefined}
-                  certification={jewelryType === "diamond" ? diamondForm.certification : undefined}
+                  goldCarat={JewelleryType === "gold" ? goldForm.carat : diamondForm.carat}
+                  goldType={JewelleryType === "gold" ? goldForm.type : undefined}
+                  certification={JewelleryType === "diamond" ? diamondForm.certification : undefined}
                 />
               ) : (
                 <Card className={cn(
                   "shadow-card border-dashed transition-all duration-300",
-                  jewelryType === "gold" 
+                  JewelleryType === "gold" 
                     ? "border-primary/30 bg-gradient-to-br from-background to-primary/5" 
-                    : jewelryType === "diamond"
+                    : JewelleryType === "diamond"
                     ? "border-secondary/30 bg-gradient-to-br from-background to-secondary/5"
                     : "border-muted-foreground/30"
                 )}>
                   <CardContent className="flex flex-col items-center justify-center py-12 sm:py-16 text-center px-4">
-                    {jewelryType === "gold" ? (
+                    {JewelleryType === "gold" ? (
                       <Crown className="h-10 w-10 sm:h-12 sm:w-12 text-primary/60 mb-3 sm:mb-4" />
-                    ) : jewelryType === "diamond" ? (
+                    ) : JewelleryType === "diamond" ? (
                       <Diamond className="h-10 w-10 sm:h-12 sm:w-12 text-secondary/60 mb-3 sm:mb-4" />
                     ) : (
                       <Gem className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground mb-3 sm:mb-4" />
                     )}
                     <h3 className={cn(
                       "text-base sm:text-lg font-semibold mb-2",
-                      jewelryType === "gold" ? "text-primary" : 
-                      jewelryType === "diamond" ? "text-secondary" : ""
+                      JewelleryType === "gold" ? "text-primary" : 
+                      JewelleryType === "diamond" ? "text-secondary" : ""
                     )}>
-                      {jewelryType ? `Ready to calculate ${jewelryType} jewelry` : "No calculation yet"}
+                      {JewelleryType ? `Ready to calculate ${JewelleryType} Jewellery` : "No calculation yet"}
                     </h3>
                     <p className="text-sm text-muted-foreground">
-                      {jewelryType 
+                      {JewelleryType 
                         ? "Enter the details above and click calculate to get pricing" 
-                        : "Select jewelry type and enter details to calculate pricing"
+                        : "Select Jewellery type and enter details to calculate pricing"
                       }
                     </p>
                   </CardContent>

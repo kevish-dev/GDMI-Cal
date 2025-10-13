@@ -15,7 +15,7 @@ export function ContactSupportBox({ className, compact = false }: ContactSupport
 
   const handleWhatsApp = () => {
     // Replace with actual WhatsApp number and message
-    const message = encodeURIComponent("Hi, I'm facing difficulty with filling details for jewelry calculation. Can you help me?");
+    const message = encodeURIComponent("Hi, I'm facing difficulty with filling details for Jewellery calculation. Can you help me?");
     window.open(`https://wa.me/919971187600?text=${message}`, "_blank");
   };
 
