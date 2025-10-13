@@ -714,7 +714,7 @@ export function JewelleryTagScanner({
                             percentage: rates[type],
                           }));
                         }}
-                        className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3"
+                        className="grid grid-cols-2 gap-2 sm:gap-3"
                       >
                         {[
                           { value: 'chains', label: 'Chains', rate: makingCharges.chains || 2 },
