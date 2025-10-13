@@ -59,6 +59,10 @@ interface PriceBreakdown {
   diamondValue: number;
   diamondColor?: string;
   diamondClarity?: string;
+  stoneWeight?: number;
+  stoneValue: number;
+  kundanWeight?: number;
+  kundanValue: number;
   makingChargeRate: number | string;
   makingCharges: number;
   subTotal: number;
@@ -218,6 +222,10 @@ export default function Calculator() {
         diamondRate: diamondRate > 0 ? diamondRate : undefined,
         diamondWeight: diamondWeightValue > 0 ? diamondWeightValue : undefined,
         diamondValue,
+        stoneWeight: undefined,
+        stoneValue: 0,
+        kundanWeight: undefined,
+        kundanValue: 0,
         makingChargeRate: makingChargeRateDisplay,
         makingCharges: calculatedMakingCharges,
         subTotal,
@@ -763,6 +771,10 @@ export default function Calculator() {
                   diamondRate={priceBreakdown.diamondRate}
                   diamondWeight={priceBreakdown.diamondWeight}
                   diamondValue={priceBreakdown.diamondValue}
+                  stoneWeight={priceBreakdown.stoneWeight}
+                  stoneValue={priceBreakdown.stoneValue}
+                  kundanWeight={priceBreakdown.kundanWeight}
+                  kundanValue={priceBreakdown.kundanValue}
                   makingChargeRate={priceBreakdown.makingChargeRate}
                   makingCharges={priceBreakdown.makingCharges}
                   subTotal={priceBreakdown.subTotal}

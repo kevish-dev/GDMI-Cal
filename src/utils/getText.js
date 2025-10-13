@@ -49,7 +49,7 @@ The tags may contain information in different formats and abbreviations:
 - G.W/G.Wt/GW = Gross Weight (total weight in grams)
 - N.W/N.Wt/NW = Net Weight (pure gold weight in grams)
 - STN/Stn/STONES = Stone weight (in grams or carats)
-- KUN/Kun/KUND = Kundan/stone weight (in grams or carats)
+- KUN/Kun/KUND/KUNDAN = Kundan weight (in grams or carats) - SEPARATE from stones
 - ICS = Additional stone information
 - Item codes may appear as: BG544, GCS029, ER1635, DLR9658, etc.
 - Purity: 22K, 18K, 14K, or as "22KT", "18KT"
@@ -61,7 +61,8 @@ Extract ALL visible text and convert it into a JSON object with these fields:
   "grossWeight": <number in grams - total weight including stones>,
   "netWeight": <number in grams - pure gold weight without stones>,
   "carat": <string - e.g., "22K", "18K", "14K">,
-  "stoneWeight": <number - total weight of all stones/kundan in grams>,
+  "stoneWeight": <number - total weight of ONLY stones (STN/STONES/ICS) in grams, DO NOT include kundan>,
+  "kundanWeight": <number - ONLY kundan (KUN/KUND/KUNDAN) weight in grams, SEPARATE from stones>,
   "stones": [
     {
       "type": <string - e.g., "STN", "STONES", "ICS", "PC", "CS", "RD", "ELITE">,
@@ -73,6 +74,8 @@ Extract ALL visible text and convert it into a JSON object with these fields:
   "type": <string - if visible: chain, ring, bangle, earring, pendant, etc.>,
   "purity": <string - gold purity if mentioned>,
   "diameter": <string - if mentioned like "Dia.2.50">,
+  "huid": <string - HUID number if visible>,
+  "hallmark": <string - hallmark information if visible>,
   "rawText": <string - any other visible text not captured above>
 }
 
@@ -80,9 +83,11 @@ IMPORTANT parsing rules:
 1. When you see formats like "1.250\\1000", extract both values and sum them
 2. For stone notations like "PC-104\\2.01", the first is piece count (PC-104) and second is weight (2.01)
 3. For "STN:1.250\\1000", this means stones total 1.250+1.000 = 2.250 grams
-4. Item codes can have various formats - capture the exact text
-5. QR codes and barcodes are for reference only - focus on printed text
-6. If multiple stone types (STN, KUN, ICS), list each separately in stones array
+4. IMPORTANT: Keep STONE (STN) and KUNDAN (KUN) weights SEPARATE - they are different materials
+5. Item codes can have various formats - capture the exact text
+6. QR codes and barcodes are for reference only - focus on printed text
+7. If multiple stone types (STN, KUN, ICS), kundan should go in kundanWeight field, others in stoneWeight
+8. Extract HUID and hallmark information if visible on the tag
 
 Only include fields with actual values. Use null for fields that cannot be determined. Return ONLY valid JSON, no additional text or markdown.`
       : `You are analyzing ${imageCount} of a diamond Jewellery tag ${viewText}. These tags can be in various formats including:
@@ -212,9 +217,25 @@ export function normalizeExtractedData(data, JewelleryType) {
 
   if (JewelleryType === "gold") {
     // Calculate total stone weight from stones array if not provided
+    // BUT exclude kundan - kundan should be separate
     if (!normalized.stoneWeight && normalized.stones && Array.isArray(normalized.stones)) {
       normalized.stoneWeight = normalized.stones.reduce((sum, stone) => {
-        return sum + (stone.weight || 0);
+        // Only add non-kundan stones
+        if (stone.type && !stone.type.toUpperCase().includes('KUN')) {
+          return sum + (stone.weight || 0);
+        }
+        return sum;
+      }, 0);
+    }
+
+    // Calculate kundan weight from stones array if marked as kundan
+    if (!normalized.kundanWeight && normalized.stones && Array.isArray(normalized.stones)) {
+      normalized.kundanWeight = normalized.stones.reduce((sum, stone) => {
+        // Only add kundan stones
+        if (stone.type && stone.type.toUpperCase().includes('KUN')) {
+          return sum + (stone.weight || 0);
+        }
+        return sum;
       }, 0);
     }
 
@@ -224,13 +245,15 @@ export function normalizeExtractedData(data, JewelleryType) {
     }
 
     // Calculate netWeight if we have grossWeight and stoneWeight
-    if (!normalized.netWeight && normalized.grossWeight && normalized.stoneWeight) {
-      normalized.netWeight = normalized.grossWeight - normalized.stoneWeight;
+    // Note: grossWeight typically includes both stones and kundan
+    const totalStoneAndKundan = (normalized.stoneWeight || 0) + (normalized.kundanWeight || 0);
+    if (!normalized.netWeight && normalized.grossWeight && totalStoneAndKundan > 0) {
+      normalized.netWeight = normalized.grossWeight - totalStoneAndKundan;
     }
 
     // Calculate grossWeight if we have netWeight and stoneWeight
-    if (!normalized.grossWeight && normalized.netWeight && normalized.stoneWeight) {
-      normalized.grossWeight = normalized.netWeight + normalized.stoneWeight;
+    if (!normalized.grossWeight && normalized.netWeight && totalStoneAndKundan > 0) {
+      normalized.grossWeight = normalized.netWeight + totalStoneAndKundan;
     }
 
   } else if (JewelleryType === "diamond") {

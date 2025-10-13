@@ -14,6 +14,10 @@ interface PriceBreakdownProps {
   diamondValue?: number;
   diamondColor?: string;
   diamondClarity?: string;
+  stoneWeight?: number;
+  stoneValue?: number;
+  kundanWeight?: number;
+  kundanValue?: number;
   makingChargeRate: number | string;
   makingCharges: number;
   subTotal: number;
@@ -26,6 +30,18 @@ interface PriceBreakdownProps {
   goldCarat?: string;
   goldType?: string;
   certification?: string;
+  // Additional extracted information
+  extractedData?: {
+    itemCode?: string;
+    grossWeight?: number;
+    netWeight?: number;
+    huid?: string;
+    hallmark?: string;
+    type?: string;
+    diameter?: string;
+    purity?: string;
+    rawText?: string;
+  };
 }
 
 export function PriceBreakdownCard({
@@ -38,6 +54,10 @@ export function PriceBreakdownCard({
   diamondValue = 0,
   diamondColor,
   diamondClarity,
+  stoneWeight,
+  stoneValue = 0,
+  kundanWeight,
+  kundanValue = 0,
   makingChargeRate,
   makingCharges,
   subTotal,
@@ -50,6 +70,7 @@ export function PriceBreakdownCard({
   goldCarat = "",
   goldType = "",
   certification = "",
+  extractedData,
 }: PriceBreakdownProps) {
   
   const formatCurrency = (value: number) => {
@@ -116,6 +137,82 @@ export function PriceBreakdownCard({
       </CardHeader>
 
       <CardContent className="space-y-0 p-0">
+        {/* Extracted Information Section */}
+        {extractedData && (
+          <>
+            <div className="p-4 bg-gradient-to-br from-gray-50 to-gray-100 border-b-2">
+              <h3 className="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
+                <Badge variant="outline" className="bg-white">
+                  Extracted Information
+                </Badge>
+              </h3>
+              <div className="grid grid-cols-2 gap-3 text-xs">
+                {extractedData.itemCode && (
+                  <div className="flex flex-col">
+                    <span className="text-gray-500 font-medium">Item Code</span>
+                    <span className="font-bold text-gray-900">{extractedData.itemCode}</span>
+                  </div>
+                )}
+                {extractedData.type && (
+                  <div className="flex flex-col">
+                    <span className="text-gray-500 font-medium">Type</span>
+                    <span className="font-bold text-gray-900 capitalize">{extractedData.type}</span>
+                  </div>
+                )}
+                {extractedData.grossWeight && (
+                  <div className="flex flex-col">
+                    <span className="text-gray-500 font-medium">Gross Weight</span>
+                    <span className="font-bold text-gray-900">{formatWeight(extractedData.grossWeight)}g</span>
+                  </div>
+                )}
+                {extractedData.netWeight && (
+                  <div className="flex flex-col">
+                    <span className="text-gray-500 font-medium">Net Weight</span>
+                    <span className="font-bold text-gray-900">{formatWeight(extractedData.netWeight)}g</span>
+                  </div>
+                )}
+                {stoneWeight && stoneWeight > 0 && (
+                  <div className="flex flex-col">
+                    <span className="text-gray-500 font-medium">Stone Weight</span>
+                    <span className="font-bold text-emerald-700">{formatWeight(stoneWeight)}g</span>
+                  </div>
+                )}
+                {kundanWeight && kundanWeight > 0 && (
+                  <div className="flex flex-col">
+                    <span className="text-gray-500 font-medium">Kundan Weight</span>
+                    <span className="font-bold text-orange-700">{formatWeight(kundanWeight)}g</span>
+                  </div>
+                )}
+                {extractedData.huid && (
+                  <div className="flex flex-col">
+                    <span className="text-gray-500 font-medium">HUID</span>
+                    <span className="font-bold text-gray-900 text-[10px]">{extractedData.huid}</span>
+                  </div>
+                )}
+                {extractedData.hallmark && (
+                  <div className="flex flex-col">
+                    <span className="text-gray-500 font-medium">Hallmark</span>
+                    <span className="font-bold text-gray-900">{extractedData.hallmark}</span>
+                  </div>
+                )}
+                {extractedData.diameter && (
+                  <div className="flex flex-col">
+                    <span className="text-gray-500 font-medium">Diameter</span>
+                    <span className="font-bold text-gray-900">{extractedData.diameter}</span>
+                  </div>
+                )}
+                {extractedData.purity && (
+                  <div className="flex flex-col">
+                    <span className="text-gray-500 font-medium">Purity</span>
+                    <span className="font-bold text-gray-900">{extractedData.purity}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+            <Separator className="my-0" />
+          </>
+        )}
+
         {/* Gold Calculation */}
         <div className="p-4 space-y-3">
           <div className="flex items-center justify-between py-2">
@@ -226,6 +323,80 @@ export function PriceBreakdownCard({
           </>
         )}
 
+        {/* Stone Weight & Value */}
+        {stoneValue > 0 && stoneWeight && (
+          <>
+            <Separator className="my-0" />
+            <div className="p-4 space-y-3 bg-emerald-50/30">
+              <div className="flex items-center justify-between py-2">
+                <div className="flex items-center space-x-2">
+                  <Gem className="h-4 w-4 text-emerald-500" />
+                  <span className="text-sm text-gray-600">Stone Rate</span>
+                </div>
+                <span className="font-semibold text-gray-900">₹800/g</span>
+              </div>
+
+              <div className="flex items-center justify-between py-2">
+                <span className="text-sm text-gray-600 pl-6">Weight</span>
+                <span className="font-semibold text-gray-900">{formatWeight(stoneWeight)}g</span>
+              </div>
+
+              <div className="flex items-center justify-between py-2 bg-white -mx-4 px-4 rounded">
+                <span className="text-sm text-gray-600 pl-6">Final Value</span>
+                <span className="font-bold text-gray-900">₹{formatCurrency(stoneValue)}</span>
+              </div>
+
+              {/* Calculation Formula */}
+              <div className="space-y-1 py-2 text-xs bg-emerald-50 -mx-4 px-4">
+                <div className="flex items-center justify-center text-gray-600">
+                  <Calculator className="h-3 w-3 mr-1" />
+                  <span className="font-semibold">Formula: Stone Weight × ₹800</span>
+                </div>
+                <div className="flex items-center justify-center text-gray-500">
+                  <span className="font-medium">Calculation: {formatWeight(stoneWeight)}g × ₹800 = ₹{formatCurrency(stoneValue)}</span>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* Kundan Weight & Value */}
+        {kundanValue > 0 && kundanWeight && (
+          <>
+            <Separator className="my-0" />
+            <div className="p-4 space-y-3 bg-orange-50/30">
+              <div className="flex items-center justify-between py-2">
+                <div className="flex items-center space-x-2">
+                  <Gem className="h-4 w-4 text-orange-500" />
+                  <span className="text-sm text-gray-600">Kundan Rate</span>
+                </div>
+                <span className="font-semibold text-gray-900">₹200/g</span>
+              </div>
+
+              <div className="flex items-center justify-between py-2">
+                <span className="text-sm text-gray-600 pl-6">Weight</span>
+                <span className="font-semibold text-gray-900">{formatWeight(kundanWeight)}g</span>
+              </div>
+
+              <div className="flex items-center justify-between py-2 bg-white -mx-4 px-4 rounded">
+                <span className="text-sm text-gray-600 pl-6">Final Value</span>
+                <span className="font-bold text-gray-900">₹{formatCurrency(kundanValue)}</span>
+              </div>
+
+              {/* Calculation Formula */}
+              <div className="space-y-1 py-2 text-xs bg-orange-50 -mx-4 px-4">
+                <div className="flex items-center justify-center text-gray-600">
+                  <Calculator className="h-3 w-3 mr-1" />
+                  <span className="font-semibold">Formula: Kundan Weight × ₹200</span>
+                </div>
+                <div className="flex items-center justify-center text-gray-500">
+                  <span className="font-medium">Calculation: {formatWeight(kundanWeight)}g × ₹200 = ₹{formatCurrency(kundanValue)}</span>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+
         {/* Making Charges */}
         <Separator className="my-0" />
         <div className="p-4 space-y-3">
@@ -284,14 +455,18 @@ export function PriceBreakdownCard({
               <span className="font-semibold">
                 Formula: Gold Value 
                 {diamondValue > 0 && ' + Diamond Value'}
+                {stoneValue > 0 && ' + Stone Value'}
+                {kundanValue > 0 && ' + Kundan Value'}
                 {' + Making Charges'}
               </span>
             </div>
             <div className="flex items-center justify-center text-gray-500">
               <span className="font-medium">
-                Calculation: {formatCurrency(goldValue)} 
-                {diamondValue > 0 && ` + ${formatCurrency(diamondValue)}`}
-                {` + ${formatCurrency(makingCharges)} = ${formatCurrency(subTotal)}`}
+                Calculation: ₹{formatCurrency(goldValue)} 
+                {diamondValue > 0 && ` + ₹${formatCurrency(diamondValue)}`}
+                {stoneValue > 0 && ` + ₹${formatCurrency(stoneValue)}`}
+                {kundanValue > 0 && ` + ₹${formatCurrency(kundanValue)}`}
+                {` + ₹${formatCurrency(makingCharges)} = ₹${formatCurrency(subTotal)}`}
               </span>
             </div>
           </div>

@@ -41,6 +41,7 @@ interface ExtractedData {
   carat?: string;
   diamondWeight?: number;
   stoneWeight?: number;
+  kundanWeight?: number;
   purity?: string;
   itemCode?: string;
   [key: string]: any;
@@ -69,6 +70,10 @@ interface PriceBreakdown {
   diamondValue: number;
   diamondColor?: string;
   diamondClarity?: string;
+  stoneWeight?: number;
+  stoneValue: number;
+  kundanWeight?: number;
+  kundanValue: number;
   makingChargeRate: number | string;
   makingCharges: number;
   subTotal: number;
@@ -355,6 +360,8 @@ export function JewelleryTagScanner({
         clarity: extractedData.clarity || missingDetails.clarity,
       };
 
+      console.log('📋 Complete Data for Calculation:', completeData);
+
       // Calculate Net Weight from Gross Weight - Diamond Weight if net weight is missing
       if (!completeData.netWeight && !completeData.weight) {
         const grossWeight = completeData.totalWeight || completeData.grossWeight || 0;
@@ -370,12 +377,39 @@ export function JewelleryTagScanner({
       // Calculate price based on extracted data with making charges
       let goldValue = 0;
       let diamondValue = 0;
+      let stoneValue = 0;
+      let kundanValue = 0;
       let calculatedMakingCharges = 0;
       let goldRate = 0;
       let goldWeightValue = 0;
       let diamondRate = 0;
       let diamondWeightValue = 0;
+      let stoneWeightValue = 0;
+      let kundanWeightValue = 0;
       let makingChargeRateDisplay: number | string = 0;
+
+      // Calculate stone and kundan prices (applicable for both gold and diamond)
+      const stoneWeight = completeData.stoneWeight || 0;
+      const kundanWeight = completeData.kundanWeight || 0;
+      
+      console.log('💎 Stone & Kundan Calculation:', {
+        stoneWeight,
+        kundanWeight,
+        stoneRate: 800,
+        kundanRate: 200
+      });
+      
+      if (stoneWeight > 0) {
+        stoneWeightValue = stoneWeight;
+        stoneValue = stoneWeight * 800; // ₹800 per gram
+        console.log('✅ Stone value calculated:', stoneValue);
+      }
+      
+      if (kundanWeight > 0) {
+        kundanWeightValue = kundanWeight;
+        kundanValue = kundanWeight * 200; // ₹200 per gram
+        console.log('✅ Kundan value calculated:', kundanValue);
+      }
 
       if (JewelleryType === "gold") {
         const weight = completeData.weight || completeData.netWeight || 0;
@@ -499,7 +533,7 @@ export function JewelleryTagScanner({
         makingChargeRateDisplay = makingChargesData.percentage || 800;
       }
 
-      const subTotal = goldValue + diamondValue + calculatedMakingCharges;
+      const subTotal = goldValue + diamondValue + stoneValue + kundanValue + calculatedMakingCharges;
       const finalPrice = subTotal; // No GST - final price is same as subtotal
 
       // Determine display values for diamond color and clarity
@@ -515,12 +549,18 @@ export function JewelleryTagScanner({
         diamondValue,
         diamondColor: displayColor,
         diamondClarity: displayClarity,
+        stoneWeight: stoneWeightValue > 0 ? stoneWeightValue : undefined,
+        stoneValue,
+        kundanWeight: kundanWeightValue > 0 ? kundanWeightValue : undefined,
+        kundanValue,
         makingChargeRate: makingChargeRateDisplay,
         makingCharges: calculatedMakingCharges,
         subTotal,
         gst: 0, // No GST
         finalPrice,
       };
+
+      console.log('💰 Price Breakdown:', breakdown);
 
       setCalculatedPrice(finalPrice);
       setPriceBreakdown(breakdown);
@@ -1220,10 +1260,10 @@ export function JewelleryTagScanner({
                   )}
                   
                   {/* Kundan Weight - Prominently displayed */}
-                  {extractedData.kundWeight && (
+                  {extractedData.kundanWeight && (
                     <div className="flex justify-between p-2 rounded">
                       <span className="text-muted-foreground font-semibold">Kundan Weight:</span>
-                      <span className="font-bold ">{extractedData.kundWeight}g</span>
+                      <span className="font-bold ">{extractedData.kundanWeight}g</span>
                     </div>
                   )}
                   

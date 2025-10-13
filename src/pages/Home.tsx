@@ -22,6 +22,10 @@ interface PriceBreakdown {
   diamondValue: number;
   diamondColor?: string;
   diamondClarity?: string;
+  stoneWeight?: number;
+  stoneValue: number;
+  kundanWeight?: number;
+  kundanValue: number;
   makingChargeRate: number | string;
   makingCharges: number;
   subTotal: number;
@@ -90,81 +94,6 @@ export default function Home() {
           {/* Show price breakdown and extracted info if scan result is available */}
           {scanResult ? (
             <div className="space-y-6">
-              {/* Extracted Information Card */}
-              <Card className="shadow-lg border-2 border-primary/30">
-                <CardHeader className="pb-4 bg-gradient-to-r from-primary/5 to-primary/10">
-                  <CardTitle className="flex items-center space-x-2 text-lg">
-                    <ScanLine className="h-5 w-5 text-primary" />
-                    <span>Extracted Information</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="pt-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {scanResult.extractedData.itemCode && (
-                      <div className="flex justify-between items-center py-2 px-3 bg-gray-50 rounded">
-                        <span className="text-sm text-gray-600 font-medium">Item Code:</span>
-                        <span className="text-sm font-semibold">{scanResult.extractedData.itemCode}</span>
-                      </div>
-                    )}
-                    {scanResult.extractedData.carat && (
-                      <div className="flex justify-between items-center py-2 px-3 bg-gray-50 rounded">
-                        <span className="text-sm text-gray-600 font-medium">Carat/Purity:</span>
-                        <span className="text-sm font-semibold">{scanResult.extractedData.carat.toUpperCase()}</span>
-                      </div>
-                    )}
-                    {(scanResult.extractedData.weight || scanResult.extractedData.netWeight) && (
-                      <div className="flex justify-between items-center py-2 px-3 bg-gray-50 rounded">
-                        <span className="text-sm text-gray-600 font-medium">Weight:</span>
-                        <span className="text-sm font-semibold">
-                          {(scanResult.extractedData.weight || scanResult.extractedData.netWeight)?.toFixed(3)}g
-                        </span>
-                      </div>
-                    )}
-                    {scanResult.extractedData.grossWeight && (
-                      <div className="flex justify-between items-center py-2 px-3 bg-gray-50 rounded">
-                        <span className="text-sm text-gray-600 font-medium">Gross Weight:</span>
-                        <span className="text-sm font-semibold">{scanResult.extractedData.grossWeight.toFixed(3)}g</span>
-                      </div>
-                    )}
-                    {scanResult.extractedData.stoneWeight && (
-                      <div className="flex justify-between items-center py-2 px-3 bg-gray-50 rounded">
-                        <span className="text-sm text-gray-600 font-medium">Stone Weight:</span>
-                        <span className="text-sm font-semibold">{scanResult.extractedData.stoneWeight.toFixed(3)}g</span>
-                      </div>
-                    )}
-                    {scanResult.extractedData.diamondWeight && (
-                      <div className="flex justify-between items-center py-2 px-3 bg-gray-50 rounded">
-                        <span className="text-sm text-gray-600 font-medium">Diamond Weight:</span>
-                        <span className="text-sm font-semibold">{scanResult.extractedData.diamondWeight.toFixed(3)}ct</span>
-                      </div>
-                    )}
-                    {scanResult.extractedData.color && (
-                      <div className="flex justify-between items-center py-2 px-3 bg-gray-50 rounded">
-                        <span className="text-sm text-gray-600 font-medium">Diamond Color:</span>
-                        <span className="text-sm font-semibold">{scanResult.extractedData.color}</span>
-                      </div>
-                    )}
-                    {scanResult.extractedData.clarity && (
-                      <div className="flex justify-between items-center py-2 px-3 bg-gray-50 rounded">
-                        <span className="text-sm text-gray-600 font-medium">Diamond Clarity:</span>
-                        <span className="text-sm font-semibold">{scanResult.extractedData.clarity}</span>
-                      </div>
-                    )}
-                    {scanResult.extractedData.type && (
-                      <div className="flex justify-between items-center py-2 px-3 bg-gray-50 rounded">
-                        <span className="text-sm text-gray-600 font-medium">Jewellery Type:</span>
-                        <span className="text-sm font-semibold capitalize">{scanResult.extractedData.type}</span>
-                      </div>
-                    )}
-                    {scanResult.makingCharges.goldType && (
-                      <div className="flex justify-between items-center py-2 px-3 bg-gray-50 rounded">
-                        <span className="text-sm text-gray-600 font-medium">Gold Type:</span>
-                        <span className="text-sm font-semibold capitalize">{scanResult.makingCharges.goldType}</span>
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
 
               {/* Price Breakdown */}
               <div>
@@ -180,6 +109,10 @@ export default function Home() {
                   diamondValue={scanResult.priceBreakdown.diamondValue}
                   diamondColor={scanResult.priceBreakdown.diamondColor}
                   diamondClarity={scanResult.priceBreakdown.diamondClarity}
+                  stoneWeight={scanResult.priceBreakdown.stoneWeight}
+                  stoneValue={scanResult.priceBreakdown.stoneValue}
+                  kundanWeight={scanResult.priceBreakdown.kundanWeight}
+                  kundanValue={scanResult.priceBreakdown.kundanValue}
                   makingChargeRate={scanResult.priceBreakdown.makingChargeRate}
                   makingCharges={scanResult.priceBreakdown.makingCharges}
                   subTotal={scanResult.priceBreakdown.subTotal}
@@ -188,6 +121,16 @@ export default function Home() {
                   goldCarat={scanResult.extractedData.carat}
                   goldType={scanResult.makingCharges.goldType}
                   certification={scanResult.verificationAnswers?.certificationType}
+                  extractedData={{
+                    itemCode: scanResult.extractedData.itemCode,
+                    grossWeight: scanResult.extractedData.grossWeight,
+                    netWeight: scanResult.extractedData.netWeight,
+                    huid: scanResult.extractedData.huid,
+                    hallmark: scanResult.extractedData.hallmark,
+                    type: scanResult.extractedData.type,
+                    diameter: scanResult.extractedData.diameter,
+                    purity: scanResult.extractedData.purity,
+                  }}
                 />
 
                 <div className="text-center mt-4 space-y-2">
