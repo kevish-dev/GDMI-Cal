@@ -166,7 +166,7 @@ export default function Home() {
       <GoldRateMarquee />
 
       {/* Hero Section */}
-      <div className="relative min-h-[calc(100vh-200px)] flex items-center justify-center px-3 sm:px-4 py-12 sm:py-16 lg:py-20 bg-gradient-to-b from-background via-muted/20 to-background">
+      <div className="relative flex  px-3 sm:px-4 py-12 sm:py-16 lg:py-20 bg-gradient-to-b from-background via-muted/20 to-background">
         <div className="container mx-auto max-w-6xl">
           <div className="text-left space-y-6 sm:space-y-8 mb-12 sm:mb-16">
             {/* Main Heading */}
@@ -200,67 +200,79 @@ export default function Home() {
               </Button>
             </div>
           </div>
+        </div>
+      </div>
 
-          {/* How it Works Section */}
-          <div className="bg-[#DED9CD] py-6 px-4 sm:px-6 lg:px-8 rounded-2xl shadow-xl">
-            <h2 className="text-5xl sm:text-3xl lg:text-4xl mb-10 sm:mb-12 text-[#564C35]" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
-              How it works
-            </h2>
+      {/* How it Works Section - Full Width */}
+      <div className="w-full bg-[#DED9CD] py-12 sm:py-16">
+        <div className="container mx-auto max-w-4xl px-6 sm:px-10 lg:px-16">
+          <h2 
+            className="text-5xl sm:text-5xl md:text-6xl mb-12 sm:mb-16 text-[#564C35]" 
+            style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 400 }}
+          >
+            How it works
+          </h2>
 
-            <div className="max-w-4xl mx-auto space-y-8 sm:space-y-10">
+          <div className="space-y-10 container mx-auto max-w-4xl">
               {/* Step 1 */}
-              <div className="flex gap-4 sm:gap-6 items-start">
-                <div className="flex-shrink-0">
-                  <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-[#907F58] text-white flex items-center justify-center text-xl sm:text-2xl font-bold shadow-lg">
+              <div className="flex gap-5 sm:gap-6 items-start">
+                <div className="flex-shrink-0 flex flex-col items-center">
+                  <div className="w-8 h-8 sm:w-14 sm:h-14 rounded-full bg-[#907F58] text-white flex items-center justify-center text-xl sm:text-2xl">
                     1
                   </div>
                 </div>
-                <div className="flex-1 pt-1">
-                  <h3 className="text-2xl sm:text-2xl font-bold text-foreground mb-2 uppercase tracking-wide text-[#564C35]" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+                <div className="flex-1">
+                  <h3 
+                    className="text-xl sm:text-2xl md:text-3xl font-bold text-[#564C35]  uppercase tracking-wide" 
+                    style={{ fontFamily: "'Cormorant Garamond', serif" }}
+                  >
                     Scan Tag
                   </h3>
-                  <p className="text-base sm:text-lg text-muted-foreground leading-relaxed">
-                    Upload the front and back of your jewellery tag.
+                  <p className="text-base sm:text-lg text-[#6B6456] leading-relaxed font-light">
+                    <span className="block">Upload the front and back of your</span>
+                    <span className="block">jewellery tag.</span>
                   </p>
                 </div>
               </div>
 
-              {/* Connector Line */}
-              <div className="ml-6 sm:ml-7 w-px h-8 sm:h-12 bg-[#907F58]/30"></div>
-
               {/* Step 2 */}
-              <div className="flex gap-4 sm:gap-6 items-start">
-                <div className="flex-shrink-0">
-                  <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-[#907F58] text-white flex items-center justify-center text-xl sm:text-2xl font-bold shadow-lg">
+              <div className="flex gap-5 sm:gap-6 items-start">
+                <div className="flex-shrink-0 flex flex-col items-center">
+                  <div className="w-8 h-8 sm:w-14 sm:h-14 rounded-full bg-[#907F58] text-white flex items-center justify-center text-xl sm:text-2xl ">
                     2
                   </div>
                 </div>
-                <div className="flex-1 pt-1">
-                  <h3 className="text-2xl sm:text-2xl font-bold text-foreground mb-2 uppercase tracking-wide text-[#564C35]" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+                <div className="flex-1">
+                  <h3 
+                    className="text-xl sm:text-2xl md:text-3xl font-bold text-[#564C35]  uppercase tracking-wide" 
+                    style={{ fontFamily: "'Cormorant Garamond', serif" }}
+                  >
                     Select Jewellery Type
                   </h3>
-                  <p className="text-base sm:text-lg text-muted-foreground leading-relaxed">
-                    Pick your jewellery type to get accurate making charges.
+                  <p className="text-base sm:text-lg text-[#6B6456] leading-relaxed font-light">
+                    <span className="block">Pick your jewellery type to get accurate </span>
+                    <span className="block">making charges.</span>
                   </p>
                 </div>
               </div>
 
-              {/* Connector Line */}
-              <div className="ml-6 sm:ml-7 w-px h-8 sm:h-12 bg-[#907F58]/30"></div>
-
               {/* Step 3 */}
-              <div className="flex gap-4 sm:gap-6 items-start">
+              <div className="flex gap-5 sm:gap-6 items-start">
                 <div className="flex-shrink-0">
-                  <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-[#907F58] text-white flex items-center justify-center text-xl sm:text-2xl font-bold shadow-lg">
+                  <div className="w-8 h-8 sm:w-14 sm:h-14 rounded-full bg-[#907F58] text-white flex items-center justify-center text-xl sm:text-2xl">
                     3
                   </div>
                 </div>
-                <div className="flex-1 pt-1">
-                  <h3 className="text-2xl sm:text-2xl font-bold text-foreground mb-2 uppercase tracking-wide text-[#564C35]" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+                <div className="flex-1">
+                  <h3 
+                    className="text-xl sm:text-2xl md:text-3xl font-bold text-[#564C35] uppercase tracking-wide" 
+                    style={{ fontFamily: "'Cormorant Garamond', serif" }}
+                  >
                     Get Actual Price
                   </h3>
-                  <p className="text-base sm:text-lg text-muted-foreground leading-relaxed">
-                    View your true price based on live gold and diamond rates.
+                  <p className="text-base sm:text-lg text-[#6B6456] leading-relaxed font-light">
+                    <span className="block">View your true price based on live gold</span>
+                    <span className="block">and diamond rates.</span>
                   </p>
                 </div>
               </div>
@@ -268,8 +280,8 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Floating Contact Buttons */}
-        <div className="fixed right-4 sm:right-6 bottom-20 sm:bottom-24 z-50 flex flex-col gap-3">
+      {/* Floating Contact Buttons */}
+      <div className="fixed right-4 sm:right-6 bottom-20 sm:bottom-24 z-50 flex flex-col gap-3">
           {/* Phone Button */}
           <button
             onClick={handleCallNow}
@@ -288,8 +300,7 @@ export default function Home() {
             <MessageCircle className="h-6 w-6 sm:h-7 sm:w-7" />
           </button>
         </div>
-      </div>
-
+      
       {/* User Verification Modal */}
       <UserVerificationModal />
     </Layout>
