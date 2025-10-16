@@ -106,7 +106,7 @@ export function UserVerificationModal({ onSuccess }: UserVerificationModalProps)
 
   return (
     <Dialog open={isModalOpen} onOpenChange={() => !isLoading && closeVerificationModal()}>
-      <DialogContent className="w-[calc(100vw-2rem)] max-w-md mx-4 sm:mx-auto sm:w-full">
+      <DialogContent className="w-[calc(100vw-2rem)] max-w-md sm:mx-auto sm:w-full">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-lg sm:text-xl">
             Enter details and get the actual price

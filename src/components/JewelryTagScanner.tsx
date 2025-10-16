@@ -31,6 +31,7 @@ import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { extractTextFromImages, normalizeExtractedData } from "@/utils/getText";
 import { useRates } from "@/contexts/RatesContext";
+import { useUserVerification } from "@/contexts/UserVerificationContext";
 
 type JewelleryType = "gold" | "diamond" | null;
 type Certification = "IGI" | "Non-IGI";
@@ -141,12 +142,14 @@ export function JewelleryTagScanner({
   const [missingDetails, setMissingDetails] = useState<{
     carat?: string;
     netWeight?: number;
+    diamondWeight?: number;
     color?: string;
     clarity?: string;
   }>({});
   
   const { toast } = useToast();
   const { goldRates, diamondRates, makingCharges } = useRates();
+  const { isVerifiedUser, openVerificationModal } = useUserVerification();
   
   // Refs for camera inputs and video
   const topCameraInputRef = useRef<HTMLInputElement>(null);
@@ -338,6 +341,12 @@ export function JewelleryTagScanner({
   };
 
   const handleCalculatePreview = async () => {
+    // Check if user is verified before allowing calculation
+    if (!isVerifiedUser) {
+      openVerificationModal();
+      return;
+    }
+
     if (!JewelleryType || !extractedData) {
       toast({
         title: "Missing data",
@@ -356,6 +365,7 @@ export function JewelleryTagScanner({
         carat: extractedData.carat || missingDetails.carat,
         weight: extractedData.weight || missingDetails.netWeight,
         netWeight: extractedData.netWeight || missingDetails.netWeight,
+        diamondWeight: extractedData.diamondWeight || missingDetails.diamondWeight,
         color: extractedData.color || missingDetails.color,
         clarity: extractedData.clarity || missingDetails.clarity,
       };
@@ -481,8 +491,8 @@ export function JewelleryTagScanner({
         
         if (diamondWeight <= 0) {
           toast({
-            title: "Invalid diamond weight",
-            description: "Diamond weight must be greater than 0. Please check the extracted data.",
+            title: "Missing diamond weight",
+            description: "Please enter diamond weight in the missing details section.",
             variant: "destructive",
           });
           setIsCalculating(false);
@@ -617,10 +627,17 @@ export function JewelleryTagScanner({
     )
   );
   
-  const hasMissingDetails = !extractedData?.carat || !hasNetWeight;
+  // Check if diamond weight is available (only for diamond jewellery)
+  const hasDiamondWeight = JewelleryType !== "diamond" || !!(
+    extractedData?.diamondWeight ||
+    (extractedData?.diamonds && Array.isArray(extractedData.diamonds) && extractedData.diamonds.length > 0)
+  );
+  
+  const hasMissingDetails = !extractedData?.carat || !hasNetWeight || !hasDiamondWeight;
   const missingDetailsFilled = 
     (!extractedData?.carat ? !!missingDetails.carat : true) &&
-    (!hasNetWeight ? !!missingDetails.netWeight : true);
+    (!hasNetWeight ? !!missingDetails.netWeight : true) &&
+    (!hasDiamondWeight ? !!missingDetails.diamondWeight : true);
   
   const canCalculate =
     (!hasMissingDetails || missingDetailsFilled) &&
@@ -1411,7 +1428,14 @@ export function JewelleryTagScanner({
                 );
                 
                 const needsNetWeightInput = !(extractedData.weight || extractedData.netWeight) && !canCalculateNetWeight;
-                const showMissingDetails = !extractedData.carat || needsNetWeightInput;
+                
+                // Check if diamond weight is missing (for diamond jewellery only)
+                const needsDiamondWeightInput = JewelleryType === "diamond" && !(
+                  extractedData.diamondWeight ||
+                  (extractedData.diamonds && Array.isArray(extractedData.diamonds) && extractedData.diamonds.length > 0)
+                );
+                
+                const showMissingDetails = !extractedData.carat || needsNetWeightInput || needsDiamondWeightInput;
                 
                 return showMissingDetails ? (
                   <div className="space-y-4">
@@ -1506,6 +1530,44 @@ export function JewelleryTagScanner({
                           </div>
                           <p className="text-xs text-muted-foreground mt-2">
                             Enter the net weight of gold/diamond in the Jewellery
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Missing Diamond Weight - Only for Diamond Jewellery */}
+                  {needsDiamondWeightInput && (
+                    <div className="space-y-3 p-4 sm:p-5 bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-950/20 dark:to-orange-900/20 border-2 border-orange-200 dark:border-orange-800 rounded-xl shadow-sm">
+                      <div className="flex items-start gap-3">
+                        <div className="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-orange-500 flex items-center justify-center mt-0.5">
+                          <span className="text-xs sm:text-sm font-bold text-white">!</span>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <Label className="text-sm sm:text-base font-semibold leading-relaxed text-foreground block mb-3">
+                            Enter Diamond Weight (in carats)
+                          </Label>
+                          <div className="relative">
+                            <input
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              placeholder="e.g., 0.5"
+                              value={missingDetails.diamondWeight || ""}
+                              onChange={(e) =>
+                                setMissingDetails((prev) => ({
+                                  ...prev,
+                                  diamondWeight: parseFloat(e.target.value) || undefined,
+                                }))
+                              }
+                              className="w-full p-3 sm:p-4 pr-12 rounded-lg border-2 border-orange-300 dark:border-orange-700 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 outline-none transition-all bg-background text-foreground font-medium"
+                            />
+                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">
+                              ct
+                            </span>
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-2">
+                            Enter the total diamond weight in carats
                           </p>
                         </div>
                       </div>
