@@ -170,9 +170,9 @@ export default function Home() {
         <div className="container mx-auto max-w-6xl">
           <div className="text-left space-y-6 sm:space-y-8 mb-12 sm:mb-16">
             {/* Main Heading */}
-            <h1 className="text-4xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight px-4" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
-              <span className="block text-foreground">Save Lakhs, know the</span>
-              <span className="block text-foreground">actual price of</span>
+            <h1 className="text-5xl sm:text-4xl md:text-5xl lg:text-6xl font-medium leading-tight px-2" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+              <span className="block text-foreground">Save Lakhs, know</span>
+              <span className="block text-foreground">the actual price of</span>
               <span className="block text-foreground">any jewellery.</span>
             </h1>
 
