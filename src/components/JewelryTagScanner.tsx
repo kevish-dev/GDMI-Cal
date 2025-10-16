@@ -20,6 +20,8 @@ import {
   Loader2,
   ChevronRight,
   ChevronLeft,
+  ChevronUp,
+  ChevronDown,
   Crown,
   Diamond,
   ArrowRight,
@@ -137,6 +139,7 @@ export function JewelleryTagScanner({
   const [priceBreakdown, setPriceBreakdown] = useState<PriceBreakdown | null>(null);
   const [activeCamera, setActiveCamera] = useState<"top" | "bottom" | null>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
+  const [expandedSide, setExpandedSide] = useState<"top" | "bottom" | null>(null);
   
   // State for missing compulsory details
   const [missingDetails, setMissingDetails] = useState<{
@@ -300,10 +303,10 @@ export function JewelleryTagScanner({
   };
 
   const handleExtractText = async () => {
-    if (!images.top) {
+    if (!images.top || !images.bottom) {
       toast({
-        title: "Missing image",
-        description: "Please upload at least the top view image",
+        title: "Missing images",
+        description: "Please scan both sides of the tag",
         variant: "destructive",
       });
       return;
@@ -322,11 +325,11 @@ export function JewelleryTagScanner({
       const normalizedData = normalizeExtractedData(data, JewelleryType!);
       
       setExtractedData(normalizedData);
-      setStep(3); // Go to verification step
+      setStep(2); // Go to select jewellery type step
       toast({
         title: "Text extracted successfully",
         description:
-          "Please verify the extracted information",
+          "Please select jewellery type",
       });
     } catch (error) {
       toast({
@@ -608,12 +611,12 @@ export function JewelleryTagScanner({
     }
   };
 
-  const canProceedToStep2 = 
+  const canProceedToStep2 = images.top !== null && images.bottom !== null; // Both images required
+  const canProceedToStep3 = 
     JewelleryType !== null &&
     (JewelleryType === "gold"
       ? makingChargesData.goldType !== undefined && makingChargesData.percentage !== undefined
       : true); // Diamond Jewellery auto-sets making charges, no manual input needed
-  const canProceedToStep3 = images.top !== null; // Only top image required
   
   // Check if all compulsory details are available
   // Net weight can be calculated from Gross Weight - Diamond Weight
@@ -655,15 +658,10 @@ export function JewelleryTagScanner({
       <CardHeader className="relative border-b">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="relative">
-              <ScanLine className="h-8 w-8 text-primary animate-pulse" />
-              <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full" />
-            </div>
             <div>
               <CardTitle className="text-xl sm:text-2xl">
-                Scan Jewellery Tag
+                {step === 1 ? "Step 1-Scan" : step === 2 ? "Step 2-Select" : "Step 3-Verify"}
               </CardTitle>
-              <CardDescription>Step {step} of 3</CardDescription>
             </div>
           </div>
           {!embedded && (
@@ -679,223 +677,60 @@ export function JewelleryTagScanner({
         </div>
         
         {/* Custom Stepped Progress Bar */}
-        <div className="mt-6 flex items-center justify-center gap-3">
-          {[1, 2, 3].map((stepNumber) => (
-            <div
-              key={stepNumber}
-              className={cn(
-                "flex-1 h-2 rounded-full transition-all duration-300",
-                stepNumber <= step
-                  ? "bg-primary"
-                  : "bg-muted"
-              )}
-            />
-          ))}
+        <div className="mt-6 flex items-center justify-between gap-2">
+          <div className="flex-1">
+            <div className="flex items-center gap-2">
+              <span className={cn(
+                "text-xs font-medium whitespace-nowrap",
+                step === 1 ? "text-[#8B7355]" : "text-gray-400"
+              )}>
+                Step 1-Scan
+              </span>
+              <div className={cn(
+                "h-1 flex-1 rounded-full transition-all duration-300",
+                step >= 1 ? "bg-[#8B7355]" : "bg-gray-200"
+              )} />
+            </div>
+          </div>
+          <div className="flex-1">
+            <div className="flex items-center gap-2">
+              <span className={cn(
+                "text-xs font-medium whitespace-nowrap",
+                step === 2 ? "text-[#8B7355]" : "text-gray-400"
+              )}>
+                Step 2-Select
+              </span>
+              <div className={cn(
+                "h-1 flex-1 rounded-full transition-all duration-300",
+                step >= 2 ? "bg-[#8B7355]" : "bg-gray-200"
+              )} />
+            </div>
+          </div>
+          <div className="flex-1">
+            <div className="flex items-center gap-2">
+              <span className={cn(
+                "text-xs font-medium whitespace-nowrap",
+                step === 3 ? "text-[#8B7355]" : "text-gray-400"
+              )}>
+                Step 3-Verify
+              </span>
+              <div className={cn(
+                "h-1 flex-1 rounded-full transition-all duration-300",
+                step >= 3 ? "bg-[#8B7355]" : "bg-gray-200"
+              )} />
+            </div>
+          </div>
         </div>
       </CardHeader>
 
         <CardContent className="pt-6 space-y-6">
-          {/* Step 1: Select Type & Making Charges */}
+          {/* Step 1: Scan both sides of tag */}
           {step === 1 && (
             <div className="space-y-6 animate-in fade-in duration-500">
-              <div className="text-center space-y-2">
-                <h3 className="text-xl font-semibold text-foreground">
-                  Select type of jewellery
-                </h3>
-              </div>
+              <h1 className="text-3xl sm:text-4xl font-serif text-center">
+                Scan both sides of tag
+              </h1>
 
-              {/* Jewellery Type Selection with Making Charges */}
-              <div className="space-y-4">
-                {/* Option A: Gold with Making Charges */}
-                <div 
-                  className={cn(
-                    "group transition-all duration-300",
-                    JewelleryType === "gold" && "scale-[1.01]"
-                  )}
-                >
-                  <div className={cn(
-                    "relative rounded-2xl border-2 transition-all duration-300",
-                    JewelleryType === "gold" 
-                      ? "border-primary bg-primary/5 shadow-lg shadow-primary/20" 
-                      : "border-muted-foreground/20 bg-background"
-                  )}>
-                    
-                    {/* Selection Indicator */}
-                    {JewelleryType === "gold" && (
-                      <div className="absolute -top-3 -right-3 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center shadow-lg animate-in zoom-in duration-300 z-10">
-                        <Check className="h-5 w-5 text-white" />
-                      </div>
-                    )}
-
-                    {/* Main Gold Header - Clickable */}
-                    <div 
-                      onClick={() => setJewelleryType("gold")}
-                      className="p-4 sm:p-6 cursor-pointer hover:bg-primary/5 transition-colors rounded-t-2xl"
-                    >
-                      <div className="flex items-center gap-3 sm:gap-6">
-                        {/* Icon */}
-                        <div className={cn(
-                          "p-3 sm:p-4 rounded-xl transition-colors flex-shrink-0",
-                          JewelleryType === "gold" ? "bg-primary/10" : "bg-muted"
-                        )}>
-                          <Crown className={cn(
-                            "h-8 w-8 sm:h-10 sm:w-10 transition-colors",
-                            JewelleryType === "gold" ? "text-primary" : "text-muted-foreground"
-                          )} />
-                        </div>
-
-                        {/* Content */}
-                        <div className="flex-1 min-w-0">
-                          <h4 className="text-xl sm:text-2xl font-bold">Gold</h4>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Gold Making Charges Sub-options with Radio Inputs */}
-                    <div className="px-4 sm:px-6 pb-4 sm:pb-6 pt-2 border-t border-muted">
-                      <p className="text-xs text-muted-foreground mb-3">Select making charge type:</p>
-                      <RadioGroup
-                        value={JewelleryType === "gold" ? (makingChargesData.goldType || "") : ""}
-                        onValueChange={(value) => {
-                          setJewelleryType("gold");
-                          const type = value as GoldType;
-                          const rates = {
-                            chains: makingCharges.chains || 2,
-                            plain: makingCharges.plain || 3.5,
-                            temple: makingCharges.temple || 7,
-                            italian: makingCharges.italianGold || 18
-                          };
-                          setMakingChargesData((prev) => ({
-                            ...prev,
-                            goldType: type,
-                            percentage: rates[type],
-                          }));
-                        }}
-                        className="grid grid-cols-2 gap-2 sm:gap-3"
-                      >
-                        {[
-                          { value: 'chains', label: 'Chains', rate: makingCharges.chains || 2 },
-                          { value: 'plain', label: 'Plain', rate: makingCharges.plain || 3.5 },
-                          { value: 'temple', label: 'Temple', rate: makingCharges.temple || 7 },
-                          { value: 'italian', label: 'Italian Gold', rate: makingCharges.italianGold || 18 }
-                        ].map((type) => (
-                          <div key={type.value}>
-                            <RadioGroupItem
-                              value={type.value}
-                              id={`gold-${type.value}`}
-                              className="sr-only peer"
-                            />
-                            <Label
-                              htmlFor={`gold-${type.value}`}
-                              className={cn(
-                                "flex flex-col gap-1 p-3 sm:p-4 rounded-lg border-2 cursor-pointer transition-all",
-                                "peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary peer-data-[state=checked]:text-primary-foreground peer-data-[state=checked]:shadow-md",
-                                "hover:border-primary/50 hover:bg-primary/5"
-                              )}
-                            >
-                              <div className="flex items-center justify-between">
-                                <span className="font-semibold text-sm sm:text-base">{type.label}</span>
-                                <div className={cn(
-                                  "w-4 h-4 sm:w-5 sm:h-5 rounded-full border-2 flex items-center justify-center transition-all",
-                                  JewelleryType === "gold" && makingChargesData.goldType === type.value
-                                    ? "border-primary-foreground bg-primary-foreground"
-                                    : "border-muted-foreground"
-                                )}>
-                                  {JewelleryType === "gold" && makingChargesData.goldType === type.value && (
-                                    <div className="w-2 h-2 rounded-full bg-primary" />
-                                  )}
-                                </div>
-                              </div>
-                              <span className="text-xs peer-data-[state=checked]:text-primary-foreground/80 text-muted-foreground">
-                                {type.rate}% charges
-                              </span>
-                            </Label>
-                          </div>
-                        ))}
-                      </RadioGroup>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Option B: Diamond with Making Charges */}
-                <div 
-                  className={cn(
-                    "group transition-all duration-300",
-                    JewelleryType === "diamond" && "scale-[1.01]"
-                  )}
-                >
-                  <div className={cn(
-                    "relative rounded-2xl border-2 transition-all duration-300",
-                    JewelleryType === "diamond" 
-                      ? "border-secondary bg-secondary/5 shadow-lg shadow-secondary/20" 
-                      : "border-muted-foreground/20 bg-background"
-                  )}>
-                    
-                    {/* Selection Indicator */}
-                    {JewelleryType === "diamond" && (
-                      <div className="absolute -top-3 -right-3 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center shadow-lg animate-in zoom-in duration-300 z-10">
-                        <Check className="h-5 w-5 text-white" />
-                      </div>
-                    )}
-
-                    {/* Main Diamond Header - Clickable */}
-                    <div 
-                      onClick={() => {
-                        setJewelleryType("diamond");
-                        setMakingChargesData((prev) => ({
-                          ...prev,
-                          goldType: null,
-                          percentage: 800,
-                        }));
-                      }}
-                      className="p-4 sm:p-6 cursor-pointer hover:bg-secondary/5 transition-colors rounded-t-2xl"
-                    >
-                      <div className="flex items-center gap-3 sm:gap-6">
-                        {/* Icon */}
-                        <div className={cn(
-                          "p-3 sm:p-4 rounded-xl transition-colors flex-shrink-0",
-                          JewelleryType === "diamond" ? "bg-secondary/10" : "bg-muted"
-                        )}>
-                          <Diamond className={cn(
-                            "h-8 w-8 sm:h-10 sm:w-10 transition-colors",
-                            JewelleryType === "diamond" ? "text-secondary" : "text-muted-foreground"
-                          )} />
-                        </div>
-
-                        {/* Content */}
-                        <div className="flex-1 min-w-0">
-                          <h4 className="text-xl sm:text-2xl font-bold">Diamond</h4>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Diamond Making Charges Info */}
-                    <div className="px-4 sm:px-6 pb-4 sm:pb-6 pt-2 border-t border-muted w-fit">
-                      <div className="flex items-center justify-between p-3 sm:p-4 bg-secondary/10 rounded-lg border-2 border-secondary/20">
-                          <p className="text-xs font-bold text-secondary">₹800</p>
-                          <p className="text-xs text-muted-foreground">/gram</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex justify-end pt-4">
-                <Button
-                  onClick={() => setStep(2)}
-                  disabled={!canProceedToStep2}
-                  className="gap-2"
-                >
-                  Continue
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {/* Step 2: Upload Images & Extract */}
-          {step === 2 && (
-            <div className="space-y-6 animate-in fade-in duration-500">
               {/* Camera Modal - Full Screen */}
               {activeCamera && (
                 <div className="fixed inset-0 bg-black z-[60] flex flex-col">
@@ -908,7 +743,7 @@ export function JewelleryTagScanner({
                         </div>
                         <div>
                           <h3 className="text-white font-semibold text-base sm:text-lg">
-                            Capture {activeCamera === "top" ? "Top" : "Bottom"} View
+                            Capture {activeCamera === "top" ? "Side 1" : "Side 2"}
                           </h3>
                           <p className="text-white/70 text-xs sm:text-sm">
                             Position the tag within the frame
@@ -991,218 +826,341 @@ export function JewelleryTagScanner({
                       {/* Spacer for symmetry */}
                       <div className="w-[100px] sm:w-[116px]"></div>
                     </div>
-                    
-                    {/* Instruction Text */}
-                    <div className="mt-4 text-center">
-                      <p className="text-white/80 text-xs sm:text-sm">
-                        Tap the button to capture photo
-                      </p>
-                    </div>
                   </div>
                 </div>
               )}
 
-              <div className="grid sm:grid-cols-2 gap-4">
-                {/* Top View Capture */}
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium flex items-center gap-2">
-                    Top View <span className="text-destructive">*</span>
-                  </Label>
+              {/* Side 1 */}
+              <div className="space-y-4">
+                <h2 className="text-xl font-semibold">Side 1</h2>
+                <Card className="relative bg-[#E5DDD5] border-0 rounded-3xl overflow-hidden min-h-[280px] flex items-center justify-center">
                   {imagePreviews.top ? (
-                    <div className="relative group">
+                    <div className="relative w-full h-full">
                       <img
                         src={imagePreviews.top}
-                        alt="Top view"
-                        className="w-full h-48 object-cover rounded-lg border-2 border-primary"
+                        alt="Side 1"
+                        className="w-full h-full object-contain p-4"
                       />
-                      {/* Retake Button - Top Left */}
-                      <Button
-                        size="sm"
-                        variant="secondary"
+                      <button
                         onClick={() => handleRemoveImage("top")}
-                        className="absolute top-2 left-2 gap-1.5 shadow-lg hover:shadow-xl transition-all"
+                        className="absolute top-4 left-4 w-10 h-10 rounded-full bg-white/90 flex items-center justify-center shadow-lg hover:bg-white"
                       >
-                        <RotateCcw className="h-3.5 w-3.5" />
-                        Retake
-                      </Button>
-                      {/* Success Indicator - Top Right */}
-                      <div className="absolute top-2 right-2 bg-green-500 text-white rounded-full p-1.5 shadow-lg">
-                        <Check className="h-4 w-4" />
+                        <X className="h-5 w-5 text-gray-600" />
+                      </button>
+                      <div className="absolute top-4 right-4 w-10 h-10 rounded-full bg-green-500 flex items-center justify-center">
+                        <Check className="h-5 w-5 text-white" />
                       </div>
                     </div>
                   ) : (
-                    <div className="space-y-3">
-                      {/* Primary: Camera Capture Button */}
-                      <Button
-                        type="button"
-                        onClick={() => handleCameraCapture("top")}
-                        className="w-full h-48 flex flex-col items-center justify-center gap-3 bg-primary hover:bg-primary/90 text-primary-foreground border-2 border-primary shadow-lg"
-                      >
-                        <Camera className="h-12 w-12" />
-                        <div className="text-center">
-                          <p className="font-semibold text-base">Open Camera</p>
-                          <p className="text-xs opacity-90 mt-1">Take a photo of the tag</p>
-                        </div>
-                      </Button>
-                      
-                      {/* Secondary: Upload Option (Toggle) */}
-                      <div className="text-center">
-                        <button
-                          type="button"
-                          onClick={() => toggleUploadOption("top")}
-                          className="text-xs text-muted-foreground hover:text-primary underline-offset-2 hover:underline transition-colors"
-                        >
-                          {showUploadOption.top ? "Hide upload option" : "Or upload from gallery"}
-                        </button>
-                        
-                        {showUploadOption.top && (
-                          <div className="mt-3 animate-in fade-in duration-300">
-                            <Label
-                              htmlFor="top-image-upload"
-                              className="flex flex-col items-center justify-center h-32 border-2 border-dashed border-muted-foreground/25 rounded-lg cursor-pointer hover:border-primary/50 hover:bg-primary/5 transition-all"
-                            >
-                              <ImageIcon className="h-6 w-6 text-muted-foreground" />
-                              <span className="text-xs text-muted-foreground mt-2">
-                                Click to upload from gallery
-                              </span>
-                              <input
-                                id="top-image-upload"
-                                type="file"
-                                accept="image/*"
-                                className="hidden"
-                                onChange={(e) =>
-                                  handleImageUpload("top", e.target.files?.[0] || null)
-                                }
-                              />
-                            </Label>
-                          </div>
-                        )}
-                      </div>
-                    </div>
+                    <button
+                      onClick={() => startCamera("top")}
+                      className="flex flex-col items-center justify-center gap-3 py-16 w-full"
+                    >
+                      <Camera className="h-12 w-12 text-gray-700" />
+                      <span className="text-base font-medium text-gray-900">
+                        Click here to scan tag<br />(Side 1)
+                      </span>
+                    </button>
                   )}
-                </div>
+                </Card>
 
-                {/* Bottom View Capture */}
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium flex items-center gap-2">
-                    Bottom View
-                  </Label>
-                  {imagePreviews.bottom ? (
-                    <div className="relative group">
-                      <img
-                        src={imagePreviews.bottom}
-                        alt="Bottom view"
-                        className="w-full h-48 object-cover rounded-lg border-2 border-primary"
-                      />
-                      {/* Retake Button - Top Left */}
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        onClick={() => handleRemoveImage("bottom")}
-                        className="absolute top-2 left-2 gap-1.5 shadow-lg hover:shadow-xl transition-all"
-                      >
-                        <RotateCcw className="h-3.5 w-3.5" />
-                        Retake
-                      </Button>
-                      {/* Success Indicator - Top Right */}
-                      <div className="absolute top-2 right-2 bg-green-500 text-white rounded-full p-1.5 shadow-lg">
-                        <Check className="h-4 w-4" />
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      {/* Primary: Camera Capture Button */}
-                      <Button
-                        type="button"
-                        onClick={() => handleCameraCapture("bottom")}
-                        className="w-full h-48 flex flex-col items-center justify-center gap-3 bg-secondary hover:bg-secondary/90 text-secondary-foreground border-2 border-secondary shadow-lg"
-                      >
-                        <Camera className="h-12 w-12" />
-                        <div className="text-center">
-                          <p className="font-semibold text-base">Open Camera</p>
-                          <p className="text-xs opacity-90 mt-1">Take a photo of the tag</p>
-                        </div>
-                      </Button>
-                      
-                      {/* Secondary: Upload Option (Toggle) */}
-                      <div className="text-center">
-                        <button
-                          type="button"
-                          onClick={() => toggleUploadOption("bottom")}
-                          className="text-xs text-muted-foreground hover:text-primary underline-offset-2 hover:underline transition-colors"
-                        >
-                          {showUploadOption.bottom ? "Hide upload option" : "Or upload from gallery"}
-                        </button>
-                        
-                        {showUploadOption.bottom && (
-                          <div className="mt-3 animate-in fade-in duration-300">
-                            <Label
-                              htmlFor="bottom-image-upload"
-                              className="flex flex-col items-center justify-center h-32 border-2 border-dashed border-muted-foreground/25 rounded-lg cursor-pointer hover:border-primary/50 hover:bg-primary/5 transition-all"
-                            >
-                              <ImageIcon className="h-6 w-6 text-muted-foreground" />
-                              <span className="text-xs text-muted-foreground mt-2">
-                                Click to upload from gallery
-                              </span>
-                              <input
-                                id="bottom-image-upload"
-                                type="file"
-                                accept="image/*"
-                                className="hidden"
-                                onChange={(e) =>
-                                  handleImageUpload("bottom", e.target.files?.[0] || null)
-                                }
-                              />
-                            </Label>
+                {/* Side 1 extracted data */}
+                {extractedData && imagePreviews.top && (
+                  <div className="border border-gray-200 rounded-xl overflow-hidden">
+                    <button
+                      onClick={() => setExpandedSide(expandedSide === "top" ? null : "top")}
+                      className="w-full flex items-center justify-between px-4 py-3 bg-white"
+                    >
+                      <span className="font-medium">View Extracted Data</span>
+                      {expandedSide === "top" ? (
+                        <ChevronUp className="h-5 w-5" />
+                      ) : (
+                        <ChevronDown className="h-5 w-5" />
+                      )}
+                    </button>
+                    {expandedSide === "top" && (
+                      <div className="px-4 py-3 bg-gray-50 space-y-2 border-t">
+                        {(extractedData.totalWeight || extractedData.grossWeight) && (
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Gross Weight</span>
+                            <span className="font-semibold">{extractedData.totalWeight || extractedData.grossWeight}g</span>
+                          </div>
+                        )}
+                        {(extractedData.weight || extractedData.netWeight) && (
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Net Weight</span>
+                            <span className="font-semibold">{extractedData.weight || extractedData.netWeight}g</span>
+                          </div>
+                        )}
+                        {extractedData.carat && (
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Purity</span>
+                            <span className="font-semibold">{extractedData.carat}</span>
                           </div>
                         )}
                       </div>
-                    </div>
-                  )}
-                </div>
+                    )}
+                  </div>
+                )}
               </div>
 
-              {isExtracting && 
+              {/* Side 2 */}
+              <div className="space-y-4">
+                <h2 className="text-xl font-semibold">Side 2</h2>
+                <Card className="relative bg-[#E5DDD5] border-0 rounded-3xl overflow-hidden min-h-[280px] flex items-center justify-center">
+                  {imagePreviews.bottom ? (
+                    <div className="relative w-full h-full">
+                      <img
+                        src={imagePreviews.bottom}
+                        alt="Side 2"
+                        className="w-full h-full object-contain p-4"
+                      />
+                      <button
+                        onClick={() => handleRemoveImage("bottom")}
+                        className="absolute top-4 left-4 w-10 h-10 rounded-full bg-white/90 flex items-center justify-center shadow-lg hover:bg-white"
+                      >
+                        <X className="h-5 w-5 text-gray-600" />
+                      </button>
+                      <div className="absolute top-4 right-4 w-10 h-10 rounded-full bg-green-500 flex items-center justify-center">
+                        <Check className="h-5 w-5 text-white" />
+                      </div>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => startCamera("bottom")}
+                      className="flex flex-col items-center justify-center gap-3 py-16 w-full"
+                    >
+                      <Camera className="h-12 w-12 text-gray-700" />
+                      <span className="text-base font-medium text-gray-900">
+                        Scan Tag with Camera
+                      </span>
+                    </button>
+                  )}
+                </Card>
+
+                {/* Side 2 extracted data */}
+                {extractedData && imagePreviews.bottom && (
+                  <div className="border border-gray-200 rounded-xl overflow-hidden">
+                    <button
+                      onClick={() => setExpandedSide(expandedSide === "bottom" ? null : "bottom")}
+                      className="w-full flex items-center justify-between px-4 py-3 bg-white"
+                    >
+                      <span className="font-medium">View Extracted Data</span>
+                      {expandedSide === "bottom" ? (
+                        <ChevronUp className="h-5 w-5" />
+                      ) : (
+                        <ChevronDown className="h-5 w-5" />
+                      )}
+                    </button>
+                    {expandedSide === "bottom" && (
+                      <div className="px-4 py-3 bg-gray-50 space-y-2 border-t">
+                        {extractedData.stoneWeight && (
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Stone Weight</span>
+                            <span className="font-semibold">{extractedData.stoneWeight}g</span>
+                          </div>
+                        )}
+                        {extractedData.kundanWeight && (
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Kundan Weight</span>
+                            <span className="font-semibold">{extractedData.kundanWeight}g</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Upload from gallery option */}
+              <button
+                onClick={() => {
+                  if (!imagePreviews.top) {
+                    topCameraInputRef.current?.click();
+                  } else if (!imagePreviews.bottom) {
+                    bottomCameraInputRef.current?.click();
+                  }
+                }}
+                className="w-full py-4 border-2 border-green-500 text-green-600 rounded-xl font-medium hover:bg-green-50 transition-colors"
+              >
+                Or upload image from gallery
+              </button>
+
+              <input
+                ref={topCameraInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) handleImageUpload("top", file);
+                }}
+              />
+              <input
+                ref={bottomCameraInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) handleImageUpload("bottom", file);
+                }}
+              />
+
+              {isExtracting && (
                 <div className="bg-primary/5 border border-primary/20 rounded-lg p-6 text-center">
                   <div className="flex flex-col items-center gap-3">
-                    <div className="relative">
-                      <Loader2 className="h-12 w-12 text-primary animate-spin" />
-                      <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full animate-pulse" />
-                    </div>
-                    <div>
-                      <p className="font-semibold text-primary">
-                        Extracting Text...
-                      </p>
-                    </div>
+                    <Loader2 className="h-12 w-12 text-primary animate-spin" />
+                    <p className="font-semibold text-primary">Extracting Text...</p>
                   </div>
                 </div>
-              }
+              )}
 
-              <div className="flex justify-between pt-4">
-                <Button
-                  variant="outline"
-                  onClick={() => setStep(1)}
-                  className="gap-2"
+              {/* Next button */}
+              <Button
+                onClick={handleExtractText}
+                disabled={!canProceedToStep2 || isExtracting}
+                className="w-full py-6 bg-[#8B7355] hover:bg-[#7A6349] text-white rounded-xl text-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isExtracting ? "Extracting..." : "Next"}
+              </Button>
+            </div>
+          )}
+
+          {/* Step 2: Select jewellery type */}
+          {step === 2 && (
+            <div className="space-y-6 animate-in fade-in duration-500">
+              <h1 className="text-3xl sm:text-4xl font-serif text-center">
+                Select jewellery type
+              </h1>
+
+              {/* Gold Jewellery */}
+              <Card className="bg-[#E5DDD5] border-0 rounded-3xl p-6">
+                <h2 className="text-2xl font-serif mb-6">Gold Jewellery</h2>
+                <RadioGroup
+                  value={JewelleryType === "gold" ? (makingChargesData.goldType || "") : ""}
+                  onValueChange={(value) => {
+                    setJewelleryType("gold");
+                    const type = value as GoldType;
+                    const rates = {
+                      chains: makingCharges.chains || 2.5,
+                      plain: makingCharges.plain || 3.5,
+                      temple: makingCharges.temple || 7,
+                      italian: makingCharges.italianGold || 18
+                    };
+                    setMakingChargesData({
+                      goldType: type,
+                      percentage: rates[type],
+                    });
+                  }}
+                  className="grid grid-cols-2 gap-3"
                 >
-                  <ChevronLeft className="h-4 w-4" />
+                  {[
+                    { value: 'chains', label: 'Chains', rate: makingCharges.chains || 2.5 },
+                    { value: 'plain', label: 'Plain', rate: makingCharges.plain || 3.5 },
+                    { value: 'temple', label: 'Temple/Antique', rate: makingCharges.temple || 7 },
+                    { value: 'italian', label: 'Italian Gold', rate: makingCharges.italianGold || 18 }
+                  ].map((type) => (
+                    <div
+                      key={type.value}
+                      className={cn(
+                        "relative flex items-center justify-between px-4 py-6 rounded-2xl cursor-pointer transition-all",
+                        JewelleryType === "gold" && makingChargesData.goldType === type.value
+                          ? "bg-[#8B7355] text-white"
+                          : "bg-white text-gray-900"
+                      )}
+                      onClick={() => {
+                        setJewelleryType("gold");
+                        const goldType = type.value as GoldType;
+                        const rates = {
+                          chains: makingCharges.chains || 2.5,
+                          plain: makingCharges.plain || 3.5,
+                          temple: makingCharges.temple || 7,
+                          italian: makingCharges.italianGold || 18
+                        };
+                        setMakingChargesData({
+                          goldType,
+                          percentage: rates[goldType],
+                        });
+                      }}
+                    >
+                      <div>
+                        <div className="font-semibold text-lg">{type.label}</div>
+                        <div className={cn(
+                          "text-sm",
+                          JewelleryType === "gold" && makingChargesData.goldType === type.value
+                            ? "text-white/80"
+                            : "text-gray-500"
+                        )}>
+                          {type.rate}% making
+                        </div>
+                      </div>
+                      <RadioGroupItem
+                        value={type.value}
+                        className={cn(
+                          "border-2",
+                          JewelleryType === "gold" && makingChargesData.goldType === type.value
+                            ? "border-white"
+                            : "border-gray-300"
+                        )}
+                      />
+                    </div>
+                  ))}
+                </RadioGroup>
+              </Card>
+
+              {/* Diamond Jewellery */}
+              <Card
+                className={cn(
+                  "border-2 rounded-3xl p-6 cursor-pointer transition-colors",
+                  JewelleryType === "diamond"
+                    ? "bg-[#8B7355] text-white border-[#8B7355]"
+                    : "bg-white border-[#E5DDD5]"
+                )}
+                onClick={() => {
+                  setJewelleryType("diamond");
+                  setMakingChargesData({
+                    goldType: undefined,
+                    percentage: 800,
+                  });
+                }}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-2xl font-serif mb-2">Diamond Jewellery</h2>
+                    <p className={cn(
+                      "text-sm",
+                      JewelleryType === "diamond" ? "text-white/80" : "text-gray-500"
+                    )}>
+                      Any type of diamond jewellery
+                    </p>
+                  </div>
+                  <RadioGroupItem
+                    value="diamond"
+                    checked={JewelleryType === "diamond"}
+                    className={cn(
+                      "border-2 w-6 h-6",
+                      JewelleryType === "diamond" ? "border-white" : "border-gray-300"
+                    )}
+                  />
+                </div>
+              </Card>
+
+              {/* Navigation buttons */}
+              <div className="flex gap-4">
+                <Button
+                  onClick={() => setStep(1)}
+                  variant="outline"
+                  className="flex-1 py-6 rounded-xl text-lg font-medium border-2"
+                >
                   Back
                 </Button>
                 <Button
-                  onClick={handleExtractText}
-                  disabled={!canProceedToStep3 || isExtracting}
-                  className="gap-2"
+                  onClick={() => setStep(3)}
+                  disabled={!canProceedToStep3}
+                  className="flex-1 py-6 bg-[#8B7355] hover:bg-[#7A6349] text-white rounded-xl text-lg font-medium"
                 >
-                  {isExtracting ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      Loading...
-                    </>
-                  ) : (
-                    <>
-                      Continue
-                      <ScanLine className="h-4 w-4" />
-                    </>
-                  )}
+                  Next
                 </Button>
               </div>
             </div>
@@ -1660,328 +1618,97 @@ export function JewelleryTagScanner({
               ) : null;
               })()}
 
-              {/* Questions based on Jewellery type */}
-              {JewelleryType === "gold" ? (
-                <div className="space-y-4">
-                  {/* Question 1: Buy Back Guarantee */}
-                  <div className="space-y-3 p-4 sm:p-5 bg-gradient-to-br from-primary/5 to-primary/10 border-2 border-primary/20 rounded-xl shadow-sm">
-                    <div className="flex items-start gap-3">
-                      <div className="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary/20 flex items-center justify-center mt-0.5">
-                        <span className="text-xs sm:text-sm font-bold text-primary">1</span>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <Label className="text-sm sm:text-base font-semibold leading-relaxed text-foreground block mb-3">
-                          Does your jeweller give 100% buy back on gold weight?
-                        </Label>
-                        <RadioGroup
-                          value={
-                            verificationAnswers.buyBackGuarantee?.toString() || ""
-                          }
-                          onValueChange={(value) =>
-                            setVerificationAnswers((prev) => ({
-                              ...prev,
-                              buyBackGuarantee: value === "true",
-                            }))
-                          }
-                          className="grid grid-cols-2 gap-2 sm:gap-3"
-                        >
-                          <div>
-                            <RadioGroupItem value="true" id="buyback-yes" className="sr-only peer" />
-                            <Label
-                              htmlFor="buyback-yes"
-                              className={cn(
-                                "flex items-center justify-center gap-2 p-3 sm:p-4 rounded-lg border-2 cursor-pointer transition-all",
-                                "peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary peer-data-[state=checked]:text-primary-foreground peer-data-[state=checked]:shadow-md",
-                                "hover:border-primary/50 hover:bg-primary/5"
-                              )}
-                            >
-                              <div className={cn(
-                                "w-4 h-4 sm:w-5 sm:h-5 rounded-full border-2 flex items-center justify-center transition-all",
-                                verificationAnswers.buyBackGuarantee === true
-                                  ? "border-primary-foreground bg-primary-foreground"
-                                  : "border-muted-foreground"
-                              )}>
-                                {verificationAnswers.buyBackGuarantee === true && (
-                                  <div className="w-2 h-2 rounded-full bg-primary" />
-                                )}
-                              </div>
-                              <span className="font-medium text-sm sm:text-base">Yes</span>
-                            </Label>
-                          </div>
-                          <div>
-                            <RadioGroupItem value="false" id="buyback-no" className="sr-only peer" />
-                            <Label
-                              htmlFor="buyback-no"
-                              className={cn(
-                                "flex items-center justify-center gap-2 p-3 sm:p-4 rounded-lg border-2 cursor-pointer transition-all",
-                                "peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary peer-data-[state=checked]:text-primary-foreground peer-data-[state=checked]:shadow-md",
-                                "hover:border-primary/50 hover:bg-primary/5"
-                              )}
-                            >
-                              <div className={cn(
-                                "w-4 h-4 sm:w-5 sm:h-5 rounded-full border-2 flex items-center justify-center transition-all",
-                                verificationAnswers.buyBackGuarantee === false
-                                  ? "border-primary-foreground bg-primary-foreground"
-                                  : "border-muted-foreground"
-                              )}>
-                                {verificationAnswers.buyBackGuarantee === false && (
-                                  <div className="w-2 h-2 rounded-full bg-primary" />
-                                )}
-                              </div>
-                              <span className="font-medium text-sm sm:text-base">No</span>
-                            </Label>
-                          </div>
-                        </RadioGroup>
-                      </div>
-                    </div>
-                  </div>
+              {/* Jeweller Practice Question */}
+              <Card className="bg-[#E5DDD5] border-0 rounded-3xl p-6">
+                <p className="text-gray-700 mb-6 text-center">
+                  When you look at the back of your jewellery, can you see all the Kundan or stones?
+                </p>
 
-                  {/* Question 2: Raw Form */}
-                  <div className="space-y-3 p-4 sm:p-5 bg-gradient-to-br from-primary/5 to-primary/10 border-2 border-primary/20 rounded-xl shadow-sm">
-                    <div className="flex items-start gap-3">
-                      <div className="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary/20 flex items-center justify-center mt-0.5">
-                        <span className="text-xs sm:text-sm font-bold text-primary">2</span>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <Label className="text-sm sm:text-base font-semibold leading-relaxed text-foreground block mb-3">
-                          Does your jeweller show you the raw form of Jewellery
-                          (without stone/kundan)?
-                        </Label>
-                        <RadioGroup
-                          value={verificationAnswers.showsRawForm?.toString() || ""}
-                          onValueChange={(value) =>
-                            setVerificationAnswers((prev) => ({
-                              ...prev,
-                              showsRawForm: value === "true",
-                            }))
-                          }
-                          className="grid grid-cols-2 gap-2 sm:gap-3"
-                        >
-                          <div>
-                            <RadioGroupItem value="true" id="rawform-yes" className="sr-only peer" />
-                            <Label
-                              htmlFor="rawform-yes"
-                              className={cn(
-                                "flex items-center justify-center gap-2 p-3 sm:p-4 rounded-lg border-2 cursor-pointer transition-all",
-                                "peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary peer-data-[state=checked]:text-primary-foreground peer-data-[state=checked]:shadow-md",
-                                "hover:border-primary/50 hover:bg-primary/5"
-                              )}
-                            >
-                              <div className={cn(
-                                "w-4 h-4 sm:w-5 sm:h-5 rounded-full border-2 flex items-center justify-center transition-all",
-                                verificationAnswers.showsRawForm === true
-                                  ? "border-primary-foreground bg-primary-foreground"
-                                  : "border-muted-foreground"
-                              )}>
-                                {verificationAnswers.showsRawForm === true && (
-                                  <div className="w-2 h-2 rounded-full bg-primary" />
-                                )}
-                              </div>
-                              <span className="font-medium text-sm sm:text-base">Yes</span>
-                            </Label>
-                          </div>
-                          <div>
-                            <RadioGroupItem value="false" id="rawform-no" className="sr-only peer" />
-                            <Label
-                              htmlFor="rawform-no"
-                              className={cn(
-                                "flex items-center justify-center gap-2 p-3 sm:p-4 rounded-lg border-2 cursor-pointer transition-all",
-                                "peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary peer-data-[state=checked]:text-primary-foreground peer-data-[state=checked]:shadow-md",
-                                "hover:border-primary/50 hover:bg-primary/5"
-                              )}
-                            >
-                              <div className={cn(
-                                "w-4 h-4 sm:w-5 sm:h-5 rounded-full border-2 flex items-center justify-center transition-all",
-                                verificationAnswers.showsRawForm === false
-                                  ? "border-primary-foreground bg-primary-foreground"
-                                  : "border-muted-foreground"
-                              )}>
-                                {verificationAnswers.showsRawForm === false && (
-                                  <div className="w-2 h-2 rounded-full bg-primary" />
-                                )}
-                              </div>
-                              <span className="font-medium text-sm sm:text-base">No</span>
-                            </Label>
-                          </div>
-                        </RadioGroup>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {/* Question 1: Diamond Appreciation */}
-                  <div className="space-y-3 p-4 sm:p-5 bg-gradient-to-br from-secondary/5 to-secondary/10 border-2 border-secondary/20 rounded-xl shadow-sm">
-                    <div className="flex items-start gap-3">
-                      <div className="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-secondary/20 flex items-center justify-center mt-0.5">
-                        <span className="text-xs sm:text-sm font-bold text-secondary">1</span>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <Label className="text-sm sm:text-base font-semibold leading-relaxed text-foreground block mb-3">
-                          Does your jeweller give appreciation on diamond?
-                        </Label>
-                        <RadioGroup
-                          value={
-                            verificationAnswers.diamondAppreciation?.toString() ||
-                            ""
-                          }
-                          onValueChange={(value) =>
-                            setVerificationAnswers((prev) => ({
-                              ...prev,
-                              diamondAppreciation: value === "true",
-                            }))
-                          }
-                          className="grid grid-cols-2 gap-2 sm:gap-3"
-                        >
-                          <div>
-                            <RadioGroupItem value="true" id="appreciation-yes" className="sr-only peer" />
-                            <Label
-                              htmlFor="appreciation-yes"
-                              className={cn(
-                                "flex items-center justify-center gap-2 p-3 sm:p-4 rounded-lg border-2 cursor-pointer transition-all",
-                                "peer-data-[state=checked]:border-secondary peer-data-[state=checked]:bg-secondary peer-data-[state=checked]:text-secondary-foreground peer-data-[state=checked]:shadow-md",
-                                "hover:border-secondary/50 hover:bg-secondary/5"
-                              )}
-                            >
-                              <div className={cn(
-                                "w-4 h-4 sm:w-5 sm:h-5 rounded-full border-2 flex items-center justify-center transition-all",
-                                verificationAnswers.diamondAppreciation === true
-                                  ? "border-secondary-foreground bg-secondary-foreground"
-                                  : "border-muted-foreground"
-                              )}>
-                                {verificationAnswers.diamondAppreciation === true && (
-                                  <div className="w-2 h-2 rounded-full bg-secondary" />
-                                )}
-                              </div>
-                              <span className="font-medium text-sm sm:text-base">Yes</span>
-                            </Label>
-                          </div>
-                          <div>
-                            <RadioGroupItem value="false" id="appreciation-no" className="sr-only peer" />
-                            <Label
-                              htmlFor="appreciation-no"
-                              className={cn(
-                                "flex items-center justify-center gap-2 p-3 sm:p-4 rounded-lg border-2 cursor-pointer transition-all",
-                                "peer-data-[state=checked]:border-secondary peer-data-[state=checked]:bg-secondary peer-data-[state=checked]:text-secondary-foreground peer-data-[state=checked]:shadow-md",
-                                "hover:border-secondary/50 hover:bg-secondary/5"
-                              )}
-                            >
-                              <div className={cn(
-                                "w-4 h-4 sm:w-5 sm:h-5 rounded-full border-2 flex items-center justify-center transition-all",
-                                verificationAnswers.diamondAppreciation === false
-                                  ? "border-secondary-foreground bg-secondary-foreground"
-                                  : "border-muted-foreground"
-                              )}>
-                                {verificationAnswers.diamondAppreciation === false && (
-                                  <div className="w-2 h-2 rounded-full bg-secondary" />
-                                )}
-                              </div>
-                              <span className="font-medium text-sm sm:text-base">No</span>
-                            </Label>
-                          </div>
-                        </RadioGroup>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Question 2: Certificate Type */}
-                  <div className="space-y-3 p-4 sm:p-5 bg-gradient-to-br from-secondary/5 to-secondary/10 border-2 border-secondary/20 rounded-xl shadow-sm">
-                    <div className="flex items-start gap-3">
-                      <div className="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-secondary/20 flex items-center justify-center mt-0.5">
-                        <span className="text-xs sm:text-sm font-bold text-secondary">2</span>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <Label className="text-sm sm:text-base font-semibold leading-relaxed text-foreground block mb-3">
-                          Select type of certificate on diamond
-                        </Label>
-                        <RadioGroup
-                          value={verificationAnswers.certificationType || ""}
-                          onValueChange={(value) =>
-                            setVerificationAnswers((prev) => ({
-                              ...prev,
-                              certificationType: value as Certification,
-                            }))
-                          }
-                          className="grid grid-cols-1 gap-2 sm:gap-3"
-                        >
-                          <div>
-                            <RadioGroupItem value="IGI" id="cert-igi" className="sr-only peer" />
-                            <Label
-                              htmlFor="cert-igi"
-                              className={cn(
-                                "flex items-center justify-center gap-2 p-3 sm:p-4 rounded-lg border-2 cursor-pointer transition-all",
-                                "peer-data-[state=checked]:border-secondary peer-data-[state=checked]:bg-secondary peer-data-[state=checked]:text-secondary-foreground peer-data-[state=checked]:shadow-md",
-                                "hover:border-secondary/50 hover:bg-secondary/5"
-                              )}
-                            >
-                              <div className={cn(
-                                "w-4 h-4 sm:w-5 sm:h-5 rounded-full border-2 flex items-center justify-center transition-all",
-                                verificationAnswers.certificationType === "IGI"
-                                  ? "border-secondary-foreground bg-secondary-foreground"
-                                  : "border-muted-foreground"
-                              )}>
-                                {verificationAnswers.certificationType === "IGI" && (
-                                  <div className="w-2 h-2 rounded-full bg-secondary" />
-                                )}
-                              </div>
-                              <span className="font-medium text-sm sm:text-base">IGI Certified</span>
-                            </Label>
-                          </div>
-                          <div>
-                            <RadioGroupItem value="Non-IGI" id="cert-non-igi" className="sr-only peer" />
-                            <Label
-                              htmlFor="cert-non-igi"
-                              className={cn(
-                                "flex items-center justify-center gap-2 p-3 sm:p-4 rounded-lg border-2 cursor-pointer transition-all",
-                                "peer-data-[state=checked]:border-secondary peer-data-[state=checked]:bg-secondary peer-data-[state=checked]:text-secondary-foreground peer-data-[state=checked]:shadow-md",
-                                "hover:border-secondary/50 hover:bg-secondary/5"
-                              )}
-                            >
-                              <div className={cn(
-                                "w-4 h-4 sm:w-5 sm:h-5 rounded-full border-2 flex items-center justify-center transition-all",
-                                verificationAnswers.certificationType === "Non-IGI"
-                                  ? "border-secondary-foreground bg-secondary-foreground"
-                                  : "border-muted-foreground"
-                              )}>
-                                {verificationAnswers.certificationType === "Non-IGI" && (
-                                  <div className="w-2 h-2 rounded-full bg-secondary" />
-                                )}
-                              </div>
-                              <span className="font-medium text-sm sm:text-base">Non-IGI (Self Certified)</span>
-                            </Label>
-                          </div>
-                        </RadioGroup>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              <div className="flex justify-between pt-4">
-                <Button
-                  variant="outline"
-                  onClick={() => setStep(2)}
-                  className="gap-2"
+                <RadioGroup
+                  value={verificationAnswers.showsRawForm?.toString() || ""}
+                  onValueChange={(value) =>
+                    setVerificationAnswers((prev) => ({
+                      ...prev,
+                      showsRawForm: value === "true",
+                      // Auto-set other required fields for validation
+                      buyBackGuarantee: JewelleryType === "gold" ? true : prev.buyBackGuarantee,
+                      diamondAppreciation: JewelleryType === "diamond" ? false : prev.diamondAppreciation,
+                      certificationType: JewelleryType === "diamond" ? "Non-IGI" : prev.certificationType,
+                    }))
+                  }
+                  className="space-y-3"
                 >
-                  <ChevronLeft className="h-4 w-4" />
+                  <div
+                    className={cn(
+                      "flex items-center justify-between px-6 py-5 rounded-2xl cursor-pointer transition-all",
+                      verificationAnswers.showsRawForm === true
+                        ? "bg-[#8B7355] text-white"
+                        : "bg-white text-gray-900"
+                    )}
+                    onClick={() =>
+                      setVerificationAnswers((prev) => ({
+                        ...prev,
+                        showsRawForm: true,
+                        buyBackGuarantee: JewelleryType === "gold" ? true : prev.buyBackGuarantee,
+                        diamondAppreciation: JewelleryType === "diamond" ? false : prev.diamondAppreciation,
+                        certificationType: JewelleryType === "diamond" ? "Non-IGI" : prev.certificationType,
+                      }))
+                    }
+                  >
+                    <span className="text-base">All are visible and open from the back.</span>
+                    <RadioGroupItem
+                      value="true"
+                      className={cn(
+                        "border-2",
+                        verificationAnswers.showsRawForm === true ? "border-white" : "border-gray-300"
+                      )}
+                    />
+                  </div>
+
+                  <div
+                    className={cn(
+                      "flex items-center justify-between px-6 py-5 rounded-2xl cursor-pointer transition-all",
+                      verificationAnswers.showsRawForm === false
+                        ? "bg-[#8B7355] text-white"
+                        : "bg-white text-gray-900"
+                    )}
+                    onClick={() =>
+                      setVerificationAnswers((prev) => ({
+                        ...prev,
+                        showsRawForm: false,
+                        buyBackGuarantee: JewelleryType === "gold" ? true : prev.buyBackGuarantee,
+                        diamondAppreciation: JewelleryType === "diamond" ? false : prev.diamondAppreciation,
+                        certificationType: JewelleryType === "diamond" ? "Non-IGI" : prev.certificationType,
+                      }))
+                    }
+                  >
+                    <span className="text-base">Some are closed or covered from the back.</span>
+                    <RadioGroupItem
+                      value="false"
+                      className={cn(
+                        "border-2",
+                        verificationAnswers.showsRawForm === false ? "border-white" : "border-gray-300"
+                      )}
+                    />
+                  </div>
+                </RadioGroup>
+              </Card>
+
+              {/* Navigation buttons */}
+              <div className="flex gap-4">
+                <Button
+                  onClick={() => setStep(2)}
+                  variant="outline"
+                  className="flex-1 py-6 rounded-xl text-lg font-medium border-2"
+                >
                   Back
                 </Button>
                 <Button
                   onClick={handleCalculatePreview}
                   disabled={!canCalculate || isCalculating}
-                  className="gap-2"
+                  className="flex-1 py-6 bg-[#8B7355] hover:bg-[#7A6349] text-white rounded-xl text-lg font-medium"
                 >
-                  {isCalculating ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      Calculating...
-                    </>
-                  ) : (
-                    <>
-                      <Calculator className="h-4 w-4" />
-                      Calculate & Finish
-                    </>
-                  )}
+                  {isCalculating ? "Calculating..." : "Get Results"}
                 </Button>
               </div>
             </div>
