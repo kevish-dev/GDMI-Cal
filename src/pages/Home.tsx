@@ -177,16 +177,16 @@ export default function Home() {
             </h1>
 
             {/* Subheading */}
-            <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto px-4 leading-relaxed">
+            <p className="text-xl sm:text-lg md:text-xl font-light text-muted-foreground max-w-2xl mx-auto px-2 leading-relaxed">
               Snap. Scan. See what it's worth. Our smart calculator instantly reads your tag and reveals your jewellery's true value.
             </p>
 
             {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center px-4 pt-4">
+            <div className="flex  gap-3 sm:gap-4 justify-center items-center px-4 pt-4">
               <Button
                 size="lg"
                 onClick={() => setShowScanner(true)}
-                className="w-full sm:w-auto bg-[#907F58] hover:bg-[#6D5A42] text-white px-8 py-6 text-base sm:text-lg rounded-lg shadow-lg transition-all"
+                className="w-full sm:w-auto bg-[#907F58] hover:bg-[#6D5A42] text-white px-8 py-2 text-base sm:text-lg rounded-lg shadow-lg transition-all"
               >
                 Scan Tag and know
               </Button>
@@ -194,7 +194,7 @@ export default function Home() {
                 size="lg"
                 variant="outline"
                 onClick={() => navigate('/calculator')}
-                className="w-full sm:w-auto border-2 border-[#907F58] text-[#907F58] hover:bg-[#907F58] hover:text-white px-8 py-6 text-base sm:text-lg rounded-lg transition-all"
+                className="w-full sm:w-auto border-2 border-[#907F58] text-[#907F58] hover:bg-[#907F58] hover:text-white px-8 py-2 text-base sm:text-lg rounded-lg transition-all"
               >
                 Enter Manually
               </Button>
@@ -202,8 +202,8 @@ export default function Home() {
           </div>
 
           {/* How it Works Section */}
-          <div className="bg-gradient-to-b from-[#E8DED1] to-[#D4C4B0] py-12 sm:py-16 px-4 sm:px-6 lg:px-8 rounded-2xl shadow-xl">
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-center mb-10 sm:mb-12 text-foreground">
+          <div className="bg-[#DED9CD] py-6 px-4 sm:px-6 lg:px-8 rounded-2xl shadow-xl">
+            <h2 className="text-5xl sm:text-3xl lg:text-4xl mb-10 sm:mb-12 text-[#564C35]" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
               How it works
             </h2>
 
@@ -216,7 +216,7 @@ export default function Home() {
                   </div>
                 </div>
                 <div className="flex-1 pt-1">
-                  <h3 className="text-xl sm:text-2xl font-bold text-foreground mb-2 uppercase tracking-wide">
+                  <h3 className="text-2xl sm:text-2xl font-bold text-foreground mb-2 uppercase tracking-wide text-[#564C35]" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
                     Scan Tag
                   </h3>
                   <p className="text-base sm:text-lg text-muted-foreground leading-relaxed">
@@ -236,7 +236,7 @@ export default function Home() {
                   </div>
                 </div>
                 <div className="flex-1 pt-1">
-                  <h3 className="text-xl sm:text-2xl font-bold text-foreground mb-2 uppercase tracking-wide">
+                  <h3 className="text-2xl sm:text-2xl font-bold text-foreground mb-2 uppercase tracking-wide text-[#564C35]" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
                     Select Jewellery Type
                   </h3>
                   <p className="text-base sm:text-lg text-muted-foreground leading-relaxed">
@@ -256,7 +256,7 @@ export default function Home() {
                   </div>
                 </div>
                 <div className="flex-1 pt-1">
-                  <h3 className="text-xl sm:text-2xl font-bold text-foreground mb-2 uppercase tracking-wide">
+                  <h3 className="text-2xl sm:text-2xl font-bold text-foreground mb-2 uppercase tracking-wide text-[#564C35]" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
                     Get Actual Price
                   </h3>
                   <p className="text-base sm:text-lg text-muted-foreground leading-relaxed">
