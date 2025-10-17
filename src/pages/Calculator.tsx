@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,7 +24,6 @@ import { UserVerificationModal } from "@/components/UserVerificationModal";
 import { LiveGoldRateIndicator } from "@/components/LiveGoldRateIndicator";
 import { GoldRateMarquee } from "@/components/GoldRateMarquee";
 import { ContactSupportBox } from "@/components/ContactSupportBox";
-import { PriceBreakdownCard } from "@/components/PriceBreakdownCard";
 
 type JewelleryType = "gold" | "diamond" | null;
 type GoldType = "chains" | "plain" | "temple" | "italian";
@@ -92,19 +92,16 @@ export default function Calculator() {
     stoneWeight: "",
     jewellerQuote: "",
   });
-  const [priceBreakdown, setPriceBreakdown] = useState<PriceBreakdown | null>(
-    null
-  );
   const [isCalculating, setIsCalculating] = useState(false);
   const [validationErrors, setValidationErrors] = useState<{[key: string]: boolean}>({});
 
   const { toast } = useToast();
   const { goldRates, diamondRates, makingCharges, addCalculation, loading } = useRates();
   const { isVerifiedUser, openVerificationModal } = useUserVerification();
+  const navigate = useNavigate();
 
   const handleJewelleryTypeSelect = (type: JewelleryType) => {
     setJewelleryType(type);
-    setPriceBreakdown(null);
     // Reset forms when switching types
     if (type !== JewelleryType) {
       setGoldForm({ weight: "", carat: "", type: "", jewellerQuote: "" });
@@ -215,26 +212,6 @@ export default function Calculator() {
 
       const priceDifference = jewellerQuoteValue > 0 ? finalPrice - jewellerQuoteValue : undefined;
 
-      setPriceBreakdown({
-        goldRate,
-        goldWeight: goldWeightValue,
-        goldValue,
-        diamondRate: diamondRate > 0 ? diamondRate : undefined,
-        diamondWeight: diamondWeightValue > 0 ? diamondWeightValue : undefined,
-        diamondValue,
-        stoneWeight: undefined,
-        stoneValue: 0,
-        kundanWeight: undefined,
-        kundanValue: 0,
-        makingChargeRate: makingChargeRateDisplay,
-        makingCharges: calculatedMakingCharges,
-        subTotal,
-        gst: gstAmount,
-        finalPrice,
-        jewellerQuote: jewellerQuoteValue > 0 ? jewellerQuoteValue : undefined,
-        priceDifference,
-      });
-
       // Add calculation to analytics
       await addCalculation({
         type: JewelleryType as "gold" | "diamond",
@@ -260,6 +237,41 @@ export default function Calculator() {
       toast({
         title: "Calculation complete!",
         description: "Your Jewellery price has been calculated successfully.",
+      });
+
+      // Navigate to results page with data
+      navigate("/results", {
+        state: {
+          jewelryType: JewelleryType,
+          priceBreakdown: {
+            goldRate,
+            goldWeight: goldWeightValue,
+            goldValue,
+            diamondRate: diamondRate > 0 ? diamondRate : undefined,
+            diamondWeight: diamondWeightValue > 0 ? diamondWeightValue : undefined,
+            diamondValue,
+            stoneWeight: undefined,
+            stoneValue: 0,
+            kundanWeight: undefined,
+            kundanValue: 0,
+            makingChargeRate: makingChargeRateDisplay,
+            makingCharges: calculatedMakingCharges,
+            subTotal,
+            gst: gstAmount,
+            finalPrice,
+          },
+          extractedData: {
+            carat: JewelleryType === "gold" ? goldForm.carat : diamondForm.carat,
+            weight: JewelleryType === "gold" ? parseFloat(goldForm.weight) : parseFloat(diamondForm.goldWeight),
+            netWeight: JewelleryType === "gold" ? parseFloat(goldForm.weight) : parseFloat(diamondForm.goldWeight),
+            totalWeight: JewelleryType === "gold" ? parseFloat(goldForm.weight) : parseFloat(diamondForm.goldWeight),
+            grossWeight: JewelleryType === "gold" ? parseFloat(goldForm.weight) : parseFloat(diamondForm.goldWeight),
+            diamondWeight: JewelleryType === "diamond" ? parseFloat(diamondForm.diamondWeight) : undefined,
+            color: JewelleryType === "diamond" ? diamondForm.color : undefined,
+            clarity: JewelleryType === "diamond" ? diamondForm.clarity : undefined,
+            stoneWeight: JewelleryType === "diamond" && diamondForm.stoneWeight ? parseFloat(diamondForm.stoneWeight) : undefined,
+          },
+        },
       });
     } catch (error) {
       toast({
@@ -755,67 +767,6 @@ export default function Calculator() {
                     >
                       {isCalculating ? "Calculating..." : "Calculate Price"}
                     </Button>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
-
-            {/* Results Panel - Mobile optimized */}
-            <div className="space-y-4 sm:space-y-6">
-              {priceBreakdown ? (
-                <PriceBreakdownCard
-                  JewelleryType={JewelleryType as "gold" | "diamond"}
-                  goldRate={priceBreakdown.goldRate}
-                  goldWeight={priceBreakdown.goldWeight}
-                  goldValue={priceBreakdown.goldValue}
-                  diamondRate={priceBreakdown.diamondRate}
-                  diamondWeight={priceBreakdown.diamondWeight}
-                  diamondValue={priceBreakdown.diamondValue}
-                  stoneWeight={priceBreakdown.stoneWeight}
-                  stoneValue={priceBreakdown.stoneValue}
-                  kundanWeight={priceBreakdown.kundanWeight}
-                  kundanValue={priceBreakdown.kundanValue}
-                  makingChargeRate={priceBreakdown.makingChargeRate}
-                  makingCharges={priceBreakdown.makingCharges}
-                  subTotal={priceBreakdown.subTotal}
-                  gst={priceBreakdown.gst}
-                  finalPrice={priceBreakdown.finalPrice}
-                  jewellerQuote={priceBreakdown.jewellerQuote}
-                  priceDifference={priceBreakdown.priceDifference}
-                  goldCarat={JewelleryType === "gold" ? goldForm.carat : diamondForm.carat}
-                  goldType={JewelleryType === "gold" ? goldForm.type : undefined}
-                  certification={JewelleryType === "diamond" ? diamondForm.certification : undefined}
-                />
-              ) : (
-                <Card className={cn(
-                  "shadow-card border-dashed transition-all duration-300",
-                  JewelleryType === "gold" 
-                    ? "border-primary/30 bg-gradient-to-br from-background to-primary/5" 
-                    : JewelleryType === "diamond"
-                    ? "border-secondary/30 bg-gradient-to-br from-background to-secondary/5"
-                    : "border-muted-foreground/30"
-                )}>
-                  <CardContent className="flex flex-col items-center justify-center py-12 sm:py-16 text-center px-4">
-                    {JewelleryType === "gold" ? (
-                      <Crown className="h-10 w-10 sm:h-12 sm:w-12 text-primary/60 mb-3 sm:mb-4" />
-                    ) : JewelleryType === "diamond" ? (
-                      <Diamond className="h-10 w-10 sm:h-12 sm:w-12 text-secondary/60 mb-3 sm:mb-4" />
-                    ) : (
-                      <Gem className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground mb-3 sm:mb-4" />
-                    )}
-                    <h3 className={cn(
-                      "text-base sm:text-lg font-semibold mb-2",
-                      JewelleryType === "gold" ? "text-primary" : 
-                      JewelleryType === "diamond" ? "text-secondary" : ""
-                    )}>
-                      {JewelleryType ? `Ready to calculate ${JewelleryType} Jewellery` : "No calculation yet"}
-                    </h3>
-                    <p className="text-sm text-muted-foreground">
-                      {JewelleryType 
-                        ? "Enter the details above and click calculate to get pricing" 
-                        : "Select Jewellery type and enter details to calculate pricing"
-                      }
-                    </p>
                   </CardContent>
                 </Card>
               )}

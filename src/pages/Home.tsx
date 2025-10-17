@@ -5,52 +5,17 @@ import { ScanLine, Phone, MessageCircle, ImageUp, Package, BadgeIndianRupee } fr
 import { JewelleryTagScanner } from "@/components/JewelryTagScanner";
 import { GoldRateMarquee } from "@/components/GoldRateMarquee";
 import { UserVerificationModal } from "@/components/UserVerificationModal";
-import { PriceBreakdownCard } from "@/components/PriceBreakdownCard";
 import { useToast } from "@/hooks/use-toast";
 import { useRates } from "@/contexts/RatesContext";
 import { Link, useNavigate } from "react-router-dom";
 
-interface PriceBreakdown {
-  goldRate: number;
-  goldWeight: number;
-  goldValue: number;
-  diamondRate?: number;
-  diamondWeight?: number;
-  diamondValue: number;
-  diamondColor?: string;
-  diamondClarity?: string;
-  stoneWeight?: number;
-  stoneValue: number;
-  kundanWeight?: number;
-  kundanValue: number;
-  makingChargeRate: number | string;
-  makingCharges: number;
-  subTotal: number;
-  gst: number;
-  finalPrice: number;
-}
-
-interface ScanResultData {
-  JewelleryType: "gold" | "diamond";
-  extractedData: any;
-  verificationAnswers: any;
-  makingCharges: any;
-  calculatedPrice: number;
-  priceBreakdown: PriceBreakdown;
-}
-
 export default function Home() {
-  const [scanResult, setScanResult] = useState<ScanResultData | null>(null);
   const [showScanner, setShowScanner] = useState(false);
   const { toast } = useToast();
   const { addCalculation } = useRates();
   const navigate = useNavigate();
 
   const handleScanComplete = async (result: any) => {
-    // Store the complete scan result
-    setScanResult(result);
-    setShowScanner(false);
-
     // Add calculation to analytics
     await addCalculation({
       type: result.JewelleryType as "gold" | "diamond",
@@ -68,11 +33,15 @@ export default function Home() {
       title: "Scan completed successfully!",
       description: `Price calculated: ₹${result.calculatedPrice.toLocaleString("en-IN")}`,
     });
-  };
 
-  const handleResetScan = () => {
-    setScanResult(null);
-    setShowScanner(false);
+    // Navigate to results page with data
+    navigate("/results", {
+      state: {
+        jewelryType: result.JewelleryType,
+        priceBreakdown: result.priceBreakdown,
+        extractedData: result.extractedData,
+      },
+    });
   };
 
   const handleCallNow = () => {
@@ -94,66 +63,6 @@ export default function Home() {
             onClose={() => setShowScanner(false)}
             embedded={true}
           />
-        </div>
-        <UserVerificationModal />
-      </Layout>
-    );
-  }
-
-  if (scanResult) {
-    return (
-      <Layout>
-        <GoldRateMarquee />
-        <div className="container mx-auto px-3 sm:px-4 py-8">
-          <div className="max-w-2xl mx-auto space-y-6">
-            <h3 className="font-semibold text-center text-lg mb-4">Price Calculation</h3>
-            
-            <PriceBreakdownCard
-              JewelleryType={scanResult.JewelleryType}
-              goldRate={scanResult.priceBreakdown.goldRate}
-              goldWeight={scanResult.priceBreakdown.goldWeight}
-              goldValue={scanResult.priceBreakdown.goldValue}
-              diamondRate={scanResult.priceBreakdown.diamondRate}
-              diamondWeight={scanResult.priceBreakdown.diamondWeight}
-              diamondValue={scanResult.priceBreakdown.diamondValue}
-              diamondColor={scanResult.priceBreakdown.diamondColor}
-              diamondClarity={scanResult.priceBreakdown.diamondClarity}
-              stoneWeight={scanResult.priceBreakdown.stoneWeight}
-              stoneValue={scanResult.priceBreakdown.stoneValue}
-              kundanWeight={scanResult.priceBreakdown.kundanWeight}
-              kundanValue={scanResult.priceBreakdown.kundanValue}
-              makingChargeRate={scanResult.priceBreakdown.makingChargeRate}
-              makingCharges={scanResult.priceBreakdown.makingCharges}
-              subTotal={scanResult.priceBreakdown.subTotal}
-              gst={scanResult.priceBreakdown.gst}
-              finalPrice={scanResult.priceBreakdown.finalPrice}
-              goldCarat={scanResult.extractedData.carat}
-              goldType={scanResult.makingCharges.goldType}
-              certification={scanResult.verificationAnswers?.certificationType}
-              extractedData={{
-                itemCode: scanResult.extractedData.itemCode,
-                grossWeight: scanResult.extractedData.grossWeight,
-                netWeight: scanResult.extractedData.netWeight,
-                huid: scanResult.extractedData.huid,
-                hallmark: scanResult.extractedData.hallmark,
-                type: scanResult.extractedData.type,
-                diameter: scanResult.extractedData.diameter,
-                purity: scanResult.extractedData.purity,
-              }}
-            />
-
-            <div className="text-center mt-6 space-y-3">
-              <Button
-                variant="default"
-                size="lg"
-                onClick={handleResetScan}
-                className="gap-2 w-full sm:w-auto"
-              >
-                <ScanLine className="h-5 w-5" />
-                Scan Another Tag
-              </Button>
-            </div>
-          </div>
         </div>
         <UserVerificationModal />
       </Layout>

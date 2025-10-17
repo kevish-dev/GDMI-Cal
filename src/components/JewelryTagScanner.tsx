@@ -701,20 +701,17 @@ export function JewelleryTagScanner({
           {/* Step Labels */}
           <div className="flex items-center justify-between gap-4 px-1">
             <span className={cn(
-              "text-sm font-medium transition-colors",
-              step === 1 ? "text-[#8B7355]" : step > 1 ? "text-green-600" : "text-gray-400"
+              "text-sm font-medium transition-colors text-gray-400",
             )}>
               Step 1-Scan
             </span>
             <span className={cn(
-              "text-sm font-medium transition-colors",
-              step === 2 ? "text-[#8B7355]" : step > 2 ? "text-green-600" : "text-gray-400"
+              "text-sm font-medium transition-colors text-gray-400",
             )}>
               Step 2-Select
             </span>
             <span className={cn(
-              "text-sm font-medium transition-colors",
-              step === 3 ? "text-[#8B7355]" : step > 3 ? "text-green-600" : "text-gray-400"
+              "text-sm font-medium transition-colors text-gray-400",
             )}>
               Step 3-Verify
             </span>
@@ -726,8 +723,7 @@ export function JewelleryTagScanner({
             <div className="flex-1 relative h-2 bg-gray-200 rounded-full overflow-hidden">
               <div 
                 className={cn(
-                  "absolute top-0 left-0 h-full rounded-full transition-all duration-500 ease-out",
-                  step > 1 ? "bg-green-500" : "bg-[#8B7355]"
+                  "absolute top-0 left-0 h-full rounded-full transition-all duration-500 ease-out bg-[#8B7355]",
                 )}
                 style={{ width: `${getStepProgress(1)}%` }}
               />
@@ -737,8 +733,7 @@ export function JewelleryTagScanner({
             <div className="flex-1 relative h-2 bg-gray-200 rounded-full overflow-hidden">
               <div 
                 className={cn(
-                  "absolute top-0 left-0 h-full rounded-full transition-all duration-500 ease-out",
-                  step > 2 ? "bg-green-500" : "bg-[#8B7355]"
+                  "absolute top-0 left-0 h-full rounded-full transition-all duration-500 ease-out bg-[#8B7355]"
                 )}
                 style={{ width: `${getStepProgress(2)}%` }}
               />
@@ -748,8 +743,7 @@ export function JewelleryTagScanner({
             <div className="flex-1 relative h-2 bg-gray-200 rounded-full overflow-hidden">
               <div 
                 className={cn(
-                  "absolute top-0 left-0 h-full rounded-full transition-all duration-500 ease-out",
-                  step > 3 ? "bg-green-500" : "bg-[#8B7355]"
+                  "absolute top-0 left-0 h-full rounded-full transition-all duration-500 ease-out bg-[#8B7355]"
                 )}
                 style={{ width: `${getStepProgress(3)}%` }}
               />
@@ -1069,12 +1063,16 @@ export function JewelleryTagScanner({
                 Select jewellery type
               </h1>
 
-              {/* Gold Jewellery */}
-              <Card className="bg-[#E5DDD5] border-0 rounded-3xl p-6">
-                <h2 className="text-2xl font-serif mb-6">Gold Jewellery</h2>
-                <RadioGroup
-                  value={JewelleryType === "gold" ? (makingChargesData.goldType || "") : ""}
-                  onValueChange={(value) => {
+              <RadioGroup
+                value={JewelleryType === "gold" ? (makingChargesData.goldType || "") : (JewelleryType === "diamond" ? "diamond" : "")}
+                onValueChange={(value) => {
+                  if (value === "diamond") {
+                    setJewelleryType("diamond");
+                    setMakingChargesData({
+                      goldType: undefined,
+                      percentage: 800,
+                    });
+                  } else {
                     setJewelleryType("gold");
                     const type = value as GoldType;
                     const rates = {
@@ -1087,113 +1085,131 @@ export function JewelleryTagScanner({
                       goldType: type,
                       percentage: rates[type],
                     });
-                  }}
-                  className="grid grid-cols-2 gap-3"
-                >
-                  {[
-                    { value: 'chains', label: 'Chains', rate: makingCharges.chains || 2.5 },
-                    { value: 'plain', label: 'Plain', rate: makingCharges.plain || 3.5 },
-                    { value: 'temple', label: 'Temple/Antique', rate: makingCharges.temple || 7 },
-                    { value: 'italian', label: 'Italian Gold', rate: makingCharges.italianGold || 18 }
-                  ].map((type) => (
-                    <div
-                      key={type.value}
-                      className={cn(
-                        "relative flex items-center justify-between px-4 py-6 rounded-2xl cursor-pointer transition-all",
-                        JewelleryType === "gold" && makingChargesData.goldType === type.value
-                          ? "bg-[#8B7355] text-white"
-                          : "bg-white text-gray-900"
-                      )}
-                      onClick={() => {
-                        setJewelleryType("gold");
-                        const goldType = type.value as GoldType;
-                        const rates = {
-                          chains: makingCharges.chains || 2.5,
-                          plain: makingCharges.plain || 3.5,
-                          temple: makingCharges.temple || 7,
-                          italian: makingCharges.italianGold || 18
-                        };
-                        setMakingChargesData({
-                          goldType,
-                          percentage: rates[goldType],
-                        });
-                      }}
-                    >
-                      <div>
-                        <div className="font-semibold text-lg">{type.label}</div>
-                        <div className={cn(
-                          "text-sm",
-                          JewelleryType === "gold" && makingChargesData.goldType === type.value
-                            ? "text-white/80"
-                            : "text-gray-500"
-                        )}>
-                          {type.rate}% making
-                        </div>
-                      </div>
-                      <RadioGroupItem
-                        value={type.value}
-                        className={cn(
-                          "border-2",
-                          JewelleryType === "gold" && makingChargesData.goldType === type.value
-                            ? "border-white"
-                            : "border-gray-300"
-                        )}
-                      />
-                    </div>
-                  ))}
-                </RadioGroup>
-              </Card>
-
-              {/* Diamond Jewellery */}
-              <Card
-                className={cn(
-                  "border-2 rounded-3xl p-6 cursor-pointer transition-colors",
-                  JewelleryType === "diamond"
-                    ? "bg-[#8B7355] text-white border-[#8B7355]"
-                    : "bg-white border-[#E5DDD5]"
-                )}
-                onClick={() => {
-                  setJewelleryType("diamond");
-                  setMakingChargesData({
-                    goldType: undefined,
-                    percentage: 800,
-                  });
+                  }
                 }}
+                className="space-y-6"
               >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h2 className="text-2xl font-serif mb-2">Diamond Jewellery</h2>
-                    <p className={cn(
-                      "text-sm",
-                      JewelleryType === "diamond" ? "text-white/80" : "text-gray-500"
-                    )}>
-                      Any type of diamond jewellery
-                    </p>
+                {/* Gold Jewellery */}
+                <Card className="bg-[#E5DDD5] border-0 rounded-2xl sm:rounded-3xl p-4 sm:p-6">
+                  <h2 className="text-xl sm:text-2xl font-serif mb-4 sm:mb-6">Gold Jewellery</h2>
+                  <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                    {[
+                      { value: 'chains', label: 'Chains', rate: makingCharges.chains },
+                      { value: 'plain', label: 'Plain', rate: makingCharges.plain },
+                      { value: 'temple', label: 'Temple/Antique', rate: makingCharges.temple },
+                      { value: 'italian', label: 'Italian Gold', rate: makingCharges.italianGold }
+                    ].map((type) => {
+                      const isSelected = JewelleryType === "gold" && makingChargesData.goldType === type.value;
+                      return (
+                        <div
+                          key={type.value}
+                          className={cn(
+                            "relative flex items-center justify-between px-3 sm:px-4 py-4 sm:py-6 rounded-xl sm:rounded-2xl cursor-pointer transition-all border-2",
+                            isSelected
+                              ? "bg-[#8B7355] text-white border-[#8B7355]"
+                              : "bg-white text-gray-900 border-white"
+                          )}
+                          onClick={() => {
+                            setJewelleryType("gold");
+                            const goldType = type.value as GoldType;
+                            const rates = {
+                              chains: makingCharges.chains,
+                              plain: makingCharges.plain,
+                              temple: makingCharges.temple,
+                              italian: makingCharges.italianGold
+                            };
+                            setMakingChargesData({
+                              goldType,
+                              percentage: rates[goldType],
+                            });
+                          }}
+                        >
+                          <div className="flex-1 min-w-0">
+                            <div className="font-semibold text-base sm:text-lg truncate">{type.label}</div>
+                            <div className={cn(
+                              "text-xs sm:text-sm",
+                              isSelected ? "text-white/80" : "text-gray-500"
+                            )}>
+                              {type.rate}% making
+                            </div>
+                          </div>
+                          <div className={cn(
+                            "w-6 h-6 sm:w-7 sm:h-7 rounded-full border-2 flex items-center justify-center flex-shrink-0 ml-2",
+                            isSelected
+                              ? "border-white bg-transparent"
+                              : "border-gray-300 bg-white"
+                          )}>
+                            {isSelected && (
+                              <div className="w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full bg-white" />
+                            )}
+                          </div>
+                          <RadioGroupItem
+                            value={type.value}
+                            className="sr-only"
+                          />
+                        </div>
+                      );
+                    })}
                   </div>
-                  <RadioGroupItem
-                    value="diamond"
-                    checked={JewelleryType === "diamond"}
-                    className={cn(
-                      "border-2 w-6 h-6",
-                      JewelleryType === "diamond" ? "border-white" : "border-gray-300"
-                    )}
-                  />
-                </div>
-              </Card>
+                </Card>
+
+                {/* Diamond Jewellery */}
+                <Card
+                  className={cn(
+                    "border-2 rounded-2xl sm:rounded-3xl p-4 sm:p-6 cursor-pointer transition-colors",
+                    JewelleryType === "diamond"
+                      ? "bg-[#8B7355] text-white border-[#8B7355]"
+                      : "bg-white border-[#E5DDD5]"
+                  )}
+                  onClick={() => {
+                    setJewelleryType("diamond");
+                    setMakingChargesData({
+                      goldType: undefined,
+                      percentage: 800,
+                    });
+                  }}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1 min-w-0 mr-2">
+                      <h2 className="text-xl sm:text-2xl font-serif mb-1 sm:mb-2">Diamond Jewellery</h2>
+                      <p className={cn(
+                        "text-xs sm:text-sm",
+                        JewelleryType === "diamond" ? "text-white/80" : "text-gray-500"
+                      )}>
+                        Any type of diamond jewellery
+                      </p>
+                    </div>
+                    <div className={cn(
+                      "w-6 h-6 sm:w-7 sm:h-7 rounded-full border-2 flex items-center justify-center flex-shrink-0",
+                      JewelleryType === "diamond"
+                        ? "border-white bg-transparent"
+                        : "border-gray-300 bg-white"
+                    )}>
+                      {JewelleryType === "diamond" && (
+                        <div className="w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full bg-white" />
+                      )}
+                    </div>
+                    <RadioGroupItem
+                      value="diamond"
+                      className="sr-only"
+                    />
+                  </div>
+                </Card>
+              </RadioGroup>
 
               {/* Navigation buttons */}
-              <div className="flex gap-4">
+              <div className="flex gap-3 sm:gap-4">
                 <Button
                   onClick={() => setStep(1)}
                   variant="outline"
-                  className="flex-1 py-6 rounded-xl text-lg font-medium border-2"
+                  className="flex-1 py-4 sm:py-6 rounded-xl text-base sm:text-lg font-medium border-2"
                 >
                   Back
                 </Button>
                 <Button
                   onClick={() => setStep(3)}
                   disabled={!canProceedToStep3}
-                  className="flex-1 py-6 bg-[#8B7355] hover:bg-[#7A6349] text-white rounded-xl text-lg font-medium"
+                  className="flex-1 py-4 sm:py-6 bg-[#8B7355] hover:bg-[#7A6349] disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-xl text-base sm:text-lg font-medium"
                 >
                   Next
                 </Button>
@@ -1204,212 +1220,9 @@ export function JewelleryTagScanner({
           {/* Step 3: Verification Questions */}
           {step === 3 && extractedData && (
             <div className="space-y-6 animate-in fade-in duration-500">
-              <div className="text-center space-y-2">
-                <h3 className="text-lg font-semibold">
-                  Verification Questions
-                </h3>
-              </div>
-
-              {/* Display Extracted Data */}
-              <div className="bg-muted/50 rounded-lg p-4 space-y-3">
-                <h4 className="font-semibold text-sm flex items-center gap-2">
-                  <Check className="h-4 w-4 text-green-500" />
-                  Extracted Information
-                </h4>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-                  {/* Total Weight / Gross Weight */}
-                  {(extractedData.totalWeight || extractedData.grossWeight) && (
-                    <div className="flex justify-between p-2 bg-background rounded">
-                      <span className="text-muted-foreground">Gross Weight:</span>
-                      <span className="font-medium">{extractedData.totalWeight || extractedData.grossWeight}g</span>
-                    </div>
-                  )}
-                  
-                  {/* Weight / Net Weight - Show calculated if available */}
-                  {(() => {
-                    const netWeight = extractedData.weight || extractedData.netWeight;
-                    const grossWeight = extractedData.totalWeight || extractedData.grossWeight;
-                    const diamondWeight = extractedData.diamondWeight || 
-                      (extractedData.diamonds && Array.isArray(extractedData.diamonds) 
-                        ? extractedData.diamonds.reduce((sum, d) => sum + (d.weight || 0), 0) 
-                        : 0);
-                    
-                    const calculatedNetWeight = !netWeight && grossWeight && diamondWeight 
-                      ? grossWeight - diamondWeight 
-                      : null;
-                    
-                    const displayWeight = netWeight || calculatedNetWeight;
-                    
-                    return displayWeight ? (
-                      <div className="flex justify-between p-2 bg-background rounded">
-                        <span className="text-muted-foreground">Net Weight:</span>
-                        <span className="font-medium">
-                          {displayWeight.toFixed(3)}g
-                          {calculatedNetWeight && (
-                            <span className="text-xs text-muted-foreground ml-1">(calculated)</span>
-                          )}
-                        </span>
-                      </div>
-                    ) : null;
-                  })()}
-                  
-                  {/* Purity (shown as Carat) */}
-                  {extractedData.carat && (
-                    <div className="flex justify-between p-2 bg-background rounded">
-                      <span className="text-muted-foreground">Purity:</span>
-                      <span className="font-medium">{extractedData.carat}</span>
-                    </div>
-                  )}
-                  
-                  {/* Stone Weight - Prominently displayed */}
-                  {extractedData.stoneWeight && (
-                    <div className="flex justify-between p-2 rounded">
-                      <span className="text-muted-foreground font-semibold">Stone Weight:</span>
-                      <span className="font-bold ">{extractedData.stoneWeight}g</span>
-                    </div>
-                  )}
-                  
-                  {/* Kundan Weight - Prominently displayed */}
-                  {extractedData.kundanWeight && (
-                    <div className="flex justify-between p-2 rounded">
-                      <span className="text-muted-foreground font-semibold">Kundan Weight:</span>
-                      <span className="font-bold ">{extractedData.kundanWeight}g</span>
-                    </div>
-                  )}
-                  
-                  {/* Diamond Weight (for diamond Jewellery) */}
-                  {(extractedData.diamondWeight || (extractedData.diamonds && Array.isArray(extractedData.diamonds) && extractedData.diamonds.length > 0)) && (
-                    <div className="flex justify-between p-2 bg-secondary/10 rounded border border-secondary/20">
-                      <span className="text-muted-foreground font-semibold">Diamond Weight:</span>
-                      <span className="font-bold text-secondary">
-                        {extractedData.diamondWeight || 
-                          extractedData.diamonds?.reduce((sum, d) => sum + (d.weight || 0), 0) || 0} ct
-                      </span>
-                    </div>
-                  )}
-                  
-                  {/* Diamond Color */}
-                  {(extractedData.color || (JewelleryType === "diamond" && !extractedData.color)) && (
-                    <div className="flex justify-between p-2 bg-background rounded">
-                      <span className="text-muted-foreground">Color:</span>
-                      <span className="font-medium">
-                        {extractedData.color || "H-I"}
-                        {!extractedData.color && <span className="text-xs text-muted-foreground ml-1">(default)</span>}
-                      </span>
-                    </div>
-                  )}
-                  
-                  {/* Diamond Clarity */}
-                  {(extractedData.clarity || (JewelleryType === "diamond" && !extractedData.clarity)) && (
-                    <div className="flex justify-between p-2 bg-background rounded">
-                      <span className="text-muted-foreground">Clarity:</span>
-                      <span className="font-medium">
-                        {extractedData.clarity || "SI"}
-                        {!extractedData.clarity && <span className="text-xs text-muted-foreground ml-1">(default)</span>}
-                      </span>
-                    </div>
-                  )}
-                  
-                  {/* Certification */}
-                  {extractedData.certification && (
-                    <div className="flex justify-between p-2 bg-background rounded">
-                      <span className="text-muted-foreground">Certification:</span>
-                      <span className="font-medium">{extractedData.certification}</span>
-                    </div>
-                  )}
-                  
-                  {/* Item Code */}
-                  {extractedData.itemCode && (
-                    <div className="flex justify-between p-2 bg-background rounded">
-                      <span className="text-muted-foreground">Item Code:</span>
-                      <span className="font-medium">{extractedData.itemCode}</span>
-                    </div>
-                  )}
-                  
-                  {/* Diameter */}
-                  {extractedData.diameter && (
-                    <div className="flex justify-between p-2 bg-background rounded">
-                      <span className="text-muted-foreground">Diameter:</span>
-                      <span className="font-medium">{extractedData.diameter}</span>
-                    </div>
-                  )}
-                  
-                  {/* Jewellery Type */}
-                  {extractedData.type && (
-                    <div className="flex justify-between p-2 bg-background rounded">
-                      <span className="text-muted-foreground">Type:</span>
-                      <span className="font-medium capitalize">{extractedData.type}</span>
-                    </div>
-                  )}
-                </div>
-                
-                {/* Detailed Stones Information */}
-                {extractedData.stones && Array.isArray(extractedData.stones) && extractedData.stones.length > 0 && (
-                  <div className="mt-3 p-3 bg-background rounded-lg border">
-                    <h5 className="font-semibold text-xs text-muted-foreground mb-2">Stone Details:</h5>
-                    <div className="space-y-2">
-                      {extractedData.stones.map((stone: any, idx: number) => (
-                        <div key={idx} className="flex justify-between text-xs p-2 bg-muted/50 rounded">
-                          <span className="font-medium">{stone.type || 'Stone'}</span>
-                          <span>
-                            {stone.weight}g
-                            {stone.count && ` (${stone.count} pcs)`}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                
-                {/* Detailed Diamond Information */}
-                {extractedData.diamonds && Array.isArray(extractedData.diamonds) && extractedData.diamonds.length > 0 && (
-                  <div className="mt-3 p-3 bg-background rounded-lg border">
-                    <h5 className="font-semibold text-xs text-muted-foreground mb-2">Diamond Details:</h5>
-                    <div className="space-y-2">
-                      {extractedData.diamonds.map((diamond: any, idx: number) => (
-                        <div key={idx} className="flex justify-between text-xs p-2 bg-muted/50 rounded">
-                          <span className="font-medium">
-                            {diamond.type || 'Diamond'}
-                            {diamond.color && ` (${diamond.color}`}
-                            {diamond.clarity && `/${diamond.clarity}`}
-                            {(diamond.color || diamond.clarity) && ')'}
-                          </span>
-                          <span>
-                            {diamond.weight} ct
-                            {diamond.count && ` (${diamond.count} pcs)`}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                
-                {/* Other Stones Information */}
-                {extractedData.otherStones && Array.isArray(extractedData.otherStones) && extractedData.otherStones.length > 0 && (
-                  <div className="mt-3 p-3 bg-background rounded-lg border">
-                    <h5 className="font-semibold text-xs text-muted-foreground mb-2">Other Stones:</h5>
-                    <div className="space-y-2">
-                      {extractedData.otherStones.map((stone: any, idx: number) => (
-                        <div key={idx} className="flex justify-between text-xs p-2 bg-muted/50 rounded">
-                          <span className="font-medium capitalize">{stone.type || 'Stone'}</span>
-                          <span>
-                            {stone.weight}g
-                            {stone.count && ` (${stone.count} pcs)`}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                
-                {/* Raw Text if available */}
-                {extractedData.rawText && (
-                  <div className="mt-3 p-3 bg-muted/30 rounded-lg border text-xs">
-                    <h5 className="font-semibold text-muted-foreground mb-1">Additional Info:</h5>
-                    <p className="text-muted-foreground">{extractedData.rawText}</p>
-                  </div>
-                )}
-              </div>
+              <h1 className="text-3xl sm:text-4xl font-serif text-center">
+                Jeweller Practice
+              </h1>
 
               {/* Questions for Missing Compulsory Details */}
               {(() => {
@@ -1654,10 +1467,12 @@ export function JewelleryTagScanner({
               })()}
 
               {/* Jeweller Practice Question */}
-              <Card className="bg-[#E5DDD5] border-0 rounded-3xl p-6">
-                <p className="text-gray-700 mb-6 text-center">
-                  When you look at the back of your jewellery, can you see all the Kundan or stones?
-                </p>
+              <Card className="bg-[#E5DDD5] border-0 rounded-2xl sm:rounded-3xl p-4 sm:p-6">
+                <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 mb-4 sm:mb-6">
+                  <p className="text-gray-900 text-sm sm:text-base leading-relaxed">
+                    When you look at the back of your jewellery, can you see all the Kundan or stones?
+                  </p>
+                </div>
 
                 <RadioGroup
                   value={verificationAnswers.showsRawForm?.toString() || ""}
@@ -1675,10 +1490,10 @@ export function JewelleryTagScanner({
                 >
                   <div
                     className={cn(
-                      "flex items-center justify-between px-6 py-5 rounded-2xl cursor-pointer transition-all",
+                      "flex items-center justify-between px-4 sm:px-6 py-4 sm:py-5 rounded-xl sm:rounded-2xl cursor-pointer transition-all border-2",
                       verificationAnswers.showsRawForm === true
-                        ? "bg-[#8B7355] text-white"
-                        : "bg-white text-gray-900"
+                        ? "bg-[#8B7355] text-white border-[#8B7355]"
+                        : "bg-white text-gray-900 border-white"
                     )}
                     onClick={() =>
                       setVerificationAnswers((prev) => ({
@@ -1690,22 +1505,29 @@ export function JewelleryTagScanner({
                       }))
                     }
                   >
-                    <span className="text-base">All are visible and open from the back.</span>
+                    <span className="text-sm sm:text-base flex-1">All are visible and open from the back.</span>
+                    <div className={cn(
+                      "w-6 h-6 sm:w-7 sm:h-7 rounded-full border-2 flex items-center justify-center flex-shrink-0 ml-3",
+                      verificationAnswers.showsRawForm === true
+                        ? "border-white bg-transparent"
+                        : "border-gray-300 bg-white"
+                    )}>
+                      {verificationAnswers.showsRawForm === true && (
+                        <div className="w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full bg-white" />
+                      )}
+                    </div>
                     <RadioGroupItem
                       value="true"
-                      className={cn(
-                        "border-2",
-                        verificationAnswers.showsRawForm === true ? "border-white" : "border-gray-300"
-                      )}
+                      className="sr-only"
                     />
                   </div>
 
                   <div
                     className={cn(
-                      "flex items-center justify-between px-6 py-5 rounded-2xl cursor-pointer transition-all",
+                      "flex items-center justify-between px-4 sm:px-6 py-4 sm:py-5 rounded-xl sm:rounded-2xl cursor-pointer transition-all border-2",
                       verificationAnswers.showsRawForm === false
-                        ? "bg-[#8B7355] text-white"
-                        : "bg-white text-gray-900"
+                        ? "bg-[#8B7355] text-white border-[#8B7355]"
+                        : "bg-white text-gray-900 border-white"
                     )}
                     onClick={() =>
                       setVerificationAnswers((prev) => ({
@@ -1717,31 +1539,38 @@ export function JewelleryTagScanner({
                       }))
                     }
                   >
-                    <span className="text-base">Some are closed or covered from the back.</span>
+                    <span className="text-sm sm:text-base flex-1">Some are closed or covered from the back.</span>
+                    <div className={cn(
+                      "w-6 h-6 sm:w-7 sm:h-7 rounded-full border-2 flex items-center justify-center flex-shrink-0 ml-3",
+                      verificationAnswers.showsRawForm === false
+                        ? "border-white bg-transparent"
+                        : "border-gray-300 bg-white"
+                    )}>
+                      {verificationAnswers.showsRawForm === false && (
+                        <div className="w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full bg-white" />
+                      )}
+                    </div>
                     <RadioGroupItem
                       value="false"
-                      className={cn(
-                        "border-2",
-                        verificationAnswers.showsRawForm === false ? "border-white" : "border-gray-300"
-                      )}
+                      className="sr-only"
                     />
                   </div>
                 </RadioGroup>
               </Card>
 
               {/* Navigation buttons */}
-              <div className="flex gap-4">
+              <div className="flex gap-3 sm:gap-4">
                 <Button
                   onClick={() => setStep(2)}
                   variant="outline"
-                  className="flex-1 py-6 rounded-xl text-lg font-medium border-2"
+                  className="flex-1 py-4 sm:py-6 rounded-xl text-base sm:text-lg font-medium border-2"
                 >
                   Back
                 </Button>
                 <Button
                   onClick={handleCalculatePreview}
                   disabled={!canCalculate || isCalculating}
-                  className="flex-1 py-6 bg-[#8B7355] hover:bg-[#7A6349] text-white rounded-xl text-lg font-medium"
+                  className="flex-1 py-4 sm:py-6 bg-[#8B7355] hover:bg-[#7A6349] disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-xl text-base sm:text-lg font-medium"
                 >
                   {isCalculating ? "Calculating..." : "Get Results"}
                 </Button>
