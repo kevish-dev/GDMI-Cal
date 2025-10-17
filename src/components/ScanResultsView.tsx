@@ -91,8 +91,8 @@ export function ScanResultsView({
       <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-4 sm:p-6">
         <div className="max-w-2xl mx-auto space-y-4 sm:space-y-6">
           {/* Header */}
-          <div className="text-center space-y-2">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif text-gray-800">
+          <div className="space-y-2">
+            <h1 className="text-4xl sm:text-4xl md:text-5xl font-serif text-gray-800" style={{fontFamily: "'Cormorant Garamond', serif"}}>
               True Value
             </h1>
           </div>
