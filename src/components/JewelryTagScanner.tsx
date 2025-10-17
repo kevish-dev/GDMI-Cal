@@ -650,7 +650,27 @@ export function JewelleryTagScanner({
       : verificationAnswers.diamondAppreciation !== undefined &&
         verificationAnswers.certificationType !== undefined);
 
-  const progressPercentage = (step / 3) * 100;
+  // Calculate progress percentage for each step bar
+  const getStepProgress = (stepNumber: number) => {
+    if (stepNumber < step) {
+      // Completed steps: 100%
+      return 100;
+    } else if (stepNumber === step) {
+      // Current step
+      if (step === 1) {
+        // Step 1: 5% base, +45% for each image
+        const baseProgress = 5;
+        const imagesUploaded = (images.top ? 1 : 0) + (images.bottom ? 1 : 0);
+        return baseProgress + (imagesUploaded * 45);
+      } else {
+        // Step 2 or 3: Start at 5%
+        return 5;
+      }
+    } else {
+      // Future steps: 0%
+      return 0;
+    }
+  };
 
   // Scanner content component
   const scannerContent = (
@@ -676,48 +696,63 @@ export function JewelleryTagScanner({
           )}
         </div>
         
-        {/* Custom Stepped Progress Bar */}
-        <div className="mt-6 flex items-center justify-between gap-2">
-          <div className="flex-1">
-            <div className="flex items-center gap-2">
-              <span className={cn(
-                "text-xs font-medium whitespace-nowrap",
-                step === 1 ? "text-[#8B7355]" : "text-gray-400"
-              )}>
-                Step 1-Scan
-              </span>
-              <div className={cn(
-                "h-1 flex-1 rounded-full transition-all duration-300",
-                step >= 1 ? "bg-[#8B7355]" : "bg-gray-200"
-              )} />
-            </div>
+        {/* Three Progress Bars in Same Line */}
+        <div className="mt-6 space-y-3">
+          {/* Step Labels */}
+          <div className="flex items-center justify-between gap-4 px-1">
+            <span className={cn(
+              "text-sm font-medium transition-colors",
+              step === 1 ? "text-[#8B7355]" : step > 1 ? "text-green-600" : "text-gray-400"
+            )}>
+              Step 1-Scan
+            </span>
+            <span className={cn(
+              "text-sm font-medium transition-colors",
+              step === 2 ? "text-[#8B7355]" : step > 2 ? "text-green-600" : "text-gray-400"
+            )}>
+              Step 2-Select
+            </span>
+            <span className={cn(
+              "text-sm font-medium transition-colors",
+              step === 3 ? "text-[#8B7355]" : step > 3 ? "text-green-600" : "text-gray-400"
+            )}>
+              Step 3-Verify
+            </span>
           </div>
-          <div className="flex-1">
-            <div className="flex items-center gap-2">
-              <span className={cn(
-                "text-xs font-medium whitespace-nowrap",
-                step === 2 ? "text-[#8B7355]" : "text-gray-400"
-              )}>
-                Step 2-Select
-              </span>
-              <div className={cn(
-                "h-1 flex-1 rounded-full transition-all duration-300",
-                step >= 2 ? "bg-[#8B7355]" : "bg-gray-200"
-              )} />
+          
+          {/* Progress Bars */}
+          <div className="flex items-center gap-2">
+            {/* Step 1 Bar */}
+            <div className="flex-1 relative h-2 bg-gray-200 rounded-full overflow-hidden">
+              <div 
+                className={cn(
+                  "absolute top-0 left-0 h-full rounded-full transition-all duration-500 ease-out",
+                  step > 1 ? "bg-green-500" : "bg-[#8B7355]"
+                )}
+                style={{ width: `${getStepProgress(1)}%` }}
+              />
             </div>
-          </div>
-          <div className="flex-1">
-            <div className="flex items-center gap-2">
-              <span className={cn(
-                "text-xs font-medium whitespace-nowrap",
-                step === 3 ? "text-[#8B7355]" : "text-gray-400"
-              )}>
-                Step 3-Verify
-              </span>
-              <div className={cn(
-                "h-1 flex-1 rounded-full transition-all duration-300",
-                step >= 3 ? "bg-[#8B7355]" : "bg-gray-200"
-              )} />
+
+            {/* Step 2 Bar */}
+            <div className="flex-1 relative h-2 bg-gray-200 rounded-full overflow-hidden">
+              <div 
+                className={cn(
+                  "absolute top-0 left-0 h-full rounded-full transition-all duration-500 ease-out",
+                  step > 2 ? "bg-green-500" : "bg-[#8B7355]"
+                )}
+                style={{ width: `${getStepProgress(2)}%` }}
+              />
+            </div>
+
+            {/* Step 3 Bar */}
+            <div className="flex-1 relative h-2 bg-gray-200 rounded-full overflow-hidden">
+              <div 
+                className={cn(
+                  "absolute top-0 left-0 h-full rounded-full transition-all duration-500 ease-out",
+                  step > 3 ? "bg-green-500" : "bg-[#8B7355]"
+                )}
+                style={{ width: `${getStepProgress(3)}%` }}
+              />
             </div>
           </div>
         </div>
