@@ -64,17 +64,17 @@ export default function Login() {
         <div className="max-w-md mx-auto">
           {/* Header - Mobile optimized */}
           <div className="text-center mb-6 sm:mb-8">
-            <div className="mx-auto mb-3 sm:mb-4 p-2 sm:p-3 gradient-gold rounded-xl shadow-card w-fit">
-              <Gem className="h-6 w-6 sm:h-8 sm:w-8 text-primary-foreground" />
+            <div className="mx-auto mb-3 sm:mb-4 p-2 sm:p-3 bg-[#8B7355] rounded-xl shadow-card w-fit">
+              <Gem className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
             </div>
-            <h1 className="text-2xl sm:text-3xl font-bold mb-2">Welcome Back</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold mb-2" style={{ fontFamily: "'Cormorant Garamond', serif" }}>Welcome Back</h1>
             <p className="text-muted-foreground text-sm sm:text-base px-2">
               Sign in to access your Jewellery calculator
             </p>
           </div>
 
           {/* Login Form - Mobile optimized */}
-          <Card className="shadow-elegant">
+          <Card className="shadow-elegant bg-[#E5DDD5] border-0">
             <CardHeader className="space-y-1 pb-4">
               <CardTitle className="text-xl sm:text-2xl text-center">Sign In</CardTitle>
               <CardDescription className="text-center text-sm">
@@ -145,7 +145,7 @@ export default function Login() {
 
                 <Button
                   type="submit"
-                  className="w-full gradient-gold hover-glow text-base h-12 sm:h-14 font-semibold"
+                  className="w-full bg-[#8B7355] hover:bg-[#7A6349] text-white text-base h-12 sm:h-14 font-semibold rounded-xl transition-all disabled:bg-gray-400 disabled:cursor-not-allowed"
                   disabled={isLoading}
                 >
                   {isLoading ? "Signing In..." : "Sign In"}
@@ -157,7 +157,7 @@ export default function Login() {
                   Don't have an account?{" "}
                   <Link
                     to="/register"
-                    className="text-primary font-medium transition-smooth"
+                    className="text-[#8B7355] font-medium hover:text-[#7A6349] transition-all"
                   >
                     Create one here
                   </Link>

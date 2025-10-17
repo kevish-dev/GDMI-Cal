@@ -85,17 +85,17 @@ export default function Register() {
         <div className="max-w-md mx-auto">
           {/* Header - Mobile optimized */}
           <div className="text-center mb-6 sm:mb-8">
-            <div className="mx-auto mb-3 sm:mb-4 p-2 sm:p-3 gradient-gold rounded-xl shadow-card w-fit">
-              <Gem className="h-6 w-6 sm:h-8 sm:w-8 text-primary-foreground" />
+            <div className="mx-auto mb-3 sm:mb-4 p-2 sm:p-3 bg-[#8B7355] rounded-xl shadow-card w-fit">
+              <Gem className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
             </div>
-            <h1 className="text-2xl sm:text-3xl font-bold mb-2">Create Account</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold mb-2" style={{ fontFamily: "'Cormorant Garamond', serif" }}>Create Account</h1>
             <p className="text-muted-foreground text-sm sm:text-base px-2">
               Join JewelCalc for professional Jewellery pricing
             </p>
           </div>
 
           {/* Registration Form - Mobile optimized */}
-          <Card className="shadow-elegant">
+          <Card className="shadow-elegant bg-[#E5DDD5] border-0">
             <CardHeader className="space-y-1 pb-4">
               <CardTitle className="text-xl sm:text-2xl text-center">Sign Up</CardTitle>
               <CardDescription className="text-center text-sm">
@@ -189,7 +189,7 @@ export default function Register() {
 
                 <Button
                   type="submit"
-                  className="w-full gradient-gold hover-glow text-base py-6"
+                  className="w-full bg-[#8B7355] hover:bg-[#7A6349] text-white text-base py-6 rounded-xl transition-all disabled:bg-gray-400 disabled:cursor-not-allowed"
                   disabled={isLoading}
                 >
                   {isLoading ? "Creating Account..." : "Create Account"}
@@ -201,7 +201,7 @@ export default function Register() {
                   Already have an account?{" "}
                   <Link
                     to="/login"
-                    className="text-primary font-medium transition-smooth"
+                    className="text-[#8B7355] font-medium hover:text-[#7A6349] transition-all"
                   >
                     Sign in here
                   </Link>

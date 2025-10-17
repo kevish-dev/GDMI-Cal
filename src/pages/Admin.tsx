@@ -350,57 +350,57 @@ export default function Admin() {
 
           {/* Key Metrics */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <Card>
+            <Card className="bg-[#E5DDD5] border-0">
               <CardContent className="p-6">
                 <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-primary/10 rounded-lg">
-                    <Calculator className="h-5 w-5 text-primary" />
+                  <div className="p-2 bg-[#8B7355]/10 rounded-lg">
+                    <Calculator className="h-5 w-5 text-[#8B7355]" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Total Calculations</p>
-                    <p className="text-2xl font-semibold">{analytics.totalCalculations.toLocaleString()}</p>
+                    <p className="text-sm text-gray-600">Total Calculations</p>
+                    <p className="text-2xl font-semibold text-gray-900">{analytics.totalCalculations.toLocaleString()}</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="bg-[#E5DDD5] border-0">
               <CardContent className="p-6">
                 <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
-                    <Users className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                  <div className="p-2 bg-[#8B7355]/10 rounded-lg">
+                    <Users className="h-5 w-5 text-[#8B7355]" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Gold Calculations</p>
-                    <p className="text-2xl font-semibold">{analytics.goldCalculations}</p>
+                    <p className="text-sm text-gray-600">Gold Calculations</p>
+                    <p className="text-2xl font-semibold text-gray-900">{analytics.goldCalculations}</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="bg-[#E5DDD5] border-0">
               <CardContent className="p-6">
                 <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-green-100 dark:bg-green-900/20 rounded-lg">
-                    <Diamond className="h-5 w-5 text-green-600 dark:text-green-400" />
+                  <div className="p-2 bg-[#8B7355]/10 rounded-lg">
+                    <Diamond className="h-5 w-5 text-[#8B7355]" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Diamond Calculations</p>
-                    <p className="text-2xl font-semibold">{analytics.diamondCalculations}</p>
+                    <p className="text-sm text-gray-600">Diamond Calculations</p>
+                    <p className="text-2xl font-semibold text-gray-900">{analytics.diamondCalculations}</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="bg-[#E5DDD5] border-0">
               <CardContent className="p-6">
                 <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-orange-100 dark:bg-orange-900/20 rounded-lg">
-                    <DollarSign className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+                  <div className="p-2 bg-[#8B7355]/10 rounded-lg">
+                    <DollarSign className="h-5 w-5 text-[#8B7355]" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Avg. Value</p>
-                    <p className="text-2xl font-semibold">{(analytics.avgValue / 1000).toFixed(0)}K</p>
+                    <p className="text-sm text-gray-600">Avg. Value</p>
+                    <p className="text-2xl font-semibold text-gray-900">{(analytics.avgValue / 1000).toFixed(0)}K</p>
                   </div>
                 </div>
               </CardContent>
@@ -506,7 +506,7 @@ export default function Admin() {
                     <Button
                       onClick={handleGoldRateUpdate}
                       disabled={isUploading}
-                      className="w-full"
+                      className="w-full bg-[#8B7355] hover:bg-[#7A6349] text-white rounded-xl transition-all disabled:bg-gray-400 disabled:cursor-not-allowed"
                     >
                       {isUploading ? "Updating..." : "Update Rates"}
                     </Button>
@@ -546,7 +546,7 @@ export default function Admin() {
                       <Button
                         onClick={() => document.getElementById('csv-upload')?.click()}
                         disabled={isUploading}
-                        variant="outline"
+                        className="bg-[#8B7355] hover:bg-[#7A6349] text-white rounded-xl transition-all disabled:bg-gray-400 disabled:cursor-not-allowed"
                       >
                         {isUploading ? "Processing..." : "Select File"}
                       </Button>
@@ -746,7 +746,7 @@ export default function Admin() {
                     <Button
                       onClick={handleMakingChargesUpdate}
                       disabled={isUploading}
-                      className="w-full"
+                      className="w-full bg-[#8B7355] hover:bg-[#7A6349] text-white rounded-xl transition-all disabled:bg-gray-400 disabled:cursor-not-allowed"
                     >
                       {isUploading ? "Updating..." : "Update Charges"}
                     </Button>

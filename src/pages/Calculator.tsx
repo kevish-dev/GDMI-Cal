@@ -355,21 +355,13 @@ export default function Calculator() {
             {/* Input Panel */}
             <div className="space-y-4 sm:space-y-6">
               {/* Jewellery Type Selection */}
-              <Card className="shadow-card">
+              <Card className="shadow-card bg-[#E5DDD5] border-0">
                 <CardHeader className="pb-4">
-                  <CardTitle className="flex items-center space-x-2 text-lg sm:text-xl">
-                    <Gem className={cn(
-                      "h-4 w-4 sm:h-5 sm:w-5 transition-colors",
-                      JewelleryType === "gold" ? "text-primary" : 
-                      JewelleryType === "diamond" ? "text-secondary" : "text-muted-foreground"
-                    )} />
-                    <span className={cn(
-                      "transition-colors",
-                      JewelleryType === "gold" ? "text-primary" : 
-                      JewelleryType === "diamond" ? "text-secondary" : ""
-                    )}>Select Jewellery Type</span>
+                  <CardTitle className="flex items-center space-x-2 text-lg sm:text-xl text-gray-900">
+                    <Gem className="h-4 w-4 sm:h-5 sm:w-5 text-[#8B7355]" />
+                    <span>Select Jewellery Type</span>
                   </CardTitle>
-                  <CardDescription className="text-sm">
+                  <CardDescription className="text-sm text-gray-600">
                     Choose the type of Jewellery to calculate
                   </CardDescription>
                 </CardHeader>
@@ -377,27 +369,27 @@ export default function Calculator() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     <div
                       className={cn(
-                        "relative h-16 sm:h-20 flex items-center p-4 rounded-lg border-2 cursor-pointer transition-all duration-200",
+                        "relative h-16 sm:h-20 flex items-center p-4 rounded-xl border-2 cursor-pointer transition-all duration-200",
                         JewelleryType === "gold" 
-                          ? "border-primary bg-primary/10 text-primary" 
-                          : "border-gray-200 bg-background text-gray-600"
+                          ? "border-[#8B7355] bg-[#8B7355] text-white" 
+                          : "border-white bg-white text-gray-900"
                       )}
                       onClick={() => handleJewelleryTypeSelect("gold")}
                     >
                       {/* Radio button indicator */}
                       <div className={cn(
-                        "absolute left-3 w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all duration-200",
+                        "absolute left-3 w-6 h-6 sm:w-7 sm:h-7 rounded-full border-2 flex items-center justify-center transition-all duration-200",
                         JewelleryType === "gold" 
-                          ? "border-primary bg-primary" 
+                          ? "border-white bg-transparent" 
                           : "border-gray-300 bg-white"
                       )}>
                         {JewelleryType === "gold" && (
-                          <div className="w-2 h-2 rounded-full bg-white"></div>
+                          <div className="w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full bg-white"></div>
                         )}
                       </div>
                       
                       {/* Content */}
-                      <div className="flex items-center space-x-3 ml-6">
+                      <div className="flex items-center space-x-3 ml-8">
                         <Crown className="h-5 w-5 sm:h-6 sm:w-6" />
                         <span className="font-medium text-sm sm:text-base">Gold Jewellery</span>
                       </div>
@@ -405,27 +397,27 @@ export default function Calculator() {
 
                     <div
                       className={cn(
-                        "relative h-16 sm:h-20 flex items-center p-4 rounded-lg border-2 cursor-pointer transition-all duration-200",
+                        "relative h-16 sm:h-20 flex items-center p-4 rounded-xl border-2 cursor-pointer transition-all duration-200",
                         JewelleryType === "diamond" 
-                          ? "border-secondary bg-secondary/10 text-secondary" 
-                          : "border-gray-200 bg-background text-gray-600"
+                          ? "border-[#8B7355] bg-[#8B7355] text-white" 
+                          : "border-white bg-white text-gray-900"
                       )}
                       onClick={() => handleJewelleryTypeSelect("diamond")}
                     >
                       {/* Radio button indicator */}
                       <div className={cn(
-                        "absolute left-3 w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all duration-200",
+                        "absolute left-3 w-6 h-6 sm:w-7 sm:h-7 rounded-full border-2 flex items-center justify-center transition-all duration-200",
                         JewelleryType === "diamond" 
-                          ? "border-secondary bg-secondary" 
+                          ? "border-white bg-transparent" 
                           : "border-gray-300 bg-white"
                       )}>
                         {JewelleryType === "diamond" && (
-                          <div className="w-2 h-2 rounded-full bg-white"></div>
+                          <div className="w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full bg-white"></div>
                         )}
                       </div>
                       
                       {/* Content */}
-                      <div className="flex items-center space-x-3 ml-6">
+                      <div className="flex items-center space-x-3 ml-8">
                         <Diamond className="h-5 w-5 sm:h-6 sm:w-6" />
                         <span className="font-medium text-sm sm:text-base">Diamond Jewellery</span>
                       </div>
@@ -437,12 +429,7 @@ export default function Calculator() {
               {/* Dynamic Form - Mobile optimized */}
               {JewelleryType && (
                 <Card
-                  className={cn(
-                    "shadow-card transition-smooth animate-fade-in border-2",
-                    JewelleryType === "gold" 
-                      ? "border-primary/20 bg-gradient-to-br from-background via-background to-primary/5" 
-                      : "border-secondary/20 bg-gradient-to-br from-background via-background to-secondary/5"
-                  )}
+                  className="shadow-card transition-smooth animate-fade-in border-0 bg-[#E5DDD5]"
                 >
                   <CardHeader className="pb-4">
                     <div className="flex items-center justify-between flex-wrap gap-2">
@@ -760,10 +747,7 @@ export default function Calculator() {
                     <Button
                       onClick={calculatePrice}
                       disabled={!isFormValid() || isCalculating}
-                      className={cn(
-                        "w-full hover-glow text-base h-12 sm:h-14 mt-6 font-semibold transition-smooth",
-                        JewelleryType === "gold" ? "gradient-gold" : "gradient-diamond"
-                      )}
+                      className="w-full text-base h-12 sm:h-14 mt-6 font-semibold bg-[#8B7355] hover:bg-[#7A6349] text-white disabled:bg-gray-400 disabled:cursor-not-allowed rounded-xl transition-all"
                     >
                       {isCalculating ? "Calculating..." : "Calculate Price"}
                     </Button>

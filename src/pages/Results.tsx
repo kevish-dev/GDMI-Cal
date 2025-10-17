@@ -60,10 +60,10 @@ export default function Results() {
           </div>
         ) : (
           <div className="max-w-2xl mx-auto">
-            <Card className="border-orange-200 bg-orange-50">
-              <CardContent className="flex items-center justify-center py-16 text-center">
-                <AlertCircle className="h-16 w-16 text-orange-500 mb-4" />
-                <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+            <Card className="border-0 bg-[#E5DDD5]">
+              <CardContent className="flex flex-col items-center justify-center py-16 text-center">
+                <AlertCircle className="h-16 w-16 text-[#8B7355] mb-4" />
+                <h2 className="text-2xl font-semibold text-gray-900 mb-2" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
                   No Results Found
                 </h2>
                 <p className="text-gray-600 mb-6">

@@ -48,10 +48,10 @@ export function Navbar() {
             <Link
               to="/"
               className={cn(
-                "px-3 py-2 rounded-lg transition-smooth text-sm font-medium flex items-center space-x-2",
+                "px-3 py-2 rounded-xl transition-all text-sm font-medium flex items-center space-x-2",
                 isActive("/")
-                  ? "bg-primary text-primary-foreground shadow-card"
-                  : "text-muted-foreground"
+                  ? "bg-[#8B7355] text-white shadow-card"
+                  : "text-muted-foreground hover:bg-[#E5DDD5]"
               )}
             >
               <Home className="h-4 w-4" />
@@ -61,10 +61,10 @@ export function Navbar() {
             <Link
               to="/calculator"
               className={cn(
-                "px-3 py-2 rounded-lg transition-smooth text-sm font-medium flex items-center space-x-2",
+                "px-3 py-2 rounded-xl transition-all text-sm font-medium flex items-center space-x-2",
                 isActive("/calculator")
-                  ? "bg-primary text-primary-foreground shadow-card"
-                  : "text-muted-foreground"
+                  ? "bg-[#8B7355] text-white shadow-card"
+                  : "text-muted-foreground hover:bg-[#E5DDD5]"
               )}
             >
               <Calculator className="h-4 w-4" />
@@ -75,10 +75,10 @@ export function Navbar() {
               <Link
                 to="/admin"
                 className={cn(
-                  "px-3 py-2 rounded-lg transition-smooth text-sm font-medium flex items-center space-x-2",
+                  "px-3 py-2 rounded-xl transition-all text-sm font-medium flex items-center space-x-2",
                   isActive("/admin")
-                    ? "bg-accent text-accent-foreground shadow-card"
-                    : "text-muted-foreground"
+                    ? "bg-[#8B7355] text-white shadow-card"
+                    : "text-muted-foreground hover:bg-[#E5DDD5]"
                 )}
               >
                 <Settings className="h-4 w-4" />
@@ -91,9 +91,9 @@ export function Navbar() {
           <div className="hidden md:flex items-center space-x-3">
             {isAuthenticated ? (
               <Button
-                variant="outline"
                 size="sm"
                 onClick={handleLogout}
+                className="bg-[#8B7355] hover:bg-[#7A6349] text-white rounded-xl transition-all"
               >
                 Logout
               </Button>
@@ -103,13 +103,14 @@ export function Navbar() {
                   variant="ghost"
                   size="sm"
                   asChild
+                  className="hover:bg-[#E5DDD5] rounded-xl transition-all"
                 >
                   <Link to="/login">
                     <LogIn className="h-4 w-4 mr-2" />
                     Login
                   </Link>
                 </Button>
-                {/* <Button size="sm" asChild className="gradient-gold hover-glow">
+                {/* <Button size="sm" asChild className="bg-[#8B7355] hover:bg-[#7A6349] text-white">
                   <Link to="/register">
                     <UserPlus className="h-4 w-4 mr-2" />
                     Register
@@ -137,10 +138,10 @@ export function Navbar() {
               <Link
                 to="/"
                 className={cn(
-                  "px-4 py-3 rounded-lg transition-smooth text-base font-medium flex items-center space-x-3",
+                  "px-4 py-3 rounded-xl transition-all text-base font-medium flex items-center space-x-3",
                   isActive("/")
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground"
+                    ? "bg-[#8B7355] text-white"
+                    : "text-muted-foreground hover:bg-[#E5DDD5]"
                 )}
                 onClick={() => setIsOpen(false)}
               >
@@ -151,10 +152,10 @@ export function Navbar() {
               <Link
                 to="/calculator"
                 className={cn(
-                  "px-4 py-3 rounded-lg transition-smooth text-base font-medium flex items-center space-x-3",
+                  "px-4 py-3 rounded-xl transition-all text-base font-medium flex items-center space-x-3",
                   isActive("/calculator")
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground"
+                    ? "bg-[#8B7355] text-white"
+                    : "text-muted-foreground hover:bg-[#E5DDD5]"
                 )}
                 onClick={() => setIsOpen(false)}
               >
@@ -166,10 +167,10 @@ export function Navbar() {
                 <Link
                   to="/admin"
                   className={cn(
-                    "px-4 py-3 rounded-lg transition-smooth text-base font-medium flex items-center space-x-3",
+                    "px-4 py-3 rounded-xl transition-all text-base font-medium flex items-center space-x-3",
                     isActive("/admin")
-                      ? "bg-accent text-accent-foreground"
-                      : "text-muted-foreground"
+                      ? "bg-[#8B7355] text-white"
+                      : "text-muted-foreground hover:bg-[#E5DDD5]"
                   )}
                   onClick={() => setIsOpen(false)}
                 >
@@ -181,13 +182,12 @@ export function Navbar() {
               <div className="flex flex-col space-y-2 pt-3 border-t mt-2">
                 {isAuthenticated ? (
                   <Button
-                    variant="outline"
                     size="default"
                     onClick={() => {
                       handleLogout();
                       setIsOpen(false);
                     }}
-                    className="justify-start text-base h-12"
+                    className="justify-start text-base h-12 bg-[#8B7355] hover:bg-[#7A6349] text-white rounded-xl transition-all"
                   >
                     Logout
                   </Button>
@@ -196,7 +196,7 @@ export function Navbar() {
                     variant="ghost"
                     size="default"
                     asChild
-                    className="justify-start text-base h-12"
+                    className="justify-start text-base h-12 hover:bg-[#E5DDD5] rounded-xl transition-all"
                   >
                     <Link to="/login" onClick={() => setIsOpen(false)}>
                       <LogIn className="h-5 w-5 mr-3" />
