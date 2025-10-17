@@ -86,9 +86,7 @@ export function ScanResultsView({
   const purity = extractedData.carat || "22K";
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Gold Rate Marquee */}
-      <GoldRateMarquee />
+    <div className="min-h-fit bg-gray-50">
       
       <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-4 sm:p-6">
         <div className="max-w-2xl mx-auto space-y-4 sm:space-y-6">
@@ -346,7 +344,7 @@ export function ScanResultsView({
         {/* Action Buttons */}
         <div className={cn(
           "grid gap-3 sm:gap-4 pt-2",
-          onCalculateAnother ? "grid-cols-1 sm:grid-cols-3" : "grid-cols-2"
+          onCalculateAnother ? "grid-cols-2" : "grid-cols-1"
         )}>
           <Button
             onClick={onGoHome}
@@ -361,15 +359,6 @@ export function ScanResultsView({
           >
             Scan Another Tag
           </Button>
-          {onCalculateAnother && (
-            <Button
-              onClick={onCalculateAnother}
-              variant="outline"
-              className="py-4 sm:py-6 rounded-xl text-base sm:text-lg font-medium border-2 border-[#8B7355] text-[#8B7355] hover:bg-[#8B7355]/5"
-            >
-              Manual Calculator
-            </Button>
-          )}
         </div>
       </div>
       </div>

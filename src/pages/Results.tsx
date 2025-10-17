@@ -61,7 +61,7 @@ export default function Results() {
         ) : (
           <div className="max-w-2xl mx-auto">
             <Card className="border-orange-200 bg-orange-50">
-              <CardContent className="flex flex-col items-center justify-center py-16 text-center">
+              <CardContent className="flex items-center justify-center py-16 text-center">
                 <AlertCircle className="h-16 w-16 text-orange-500 mb-4" />
                 <h2 className="text-2xl font-semibold text-gray-900 mb-2">
                   No Results Found
@@ -75,12 +75,6 @@ export default function Results() {
                     className="px-6 py-3 bg-[#8B7355] text-white rounded-xl font-medium hover:bg-[#7A6349] transition-colors"
                   >
                     Go to Homepage
-                  </button>
-                  <button
-                    onClick={handleCalculateAnother}
-                    className="px-6 py-3 border-2 border-[#8B7355] text-[#8B7355] rounded-xl font-medium hover:bg-[#8B7355]/5 transition-colors"
-                  >
-                    Manual Calculator
                   </button>
                 </div>
               </CardContent>

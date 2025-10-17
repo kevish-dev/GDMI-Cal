@@ -1459,97 +1459,250 @@ export function JewelleryTagScanner({
               ) : null;
               })()}
 
-              {/* Jeweller Practice Question */}
-              <Card className="bg-[#E5DDD5] border-0 rounded-2xl sm:rounded-3xl p-4 sm:p-6">
-                <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 mb-4 sm:mb-6">
-                  <p className="text-gray-900 text-sm sm:text-base leading-relaxed">
-                    When you look at the back of your jewellery, can you see all the Kundan or stones?
-                  </p>
-                </div>
-
-                <RadioGroup
-                  value={verificationAnswers.showsRawForm?.toString() || ""}
-                  onValueChange={(value) =>
-                    setVerificationAnswers((prev) => ({
-                      ...prev,
-                      showsRawForm: value === "true",
-                      // Auto-set other required fields for validation
-                      buyBackGuarantee: JewelleryType === "gold" ? true : prev.buyBackGuarantee,
-                      diamondAppreciation: JewelleryType === "diamond" ? false : prev.diamondAppreciation,
-                      certificationType: JewelleryType === "diamond" ? "Non-IGI" : prev.certificationType,
-                    }))
-                  }
-                  className="space-y-3"
-                >
-                  <div
-                    className={cn(
-                      "flex items-center justify-between px-4 sm:px-6 py-4 sm:py-5 rounded-xl sm:rounded-2xl cursor-pointer transition-all border-2",
-                      verificationAnswers.showsRawForm === true
-                        ? "bg-[#8B7355] text-white border-[#8B7355]"
-                        : "bg-white text-gray-900 border-white"
-                    )}
-                    onClick={() =>
-                      setVerificationAnswers((prev) => ({
-                        ...prev,
-                        showsRawForm: true,
-                        buyBackGuarantee: JewelleryType === "gold" ? true : prev.buyBackGuarantee,
-                        diamondAppreciation: JewelleryType === "diamond" ? false : prev.diamondAppreciation,
-                        certificationType: JewelleryType === "diamond" ? "Non-IGI" : prev.certificationType,
-                      }))
-                    }
-                  >
-                    <span className="text-sm sm:text-base flex-1">All are visible and open from the back.</span>
-                    <div className={cn(
-                      "w-6 h-6 sm:w-7 sm:h-7 rounded-full border-2 flex items-center justify-center flex-shrink-0 ml-3",
-                      verificationAnswers.showsRawForm === true
-                        ? "border-white bg-transparent"
-                        : "border-gray-300 bg-white"
-                    )}>
-                      {verificationAnswers.showsRawForm === true && (
-                        <div className="w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full bg-white" />
-                      )}
+              {/* Diamond-specific Questions */}
+              {JewelleryType === "diamond" && (
+                <>
+                  {/* Certificate Type Question */}
+                  <Card className="bg-[#E5DDD5] border-0 rounded-2xl sm:rounded-3xl p-4 sm:p-6">
+                    <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 mb-4 sm:mb-6">
+                      <p className="text-gray-900 text-sm sm:text-base leading-relaxed">
+                        What kind of diamond certificate do you have?
+                      </p>
                     </div>
-                    <RadioGroupItem
-                      value="true"
-                      className="sr-only"
-                    />
+
+                    <RadioGroup
+                      value={verificationAnswers.certificationType || ""}
+                      onValueChange={(value) =>
+                        setVerificationAnswers((prev) => ({
+                          ...prev,
+                          certificationType: value as Certification,
+                        }))
+                      }
+                      className="space-y-3"
+                    >
+                      <div
+                        className={cn(
+                          "flex items-center justify-between px-4 sm:px-6 py-4 sm:py-5 rounded-xl sm:rounded-2xl cursor-pointer transition-all border-2",
+                          verificationAnswers.certificationType === "IGI"
+                            ? "bg-[#8B7355] text-white border-[#8B7355]"
+                            : "bg-white text-gray-900 border-white"
+                        )}
+                        onClick={() =>
+                          setVerificationAnswers((prev) => ({
+                            ...prev,
+                            certificationType: "IGI",
+                          }))
+                        }
+                      >
+                        <span className="text-sm sm:text-base flex-1">IGI certified</span>
+                        <div className={cn(
+                          "w-6 h-6 sm:w-7 sm:h-7 rounded-full border-2 flex items-center justify-center flex-shrink-0 ml-3",
+                          verificationAnswers.certificationType === "IGI"
+                            ? "border-white bg-transparent"
+                            : "border-gray-300 bg-white"
+                        )}>
+                          {verificationAnswers.certificationType === "IGI" && (
+                            <div className="w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full bg-white" />
+                          )}
+                        </div>
+                        <RadioGroupItem value="IGI" className="sr-only" />
+                      </div>
+
+                      <div
+                        className={cn(
+                          "flex items-center justify-between px-4 sm:px-6 py-4 sm:py-5 rounded-xl sm:rounded-2xl cursor-pointer transition-all border-2",
+                          verificationAnswers.certificationType === "Non-IGI"
+                            ? "bg-[#8B7355] text-white border-[#8B7355]"
+                            : "bg-white text-gray-900 border-white"
+                        )}
+                        onClick={() =>
+                          setVerificationAnswers((prev) => ({
+                            ...prev,
+                            certificationType: "Non-IGI",
+                          }))
+                        }
+                      >
+                        <span className="text-sm sm:text-base flex-1">Not IGI certified / Other</span>
+                        <div className={cn(
+                          "w-6 h-6 sm:w-7 sm:h-7 rounded-full border-2 flex items-center justify-center flex-shrink-0 ml-3",
+                          verificationAnswers.certificationType === "Non-IGI"
+                            ? "border-white bg-transparent"
+                            : "border-gray-300 bg-white"
+                        )}>
+                          {verificationAnswers.certificationType === "Non-IGI" && (
+                            <div className="w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full bg-white" />
+                          )}
+                        </div>
+                        <RadioGroupItem value="Non-IGI" className="sr-only" />
+                      </div>
+                    </RadioGroup>
+                  </Card>
+
+                  {/* Diamond Appreciation Question */}
+                  <Card className="bg-[#E5DDD5] border-0 rounded-2xl sm:rounded-3xl p-4 sm:p-6">
+                    <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 mb-4 sm:mb-6">
+                      <p className="text-gray-900 text-sm sm:text-base leading-relaxed">
+                        Does your jeweller increase the value for your diamonds (give appreciation)?
+                      </p>
+                    </div>
+
+                    <RadioGroup
+                      value={verificationAnswers.diamondAppreciation?.toString() || ""}
+                      onValueChange={(value) =>
+                        setVerificationAnswers((prev) => ({
+                          ...prev,
+                          diamondAppreciation: value === "true",
+                        }))
+                      }
+                      className="space-y-3"
+                    >
+                      <div
+                        className={cn(
+                          "flex items-center justify-between px-4 sm:px-6 py-4 sm:py-5 rounded-xl sm:rounded-2xl cursor-pointer transition-all border-2",
+                          verificationAnswers.diamondAppreciation === true
+                            ? "bg-[#8B7355] text-white border-[#8B7355]"
+                            : "bg-white text-gray-900 border-white"
+                        )}
+                        onClick={() =>
+                          setVerificationAnswers((prev) => ({
+                            ...prev,
+                            diamondAppreciation: true,
+                          }))
+                        }
+                      >
+                        <span className="text-sm sm:text-base flex-1">Yes, they add appreciation on diamonds</span>
+                        <div className={cn(
+                          "w-6 h-6 sm:w-7 sm:h-7 rounded-full border-2 flex items-center justify-center flex-shrink-0 ml-3",
+                          verificationAnswers.diamondAppreciation === true
+                            ? "border-white bg-transparent"
+                            : "border-gray-300 bg-white"
+                        )}>
+                          {verificationAnswers.diamondAppreciation === true && (
+                            <div className="w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full bg-white" />
+                          )}
+                        </div>
+                        <RadioGroupItem value="true" className="sr-only" />
+                      </div>
+
+                      <div
+                        className={cn(
+                          "flex items-center justify-between px-4 sm:px-6 py-4 sm:py-5 rounded-xl sm:rounded-2xl cursor-pointer transition-all border-2",
+                          verificationAnswers.diamondAppreciation === false
+                            ? "bg-[#8B7355] text-white border-[#8B7355]"
+                            : "bg-white text-gray-900 border-white"
+                        )}
+                        onClick={() =>
+                          setVerificationAnswers((prev) => ({
+                            ...prev,
+                            diamondAppreciation: false,
+                          }))
+                        }
+                      >
+                        <span className="text-sm sm:text-base flex-1">No, they don't give appreciation</span>
+                        <div className={cn(
+                          "w-6 h-6 sm:w-7 sm:h-7 rounded-full border-2 flex items-center justify-center flex-shrink-0 ml-3",
+                          verificationAnswers.diamondAppreciation === false
+                            ? "border-white bg-transparent"
+                            : "border-gray-300 bg-white"
+                        )}>
+                          {verificationAnswers.diamondAppreciation === false && (
+                            <div className="w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full bg-white" />
+                          )}
+                        </div>
+                        <RadioGroupItem value="false" className="sr-only" />
+                      </div>
+                    </RadioGroup>
+                  </Card>
+                </>
+              )}
+
+              {/* Jeweller Practice Question - Only for Gold */}
+              {JewelleryType === "gold" && (
+                <Card className="bg-[#E5DDD5] border-0 rounded-2xl sm:rounded-3xl p-4 sm:p-6">
+                  <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 mb-4 sm:mb-6">
+                    <p className="text-gray-900 text-sm sm:text-base leading-relaxed">
+                      When you look at the back of your jewellery, can you see all the Kundan or stones?
+                    </p>
                   </div>
 
-                  <div
-                    className={cn(
-                      "flex items-center justify-between px-4 sm:px-6 py-4 sm:py-5 rounded-xl sm:rounded-2xl cursor-pointer transition-all border-2",
-                      verificationAnswers.showsRawForm === false
-                        ? "bg-[#8B7355] text-white border-[#8B7355]"
-                        : "bg-white text-gray-900 border-white"
-                    )}
-                    onClick={() =>
+                  <RadioGroup
+                    value={verificationAnswers.showsRawForm?.toString() || ""}
+                    onValueChange={(value) =>
                       setVerificationAnswers((prev) => ({
                         ...prev,
-                        showsRawForm: false,
-                        buyBackGuarantee: JewelleryType === "gold" ? true : prev.buyBackGuarantee,
-                        diamondAppreciation: JewelleryType === "diamond" ? false : prev.diamondAppreciation,
-                        certificationType: JewelleryType === "diamond" ? "Non-IGI" : prev.certificationType,
+                        showsRawForm: value === "true",
+                        // Auto-set other required fields for validation
+                        buyBackGuarantee: true,
                       }))
                     }
+                    className="space-y-3"
                   >
-                    <span className="text-sm sm:text-base flex-1">Some are closed or covered from the back.</span>
-                    <div className={cn(
-                      "w-6 h-6 sm:w-7 sm:h-7 rounded-full border-2 flex items-center justify-center flex-shrink-0 ml-3",
-                      verificationAnswers.showsRawForm === false
-                        ? "border-white bg-transparent"
-                        : "border-gray-300 bg-white"
-                    )}>
-                      {verificationAnswers.showsRawForm === false && (
-                        <div className="w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full bg-white" />
+                    <div
+                      className={cn(
+                        "flex items-center justify-between px-4 sm:px-6 py-4 sm:py-5 rounded-xl sm:rounded-2xl cursor-pointer transition-all border-2",
+                        verificationAnswers.showsRawForm === true
+                          ? "bg-[#8B7355] text-white border-[#8B7355]"
+                          : "bg-white text-gray-900 border-white"
                       )}
+                      onClick={() =>
+                        setVerificationAnswers((prev) => ({
+                          ...prev,
+                          showsRawForm: true,
+                          buyBackGuarantee: true,
+                        }))
+                      }
+                    >
+                      <span className="text-sm sm:text-base flex-1">All are visible and open from the back.</span>
+                      <div className={cn(
+                        "w-6 h-6 sm:w-7 sm:h-7 rounded-full border-2 flex items-center justify-center flex-shrink-0 ml-3",
+                        verificationAnswers.showsRawForm === true
+                          ? "border-white bg-transparent"
+                          : "border-gray-300 bg-white"
+                      )}>
+                        {verificationAnswers.showsRawForm === true && (
+                          <div className="w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full bg-white" />
+                        )}
+                      </div>
+                      <RadioGroupItem
+                        value="true"
+                        className="sr-only"
+                      />
                     </div>
-                    <RadioGroupItem
-                      value="false"
-                      className="sr-only"
-                    />
-                  </div>
-                </RadioGroup>
-              </Card>
+
+                    <div
+                      className={cn(
+                        "flex items-center justify-between px-4 sm:px-6 py-4 sm:py-5 rounded-xl sm:rounded-2xl cursor-pointer transition-all border-2",
+                        verificationAnswers.showsRawForm === false
+                          ? "bg-[#8B7355] text-white border-[#8B7355]"
+                          : "bg-white text-gray-900 border-white"
+                      )}
+                      onClick={() =>
+                        setVerificationAnswers((prev) => ({
+                          ...prev,
+                          showsRawForm: false,
+                          buyBackGuarantee: true,
+                        }))
+                      }
+                    >
+                      <span className="text-sm sm:text-base flex-1">Some are closed or covered from the back.</span>
+                      <div className={cn(
+                        "w-6 h-6 sm:w-7 sm:h-7 rounded-full border-2 flex items-center justify-center flex-shrink-0 ml-3",
+                        verificationAnswers.showsRawForm === false
+                          ? "border-white bg-transparent"
+                          : "border-gray-300 bg-white"
+                      )}>
+                        {verificationAnswers.showsRawForm === false && (
+                          <div className="w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full bg-white" />
+                        )}
+                      </div>
+                      <RadioGroupItem
+                        value="false"
+                        className="sr-only"
+                      />
+                    </div>
+                  </RadioGroup>
+                </Card>
+              )}
 
               {/* Navigation buttons */}
               <div className="flex gap-3 sm:gap-4">
