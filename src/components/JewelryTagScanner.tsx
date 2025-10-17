@@ -677,13 +677,6 @@ export function JewelleryTagScanner({
     <Card className="w-full shadow-2xl">
       <CardHeader className="relative border-b">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div>
-              <CardTitle className="text-xl sm:text-2xl">
-                {step === 1 ? "Step 1-Scan" : step === 2 ? "Step 2-Select" : "Step 3-Verify"}
-              </CardTitle>
-            </div>
-          </div>
           {!embedded && (
             <Button
               variant="ghost"
@@ -701,17 +694,17 @@ export function JewelleryTagScanner({
           {/* Step Labels */}
           <div className="flex items-center justify-between gap-4 px-1">
             <span className={cn(
-              "text-sm font-medium transition-colors text-gray-400",
+              `text-sm font-medium transition-colors  ${step === 1 ? 'text-gray-800' : 'text-gray-400'}`,
             )}>
               Step 1-Scan
             </span>
             <span className={cn(
-              "text-sm font-medium transition-colors text-gray-400",
+              `text-sm font-medium transition-colors  ${step === 2 ? 'text-gray-800' : 'text-gray-400'}`,
             )}>
               Step 2-Select
             </span>
             <span className={cn(
-              "text-sm font-medium transition-colors text-gray-400",
+              `text-sm font-medium transition-colors  ${step === 3 ? 'text-gray-800' : 'text-gray-400'}`,
             )}>
               Step 3-Verify
             </span>
@@ -756,7 +749,7 @@ export function JewelleryTagScanner({
           {/* Step 1: Scan both sides of tag */}
           {step === 1 && (
             <div className="space-y-6 animate-in fade-in duration-500">
-              <h1 className="text-3xl sm:text-4xl font-serif text-center">
+              <h1 className="text-4xl sm:text-4xl text-center" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
                 Scan both sides of tag
               </h1>
 
@@ -862,7 +855,7 @@ export function JewelleryTagScanner({
               {/* Side 1 */}
               <div className="space-y-4">
                 <h2 className="text-xl font-semibold">Side 1</h2>
-                <Card className="relative bg-[#E5DDD5] border-0 rounded-3xl overflow-hidden min-h-[280px] flex items-center justify-center">
+                <Card className="relative bg-[#E5DDD5] border-0 rounded-3xl overflow-hidden min-h-[200px] flex items-center justify-center">
                   {imagePreviews.top ? (
                     <div className="relative w-full h-full">
                       <img
@@ -936,7 +929,7 @@ export function JewelleryTagScanner({
               {/* Side 2 */}
               <div className="space-y-4">
                 <h2 className="text-xl font-semibold">Side 2</h2>
-                <Card className="relative bg-[#E5DDD5] border-0 rounded-3xl overflow-hidden min-h-[280px] flex items-center justify-center">
+                <Card className="relative bg-[#E5DDD5] border-0 rounded-3xl overflow-hidden min-h-[200px] flex items-center justify-center">
                   {imagePreviews.bottom ? (
                     <div className="relative w-full h-full">
                       <img
@@ -961,7 +954,7 @@ export function JewelleryTagScanner({
                     >
                       <Camera className="h-12 w-12 text-gray-700" />
                       <span className="text-base font-medium text-gray-900">
-                        Scan Tag with Camera
+                        Click here to scan tag<br />(Side 2)
                       </span>
                     </button>
                   )}
@@ -1010,7 +1003,7 @@ export function JewelleryTagScanner({
                     bottomCameraInputRef.current?.click();
                   }
                 }}
-                className="w-full py-4 border-2 border-green-500 text-green-600 rounded-xl font-medium hover:bg-green-50 transition-colors"
+                className="w-full py-4 underline rounded-xl font-medium hover:bg-green-50 transition-colors"
               >
                 Or upload image from gallery
               </button>
