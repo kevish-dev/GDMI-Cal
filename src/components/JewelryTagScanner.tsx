@@ -312,6 +312,16 @@ export function JewelleryTagScanner({
       return;
     }
 
+    // If data is already extracted, just move to the next step
+    if (extractedData) {
+      setStep(2);
+      toast({
+        title: "Data already extracted",
+        description: "Moving to jewellery type selection",
+      });
+      return;
+    }
+
     setIsExtracting(true);
 
     try {
@@ -1071,7 +1081,7 @@ export function JewelleryTagScanner({
                 disabled={!canProceedToStep2 || isExtracting}
                 className="w-full py-6 bg-[#8B7355] hover:bg-[#7A6349] text-white rounded-xl text-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isExtracting ? "Extracting..." : "Next"}
+                {isExtracting ? "Extracting..." : extractedData ? "Continue" : "Next"}
               </Button>
             </div>
           )}

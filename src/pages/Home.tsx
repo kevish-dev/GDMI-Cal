@@ -77,10 +77,10 @@ export default function Home() {
       {/* Hero Section */}
       <div className="relative flex px-3 sm:px-4 py-12 sm:py-16 lg:py-20 bg-gradient-to-b from-background via-muted/20 to-background">
         <div className="container mx-auto max-w-6xl">
-          <div className="text-center md:text-left space-y-6 sm:space-y-8 mb-12 sm:mb-16">
+          <div className="text-left md:text-left space-y-6 sm:space-y-8 mb-12 sm:mb-16">
             {/* Main Heading */}
             <h1 className="text-5xl sm:text-4xl md:text-5xl lg:text-6xl font-medium leading-tight px-2" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
-              <span className="block text-foreground">Save Lakhs, know</span>
+              <span className="block text-foreground">Save lakhs, know</span>
               <span className="block text-foreground">the actual price of</span>
               <span className="block text-foreground">any jewellery.</span>
             </h1>
@@ -116,7 +116,7 @@ export default function Home() {
       <div className="w-full bg-[#DED9CD] py-12 sm:py-16">
         <div className="container mx-auto max-w-4xl px-6 sm:px-10 lg:px-16">
           <h2 
-            className="text-center md:text-left text-5xl sm:text-5xl md:text-6xl mb-12 sm:mb-16 text-[#564C35]" 
+            className="text-left md:text-left text-5xl sm:text-5xl md:text-6xl mb-12 sm:mb-16 text-[#564C35]" 
             style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 400 }}
           >
             How it works
@@ -130,7 +130,7 @@ export default function Home() {
                     1
                   </div>
                 </div>
-                <div className="flex-1 text-center md:text-left">
+                <div className="flex-1 text-left md:text-left">
                   <h3 
                     className="text-xl sm:text-2xl md:text-3xl font-bold text-[#564C35] uppercase tracking-wide" 
                     style={{ fontFamily: "'Cormorant Garamond', serif" }}
@@ -151,7 +151,7 @@ export default function Home() {
                     2
                   </div>
                 </div>
-                <div className="flex-1 text-center md:text-left">
+                <div className="flex-1 text-left md:text-left">
                   <h3 
                     className="text-xl sm:text-2xl md:text-3xl font-bold text-[#564C35] uppercase tracking-wide" 
                     style={{ fontFamily: "'Cormorant Garamond', serif" }}
@@ -172,7 +172,7 @@ export default function Home() {
                     3
                   </div>
                 </div>
-                <div className="flex-1 text-center md:text-left">
+                <div className="flex-1 text-left md:text-left">
                   <h3 
                     className="text-xl sm:text-2xl md:text-3xl font-bold text-[#564C35] uppercase tracking-wide" 
                     style={{ fontFamily: "'Cormorant Garamond', serif" }}
