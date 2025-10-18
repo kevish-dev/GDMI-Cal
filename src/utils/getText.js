@@ -68,7 +68,7 @@ Extract ALL visible text and convert it into a JSON object with these fields:
   "diamondWeight": <number in carats - ONLY if mixed gold-diamond piece with DW/RD notation>,
   "stones": [
     {
-      "type": <string - e.g., "STN", "STONES", "ICS", "PC", "CS", "RD", "ELITE", "Piroi", "Peroi">,
+      "type": <string - e.g., "F STONES", "STN", "STONES", "ICS", "PC", "CS", "RD", "ELITE", "Piroi", "Peroi", "KUND", "KUN">,
       "weight": <number - in grams for gold jewelry (stones), in carats for diamonds>,
       "count": <number - piece count if mentioned like "PC-104">,
       "unit": <string - "g" for stones/kundan, "ct" for diamonds>
@@ -87,13 +87,13 @@ IMPORTANT parsing rules:
 1. When you see formats like "1.250\\1000", extract both values and sum them
 2. For stone notations like "PC-104\\2.01", the first is piece count (PC-104) and second is weight (2.01)
 3. For "STN:1.250\\1000", this means stones total 1.250+1.000 = 2.250 grams
-4. CRITICAL: Keep STONE (STN/CS/Piroi/Peroi) and KUNDAN (KUN) weights SEPARATE - they are different materials
+4. CRITICAL: Keep STONE (STN/CS/Piroi/Peroi/F STONES) and KUNDAN (KUN/KUND) weights SEPARATE - add them to otherStones array with proper type
 5. Stone weights in gold jewelry are in GRAMS (unit: "g")
 6. Diamond weights (DW/RD) in mixed pieces are in CARATS (unit: "ct")
 7. Kundan weights are in GRAMS (unit: "g")
 8. Item codes can have various formats - capture the exact text
 9. QR codes and barcodes are for reference only - focus on printed text
-10. If multiple stone types (STN, KUN, ICS), kundan should go in kundanWeight field, others in stoneWeight
+10. If multiple stone types (STN, KUN, ICS), each should be a separate entry in otherStones array with its type and weight
 11. Extract HUID and hallmark information if visible on the tag
 
 Only include fields with actual values. Use null for fields that cannot be determined. Return ONLY valid JSON, no additional text or markdown.`
@@ -233,7 +233,37 @@ export function normalizeExtractedData(data, JewelleryType) {
   const normalized = { ...data };
 
   if (JewelleryType === "gold") {
-    // Calculate total stone weight from stones array if not provided
+    // Process otherStones array first (new format)
+    if (normalized.otherStones && Array.isArray(normalized.otherStones)) {
+      // Separate stones and kundan from otherStones array
+      let calculatedStoneWeight = 0;
+      let calculatedKundanWeight = 0;
+
+      normalized.otherStones.forEach(stone => {
+        const stoneType = stone.type ? stone.type.toUpperCase() : '';
+        
+        // Check if this is kundan
+        if (stoneType.includes('KUN') || stoneType.includes('KUND')) {
+          calculatedKundanWeight += stone.weight || 0;
+        } else {
+          // Everything else is stone (F STONES, STN, STONES, etc.)
+          calculatedStoneWeight += stone.weight || 0;
+        }
+      });
+
+      // Set calculated weights if not already set
+      if (!normalized.stoneWeight && calculatedStoneWeight > 0) {
+        normalized.stoneWeight = calculatedStoneWeight;
+        normalized.stoneWeightUnit = 'g'; // Gold jewelry stones are in grams
+      }
+
+      if (!normalized.kundanWeight && calculatedKundanWeight > 0) {
+        normalized.kundanWeight = calculatedKundanWeight;
+        normalized.kundanWeightUnit = 'g'; // Kundan is always in grams
+      }
+    }
+
+    // Fallback: Calculate total stone weight from stones array if not provided (old format)
     // BUT exclude kundan - kundan should be separate
     if (!normalized.stoneWeight && normalized.stones && Array.isArray(normalized.stones)) {
       normalized.stoneWeight = normalized.stones.reduce((sum, stone) => {
@@ -247,7 +277,7 @@ export function normalizeExtractedData(data, JewelleryType) {
       normalized.stoneWeightUnit = 'g';
     }
 
-    // Calculate kundan weight from stones array if marked as kundan
+    // Fallback: Calculate kundan weight from stones array if marked as kundan (old format)
     if (!normalized.kundanWeight && normalized.stones && Array.isArray(normalized.stones)) {
       normalized.kundanWeight = normalized.stones.reduce((sum, stone) => {
         // Only add kundan stones
@@ -287,14 +317,34 @@ export function normalizeExtractedData(data, JewelleryType) {
       normalized.diamondWeightUnit = 'ct';
     }
 
-    // Calculate other stones weight if provided
-    // For diamond jewelry, stone weights are in CARATS
+    // Process otherStones array for diamond jewelry
+    // For diamond jewelry, other stones (including kundan) are typically in CARATS
     if (normalized.otherStones && Array.isArray(normalized.otherStones)) {
-      const otherStonesWeight = normalized.otherStones.reduce((sum, stone) => {
-        return sum + (stone.weight || 0);
-      }, 0);
-      normalized.otherStonesWeight = otherStonesWeight;
-      normalized.otherStonesWeightUnit = 'ct'; // Carats for diamond jewelry
+      let calculatedStoneWeight = 0;
+      let calculatedKundanWeight = 0;
+
+      normalized.otherStones.forEach(stone => {
+        const stoneType = stone.type ? stone.type.toUpperCase() : '';
+        
+        // Check if this is kundan
+        if (stoneType.includes('KUN') || stoneType.includes('KUND')) {
+          calculatedKundanWeight += stone.weight || 0;
+        } else {
+          // Everything else is stone
+          calculatedStoneWeight += stone.weight || 0;
+        }
+      });
+
+      // Set calculated weights if not already set
+      if (!normalized.stoneWeight && calculatedStoneWeight > 0) {
+        normalized.stoneWeight = calculatedStoneWeight;
+        normalized.stoneWeightUnit = 'ct'; // Diamond jewelry stones are in carats
+      }
+
+      if (!normalized.kundanWeight && calculatedKundanWeight > 0) {
+        normalized.kundanWeight = calculatedKundanWeight;
+        normalized.kundanWeightUnit = 'g'; // Kundan is typically in grams even for diamond jewelry
+      }
     }
 
     // For diamond jewelry, if stoneWeight exists, it should be in carats

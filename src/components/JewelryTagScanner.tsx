@@ -315,10 +315,6 @@ export function JewelleryTagScanner({
     // If data is already extracted, just move to the next step
     if (extractedData) {
       setStep(2);
-      toast({
-        title: "Data already extracted",
-        description: "Moving to jewellery type selection",
-      });
       return;
     }
 
