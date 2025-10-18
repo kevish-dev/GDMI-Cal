@@ -854,13 +854,13 @@ export function JewelleryTagScanner({
               {/* Side 1 */}
               <div className="space-y-4">
                 <h2 className="text-xl font-semibold">Side 1</h2>
-                <Card className="relative bg-[#E5DDD5] border-0 rounded-3xl overflow-hidden min-h-[200px] flex items-center justify-center">
+                <Card className="relative bg-[#E5DDD5] border-0 rounded-3xl overflow-hidden h-[250px] flex items-center justify-center">
                   {imagePreviews.top ? (
                     <div className="relative w-full h-full">
                       <img
                         src={imagePreviews.top}
                         alt="Side 1"
-                        className="w-full h-full object-contain p-4"
+                        className="w-full h-full object-cover p-4"
                       />
                       <button
                         onClick={() => handleRemoveImage("top")}
@@ -928,13 +928,13 @@ export function JewelleryTagScanner({
               {/* Side 2 */}
               <div className="space-y-4">
                 <h2 className="text-xl font-semibold">Side 2</h2>
-                <Card className="relative bg-[#E5DDD5] border-0 rounded-3xl overflow-hidden min-h-[200px] flex items-center justify-center">
+                <Card className="relative bg-[#E5DDD5] border-0 rounded-3xl overflow-hidden h-[250px] flex items-center justify-center">
                   {imagePreviews.bottom ? (
                     <div className="relative w-full h-full">
                       <img
                         src={imagePreviews.bottom}
                         alt="Side 2"
-                        className="w-full h-full object-contain p-4"
+                        className="w-full h-full object-cover p-4"
                       />
                       <button
                         onClick={() => handleRemoveImage("bottom")}
