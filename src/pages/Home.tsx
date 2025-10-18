@@ -75,9 +75,9 @@ export default function Home() {
       <GoldRateMarquee />
 
       {/* Hero Section */}
-      <div className="relative flex  px-3 sm:px-4 py-12 sm:py-16 lg:py-20 bg-gradient-to-b from-background via-muted/20 to-background">
+      <div className="relative flex px-3 sm:px-4 py-12 sm:py-16 lg:py-20 bg-gradient-to-b from-background via-muted/20 to-background">
         <div className="container mx-auto max-w-6xl">
-          <div className="text-left space-y-6 sm:space-y-8 mb-12 sm:mb-16">
+          <div className="text-center md:text-left space-y-6 sm:space-y-8 mb-12 sm:mb-16">
             {/* Main Heading */}
             <h1 className="text-5xl sm:text-4xl md:text-5xl lg:text-6xl font-medium leading-tight px-2" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
               <span className="block text-foreground">Save Lakhs, know</span>
@@ -86,12 +86,12 @@ export default function Home() {
             </h1>
 
             {/* Subheading */}
-            <p className="text-xl sm:text-lg md:text-xl font-light text-muted-foreground max-w-2xl mx-auto px-2 leading-relaxed">
+            <p className="text-xl sm:text-lg md:text-xl font-light text-muted-foreground max-w-2xl mx-auto md:mx-0 px-2 leading-relaxed">
               Snap. Scan. See what it's worth. Our smart calculator instantly reads your tag and reveals your jewellery's true value.
             </p>
 
             {/* CTA Buttons */}
-            <div className="flex  gap-3 sm:gap-4 justify-center items-center px-4 pt-4">
+            <div className="flex gap-3 sm:gap-4 justify-center md:justify-start items-center px-4 pt-4">
               <Button
                 size="lg"
                 onClick={() => setShowScanner(true)}
@@ -116,7 +116,7 @@ export default function Home() {
       <div className="w-full bg-[#DED9CD] py-12 sm:py-16">
         <div className="container mx-auto max-w-4xl px-6 sm:px-10 lg:px-16">
           <h2 
-            className="text-5xl sm:text-5xl md:text-6xl mb-12 sm:mb-16 text-[#564C35]" 
+            className="text-center md:text-left text-5xl sm:text-5xl md:text-6xl mb-12 sm:mb-16 text-[#564C35]" 
             style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 400 }}
           >
             How it works
@@ -130,9 +130,9 @@ export default function Home() {
                     1
                   </div>
                 </div>
-                <div className="flex-1">
+                <div className="flex-1 text-center md:text-left">
                   <h3 
-                    className="text-xl sm:text-2xl md:text-3xl font-bold text-[#564C35]  uppercase tracking-wide" 
+                    className="text-xl sm:text-2xl md:text-3xl font-bold text-[#564C35] uppercase tracking-wide" 
                     style={{ fontFamily: "'Cormorant Garamond', serif" }}
                   >
                     Scan Tag
@@ -147,13 +147,13 @@ export default function Home() {
               {/* Step 2 */}
               <div className="flex gap-5 sm:gap-6 items-start">
                 <div className="flex-shrink-0 flex flex-col items-center">
-                  <div className="w-8 h-8 sm:w-14 sm:h-14 rounded-full bg-[#907F58] text-white flex items-center justify-center text-xl sm:text-2xl ">
+                  <div className="w-8 h-8 sm:w-14 sm:h-14 rounded-full bg-[#907F58] text-white flex items-center justify-center text-xl sm:text-2xl">
                     2
                   </div>
                 </div>
-                <div className="flex-1">
+                <div className="flex-1 text-center md:text-left">
                   <h3 
-                    className="text-xl sm:text-2xl md:text-3xl font-bold text-[#564C35]  uppercase tracking-wide" 
+                    className="text-xl sm:text-2xl md:text-3xl font-bold text-[#564C35] uppercase tracking-wide" 
                     style={{ fontFamily: "'Cormorant Garamond', serif" }}
                   >
                     Select Jewellery Type
@@ -172,7 +172,7 @@ export default function Home() {
                     3
                   </div>
                 </div>
-                <div className="flex-1">
+                <div className="flex-1 text-center md:text-left">
                   <h3 
                     className="text-xl sm:text-2xl md:text-3xl font-bold text-[#564C35] uppercase tracking-wide" 
                     style={{ fontFamily: "'Cormorant Garamond', serif" }}
