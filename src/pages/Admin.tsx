@@ -34,11 +34,12 @@ export default function Admin() {
     chains: "",
     plain: "",
     temple: "",
-    italianGold: ""
+    italianGold: "",
+    diamond: ""
   });
   const { toast } = useToast();
   const { user, logout } = useAuth();
-  const { goldRates, updateGoldRates, diamondRates, updateDiamondRates, makingCharges, updateMakingCharges, getAnalytics, systemAnalytics, recentActivities, loading } = useRates();
+  const { goldRates, updateGoldRates, diamondRates, updateDiamondRates, makingCharges, updateMakingCharges, resetMakingCharges, getAnalytics, systemAnalytics, recentActivities, loading } = useRates();
   const navigate = useNavigate();
 
   const analytics = getAnalytics();
@@ -47,10 +48,11 @@ export default function Admin() {
   useEffect(() => {
     if (makingCharges) {
       setMakingChargesForm({
-        chains: makingCharges.chains.toString(),
-        plain: makingCharges.plain.toString(),
-        temple: makingCharges.temple.toString(),
-        italianGold: makingCharges.italianGold.toString()
+        chains: (makingCharges.chains ?? 2.5).toString(),
+        plain: (makingCharges.plain ?? 3.5).toString(),
+        temple: (makingCharges.temple ?? 7).toString(),
+        italianGold: (makingCharges.italianGold ?? 18).toString(),
+        diamond: (makingCharges.diamond ?? 800).toString()
       });
     }
   }, [makingCharges]);
@@ -291,7 +293,8 @@ export default function Admin() {
       chains: parseFloat(makingChargesForm.chains),
       plain: parseFloat(makingChargesForm.plain),
       temple: parseFloat(makingChargesForm.temple),
-      italianGold: parseFloat(makingChargesForm.italianGold)
+      italianGold: parseFloat(makingChargesForm.italianGold),
+      diamond: parseFloat(makingChargesForm.diamond)
     };
 
     // Check if all values are valid numbers
@@ -318,6 +321,28 @@ export default function Admin() {
       toast({
         title: "Update failed",
         description: "Failed to update making charges. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleResetMakingCharges = async () => {
+    setIsUploading(true);
+    
+    try {
+      await resetMakingCharges();
+      
+      toast({
+        title: "Making charges reset",
+        description: "Making charges have been reset to default values (Chains: 2.5%, Plain: 3.5%, Temple: 7%, Italian Gold: 18%, Diamond: ₹800/g)."
+      });
+    } catch (error) {
+      console.error('Error resetting making charges:', error);
+      toast({
+        title: "Reset failed",
+        description: "Failed to reset making charges. Please try again.",
         variant: "destructive"
       });
     } finally {
@@ -645,7 +670,7 @@ export default function Admin() {
                             <p className="text-sm text-muted-foreground">Basic chain Jewellery</p>
                           </div>
                           <div className="text-right">
-                            <p className="text-lg font-semibold">{makingCharges.chains}%</p>
+                            <p className="text-lg font-semibold">{makingCharges.chains ?? 2.5}%</p>
                           </div>
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg">
@@ -654,7 +679,7 @@ export default function Admin() {
                             <p className="text-sm text-muted-foreground">Simple designs</p>
                           </div>
                           <div className="text-right">
-                            <p className="text-lg font-semibold">{makingCharges.plain}%</p>
+                            <p className="text-lg font-semibold">{makingCharges.plain ?? 3.5}%</p>
                           </div>
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg">
@@ -663,7 +688,7 @@ export default function Admin() {
                             <p className="text-sm text-muted-foreground">Traditional designs</p>
                           </div>
                           <div className="text-right">
-                            <p className="text-lg font-semibold">{makingCharges.temple}%</p>
+                            <p className="text-lg font-semibold">{makingCharges.temple ?? 7}%</p>
                           </div>
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg">
@@ -672,7 +697,16 @@ export default function Admin() {
                             <p className="text-sm text-muted-foreground">Premium craftsmanship</p>
                           </div>
                           <div className="text-right">
-                            <p className="text-lg font-semibold">{makingCharges.italianGold}%</p>
+                            <p className="text-lg font-semibold">{makingCharges.italianGold ?? 18}%</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">Diamond Jewellery</p>
+                            <p className="text-sm text-muted-foreground">Per gram of gold weight</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-lg font-semibold">₹{makingCharges.diamond ?? 800}/g</p>
                           </div>
                         </div>
                       </div>
@@ -741,15 +775,37 @@ export default function Admin() {
                           className="h-10"
                         />
                       </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="diamond">Diamond (₹/gram)</Label>
+                        <Input
+                          id="diamond"
+                          type="number"
+                          step="1"
+                          placeholder="0"
+                          value={makingChargesForm.diamond}
+                          onChange={(e) => setMakingChargesForm(prev => ({ ...prev, diamond: e.target.value }))}
+                          className="h-10"
+                        />
+                      </div>
                     </div>
 
-                    <Button
-                      onClick={handleMakingChargesUpdate}
-                      disabled={isUploading}
-                      className="w-full bg-[#8B7355] hover:bg-[#7A6349] text-white rounded-xl transition-all disabled:bg-gray-400 disabled:cursor-not-allowed"
-                    >
-                      {isUploading ? "Updating..." : "Update Charges"}
-                    </Button>
+                    <div className="flex gap-3">
+                      <Button
+                        onClick={handleMakingChargesUpdate}
+                        disabled={isUploading}
+                        className="flex-1 bg-[#8B7355] hover:bg-[#7A6349] text-white rounded-xl transition-all disabled:bg-gray-400 disabled:cursor-not-allowed"
+                      >
+                        {isUploading ? "Updating..." : "Update Charges"}
+                      </Button>
+                      <Button
+                        onClick={handleResetMakingCharges}
+                        disabled={isUploading}
+                        variant="outline"
+                        className="rounded-xl border-[#8B7355] text-[#8B7355] hover:bg-[#8B7355] hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Reset to Defaults
+                      </Button>
+                    </div>
                   </CardContent>
                 </Card>
               </div>
@@ -786,9 +842,9 @@ export default function Admin() {
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-muted-foreground">Making Charges</span>
                       <div className="text-right">
-                        <span className="text-sm font-medium">4 types</span>
+                        <span className="text-sm font-medium">5 types</span>
                         <p className="text-xs text-muted-foreground">
-                          {makingCharges.chains}% - {makingCharges.italianGold}%
+                          {makingCharges.chains ?? 2.5}% - {makingCharges.italianGold ?? 18}%
                         </p>
                       </div>
                     </div>
@@ -931,34 +987,41 @@ export default function Admin() {
                             <span className="font-medium text-sm">Chains</span>
                             <p className="text-xs text-muted-foreground">Basic chain work</p>
                           </div>
-                          <span className="font-semibold text-sm">{makingCharges.chains}%</span>
+                          <span className="font-semibold text-sm">{makingCharges.chains ?? 2.5}%</span>
                         </div>
                         <div className="flex justify-between items-center p-2 border rounded-lg bg-slate-50/50 dark:bg-slate-900/10">
                           <div>
                             <span className="font-medium text-sm">Plain</span>
                             <p className="text-xs text-muted-foreground">Simple designs</p>
                           </div>
-                          <span className="font-semibold text-sm">{makingCharges.plain}%</span>
+                          <span className="font-semibold text-sm">{makingCharges.plain ?? 3.5}%</span>
                         </div>
                         <div className="flex justify-between items-center p-2 border rounded-lg bg-slate-50/50 dark:bg-slate-900/10">
                           <div>
                             <span className="font-medium text-sm">Temple</span>
                             <p className="text-xs text-muted-foreground">Traditional work</p>
                           </div>
-                          <span className="font-semibold text-sm">{makingCharges.temple}%</span>
+                          <span className="font-semibold text-sm">{makingCharges.temple ?? 7}%</span>
                         </div>
                         <div className="flex justify-between items-center p-2 border rounded-lg bg-slate-50/50 dark:bg-slate-900/10">
                           <div>
                             <span className="font-medium text-sm">Italian Gold</span>
                             <p className="text-xs text-muted-foreground">Premium craft</p>
                           </div>
-                          <span className="font-semibold text-sm">{makingCharges.italianGold}%</span>
+                          <span className="font-semibold text-sm">{makingCharges.italianGold ?? 18}%</span>
+                        </div>
+                        <div className="flex justify-between items-center p-2 border rounded-lg bg-slate-50/50 dark:bg-slate-900/10">
+                          <div>
+                            <span className="font-medium text-sm">Diamond</span>
+                            <p className="text-xs text-muted-foreground">Per gram</p>
+                          </div>
+                          <span className="font-semibold text-sm">₹{makingCharges.diamond ?? 800}/g</span>
                         </div>
                       </div>
                       <div className="pt-2 border-t">
                         <div className="flex justify-between text-xs text-muted-foreground">
                           <span>Range:</span>
-                          <span>{Math.min(makingCharges.chains, makingCharges.plain, makingCharges.temple, makingCharges.italianGold)}% - {Math.max(makingCharges.chains, makingCharges.plain, makingCharges.temple, makingCharges.italianGold)}%</span>
+                          <span>{Math.min(makingCharges.chains ?? 2.5, makingCharges.plain ?? 3.5, makingCharges.temple ?? 7, makingCharges.italianGold ?? 18)}% - {Math.max(makingCharges.chains ?? 2.5, makingCharges.plain ?? 3.5, makingCharges.temple ?? 7, makingCharges.italianGold ?? 18)}%</span>
                         </div>
                       </div>
                     </div>

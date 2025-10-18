@@ -55,7 +55,7 @@ export function Footer() {
             href="tel:+919971187600" 
             className="block text-lg sm:text-xl hover:text-[#907F58] transition-colors"
           >
-            +91 XXXXXXXXXX
+            +91 9971187600
           </a>
         </div>
 

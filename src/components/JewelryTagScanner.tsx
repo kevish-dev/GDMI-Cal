@@ -80,7 +80,6 @@ interface PriceBreakdown {
   makingChargeRate: number | string;
   makingCharges: number;
   subTotal: number;
-  gst: number;
   finalPrice: number;
 }
 
@@ -162,10 +161,10 @@ export function JewelleryTagScanner({
 
   // Auto-set making charges for diamond Jewellery when diamond type is selected
   useEffect(() => {
-    if (JewelleryType === "diamond" && !makingChargesData.percentage) {
-      setMakingChargesData({ percentage: 800 });
+    if (JewelleryType === "diamond" && !makingChargesData.percentage && makingCharges) {
+      setMakingChargesData({ percentage: makingCharges.diamond || 800 });
     }
-  }, [JewelleryType, makingChargesData.percentage]);
+  }, [JewelleryType, makingChargesData.percentage, makingCharges]);
 
   // Cleanup camera stream on unmount or when camera closes
   useEffect(() => {
@@ -542,12 +541,13 @@ export function JewelleryTagScanner({
         diamondValue = diamondWeight * diamondRate;
         
         // Calculate making charges as fixed rate per gram
-        calculatedMakingCharges = (makingChargesData.percentage || 800) * goldWeight;
-        makingChargeRateDisplay = makingChargesData.percentage || 800;
+        const diamondMakingChargeRate = makingChargesData.percentage || makingCharges?.diamond || 800;
+        calculatedMakingCharges = diamondMakingChargeRate * goldWeight;
+        makingChargeRateDisplay = diamondMakingChargeRate;
       }
 
       const subTotal = goldValue + diamondValue + stoneValue + kundanValue + calculatedMakingCharges;
-      const finalPrice = subTotal; // No GST - final price is same as subtotal
+      const finalPrice = subTotal;
 
       // Determine display values for diamond color and clarity
       const displayColor = completeData.color || (JewelleryType === "diamond" ? "H-I" : undefined);
@@ -569,7 +569,6 @@ export function JewelleryTagScanner({
         makingChargeRate: makingChargeRateDisplay,
         makingCharges: calculatedMakingCharges,
         subTotal,
-        gst: 0, // No GST
         finalPrice,
       };
 
@@ -1063,7 +1062,7 @@ export function JewelleryTagScanner({
                     setJewelleryType("diamond");
                     setMakingChargesData({
                       goldType: undefined,
-                      percentage: 800,
+                      percentage: makingCharges?.diamond || 800,
                     });
                   } else {
                     setJewelleryType("gold");
@@ -1158,7 +1157,7 @@ export function JewelleryTagScanner({
                     setJewelleryType("diamond");
                     setMakingChargesData({
                       goldType: undefined,
-                      percentage: 800,
+                      percentage: makingCharges?.diamond || 800,
                     });
                   }}
                 >

@@ -16,7 +16,8 @@ import {
   subscribeToRecentActivities,
   saveCalculationToFirebase,
   logActivity,
-  initializeSystemData
+  initializeSystemData,
+  resetMakingChargesToDefaults
 } from '@/services/firestore.js';
 
 export interface GoldRate {
@@ -38,6 +39,7 @@ export interface MakingCharges {
   plain: number;
   temple: number;
   italianGold: number;
+  diamond: number; // Per gram for diamond jewelry
 }
 
 interface CalculationRecord {
@@ -85,6 +87,7 @@ interface RatesContextType {
   updateGoldRates: (rates: GoldRate[]) => Promise<void>;
   updateDiamondRates: (rates: DiamondRate[]) => Promise<void>;
   updateMakingCharges: (charges: MakingCharges) => Promise<void>;
+  resetMakingCharges: () => Promise<void>;
   addCalculation: (calculation: Omit<CalculationRecord, 'id' | 'timestamp'>) => Promise<void>;
   getAnalytics: () => SystemAnalytics;
 }
@@ -98,7 +101,8 @@ export function RatesProvider({ children }: { children: ReactNode }) {
     chains: 2.5,
     plain: 3.5,
     temple: 7,
-    italianGold: 18
+    italianGold: 18,
+    diamond: 800 // Default per gram for diamond jewelry
   });
   const [calculations, setCalculations] = useState<CalculationRecord[]>([]);
   const [systemAnalytics, setSystemAnalytics] = useState<SystemAnalytics>({
@@ -268,6 +272,25 @@ export function RatesProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const resetMakingCharges = async () => {
+    try {
+      const defaultCharges = await resetMakingChargesToDefaults();
+      
+      // Log activity
+      await logActivity({
+        type: 'rates',
+        action: 'Making charges reset',
+        description: 'Reset making charges to default values',
+        icon: 'Settings'
+      });
+      
+      // The real-time listener will update the local state
+    } catch (error) {
+      console.error('Error resetting making charges:', error);
+      throw error;
+    }
+  };
+
   const addCalculation = async (calculation: Omit<CalculationRecord, 'id' | 'timestamp'>) => {
     try {
       // Save to Firebase and update analytics automatically
@@ -315,6 +338,7 @@ export function RatesProvider({ children }: { children: ReactNode }) {
       updateGoldRates,
       updateDiamondRates,
       updateMakingCharges,
+      resetMakingCharges,
       addCalculation,
       getAnalytics
     }}>

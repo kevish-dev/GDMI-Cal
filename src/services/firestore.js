@@ -349,7 +349,8 @@ export const initializeDummyRates = async () => {
       chains: 2.5,
       plain: 3.5,
       temple: 7,
-      italianGold: 18
+      italianGold: 18,
+      diamond: 800 // Per gram for diamond jewelry
     };
 
     // Check if rates already exist
@@ -384,6 +385,24 @@ export const initializeDummyRates = async () => {
     return results;
   } catch (error) {
     console.error("Error initializing dummy rates:", error);
+    throw error;
+  }
+};
+
+// Function to reset making charges to default values
+export const resetMakingChargesToDefaults = async () => {
+  try {
+    const defaultMakingCharges = {
+      chains: 2.5,
+      plain: 3.5,
+      temple: 7,
+      italianGold: 18,
+      diamond: 800
+    };
+    await createMakingCharges(defaultMakingCharges);
+    return defaultMakingCharges;
+  } catch (error) {
+    console.error("Error resetting making charges to defaults:", error);
     throw error;
   }
 };

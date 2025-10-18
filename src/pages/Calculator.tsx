@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,7 +23,6 @@ import { useUserVerification } from "@/contexts/UserVerificationContext";
 import { UserVerificationModal } from "@/components/UserVerificationModal";
 import { LiveGoldRateIndicator } from "@/components/LiveGoldRateIndicator";
 import { GoldRateMarquee } from "@/components/GoldRateMarquee";
-import { ContactSupportBox } from "@/components/ContactSupportBox";
 
 type JewelleryType = "gold" | "diamond" | null;
 type GoldType = "chains" | "plain" | "temple" | "italian";
@@ -68,7 +67,6 @@ interface PriceBreakdown {
   subTotal: number;
   discount?: number;
   subtotalAfterDiscount?: number;
-  gst: number;
   finalPrice: number;
   jewellerQuote?: number;
   priceDifference?: number;
@@ -99,6 +97,11 @@ export default function Calculator() {
   const { goldRates, diamondRates, makingCharges, addCalculation, loading } = useRates();
   const { isVerifiedUser, openVerificationModal } = useUserVerification();
   const navigate = useNavigate();
+
+  // Debug: Log making charges to verify values
+  useEffect(() => {
+    console.log('Making Charges loaded in Calculator:', makingCharges);
+  }, [makingCharges]);
 
   const handleJewelleryTypeSelect = (type: JewelleryType) => {
     setJewelleryType(type);
@@ -196,13 +199,15 @@ export default function Calculator() {
         }
 
         diamondValue = diamondWeight * diamondRate;
-        calculatedMakingCharges = 800 * goldWeight; // 800 per gram of gold weight
-        makingChargeRateDisplay = 800;
+        
+        // Get making charges for diamond jewelry (per gram of gold weight)
+        const diamondMakingChargeRate = makingCharges.diamond || 800;
+        calculatedMakingCharges = diamondMakingChargeRate * goldWeight;
+        makingChargeRateDisplay = diamondMakingChargeRate;
       }
 
       const subTotal = goldValue + diamondValue + calculatedMakingCharges;
-      const gstAmount = (subTotal * 3) / 100; // 3% GST
-      const finalPrice = subTotal + gstAmount;
+      const finalPrice = subTotal;
 
       // Get jeweller quote if provided
       const jewellerQuoteValue = 
@@ -257,7 +262,6 @@ export default function Calculator() {
             makingChargeRate: makingChargeRateDisplay,
             makingCharges: calculatedMakingCharges,
             subTotal,
-            gst: gstAmount,
             finalPrice,
           },
           extractedData: {
@@ -525,10 +529,10 @@ export default function Calculator() {
                               validationErrors.type && "ring-2 ring-red-500 ring-offset-2 rounded-lg p-1"
                             )}
                             options={[
-                              { value: "chains", label: "Chains", description: "(2.5% making charges)" },
-                              { value: "plain", label: "Plain", description: "(3.5% making charges)" },
-                              { value: "temple", label: "Temple", description: "(7% making charges)" },
-                              { value: "italian", label: "Italian Gold", description: "(18% making charges)" }
+                              { value: "chains", label: "Chains", description: `(${makingCharges.chains}% making charges)` },
+                              { value: "plain", label: "Plain", description: `(${makingCharges.plain}% making charges)` },
+                              { value: "temple", label: "Temple", description: `(${makingCharges.temple}% making charges)` },
+                              { value: "italian", label: "Italian Gold", description: `(${makingCharges.italianGold}% making charges)` }
                             ]}
                           />
                         </div>
@@ -755,11 +759,6 @@ export default function Calculator() {
                 </Card>
               )}
             </div>
-          </div>
-          
-          {/* Contact Support Box */}
-          <div className="mt-8">
-            <ContactSupportBox />
           </div>
         </div>
       </div>

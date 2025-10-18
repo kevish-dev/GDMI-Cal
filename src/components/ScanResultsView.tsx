@@ -32,7 +32,6 @@ interface PriceBreakdown {
   makingChargeRate: number | string;
   makingCharges: number;
   subTotal: number;
-  gst: number;
   finalPrice: number;
 }
 

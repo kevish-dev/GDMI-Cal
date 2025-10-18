@@ -23,7 +23,6 @@ interface PriceBreakdownProps {
   subTotal: number;
   discount?: number;
   subtotalAfterDiscount?: number;
-  gst: number;
   finalPrice: number;
   jewellerQuote?: number;
   priceDifference?: number;
@@ -63,7 +62,6 @@ export function PriceBreakdownCard({
   subTotal,
   discount = 0,
   subtotalAfterDiscount,
-  gst,
   finalPrice,
   jewellerQuote,
   priceDifference,
