@@ -46,11 +46,13 @@ export async function extractTextFromImages(topImage, bottomImage, JewelleryType
 - White tags with printed information
 
 The tags may contain information in different formats and abbreviations:
-- G.W/G.Wt/GW = Gross Weight (total weight in grams)
-- N.W/N.Wt/NW = Net Weight (pure gold weight in grams)
-- STN/Stn/STONES = Stone weight (in grams or carats)
-- KUN/Kun/KUND/KUNDAN = Kundan weight (in grams or carats) - SEPARATE from stones
-- ICS = Additional stone information
+- Gross Weight: G.W, G.Wt, GW, GRW, G WT, Gross, Gross Wt (total weight in grams)
+- Net/Gold Weight: N.W, N.Wt, NW, Net Wt, Gold Wt, Gold Weight, G.Wt (pure gold weight in grams)
+- Stone Weight: STN, Stn, STONES, Stone Wt, SW, CS, Colour Stone, Color Stone (in grams for gold jewelry)
+- Kundan: KUN, Kun, KN, KUND, KUNDAN (in grams) - SEPARATE from stones
+- Diamond Weight (for mixed gold pieces): DW, D.W, Dia Wt, Dia W, D WT, Diamond Wt, RD (Round Diamond) (in carats)
+- Piroi/Peroi: Alternative term for stones (in grams)
+- ICS: Additional stone information (in grams)
 - Item codes may appear as: BG544, GCS029, ER1635, DLR9658, etc.
 - Purity: 22K, 18K, 14K, or as "22KT", "18KT"
 - Weights may be written with backslash separators (e.g., "1.250\\1000" means 1.250 grams for one type, 1.000 for another)
@@ -61,13 +63,15 @@ Extract ALL visible text and convert it into a JSON object with these fields:
   "grossWeight": <number in grams - total weight including stones>,
   "netWeight": <number in grams - pure gold weight without stones>,
   "carat": <string - e.g., "22K", "18K", "14K">,
-  "stoneWeight": <number - total weight of ONLY stones (STN/STONES/ICS) in grams, DO NOT include kundan>,
-  "kundanWeight": <number - ONLY kundan (KUN/KUND/KUNDAN) weight in grams, SEPARATE from stones>,
+  "stoneWeight": <number in grams - total weight of ONLY stones (STN/STONES/ICS/CS/Piroi/Peroi), DO NOT include kundan>,
+  "kundanWeight": <number in grams - ONLY kundan (KUN/KUND/KUNDAN), SEPARATE from stones>,
+  "diamondWeight": <number in carats - ONLY if mixed gold-diamond piece with DW/RD notation>,
   "stones": [
     {
-      "type": <string - e.g., "STN", "STONES", "ICS", "PC", "CS", "RD", "ELITE">,
-      "weight": <number in grams or carats>,
-      "count": <number - piece count if mentioned like "PC-104">
+      "type": <string - e.g., "STN", "STONES", "ICS", "PC", "CS", "RD", "ELITE", "Piroi", "Peroi">,
+      "weight": <number - in grams for gold jewelry (stones), in carats for diamonds>,
+      "count": <number - piece count if mentioned like "PC-104">,
+      "unit": <string - "g" for stones/kundan, "ct" for diamonds>
     }
   ],
   "itemCode": <string - product code like "BG544", "GCS029", "DLR9658", "OLRB874", "PR-LR-9127">,
@@ -83,11 +87,14 @@ IMPORTANT parsing rules:
 1. When you see formats like "1.250\\1000", extract both values and sum them
 2. For stone notations like "PC-104\\2.01", the first is piece count (PC-104) and second is weight (2.01)
 3. For "STN:1.250\\1000", this means stones total 1.250+1.000 = 2.250 grams
-4. IMPORTANT: Keep STONE (STN) and KUNDAN (KUN) weights SEPARATE - they are different materials
-5. Item codes can have various formats - capture the exact text
-6. QR codes and barcodes are for reference only - focus on printed text
-7. If multiple stone types (STN, KUN, ICS), kundan should go in kundanWeight field, others in stoneWeight
-8. Extract HUID and hallmark information if visible on the tag
+4. CRITICAL: Keep STONE (STN/CS/Piroi/Peroi) and KUNDAN (KUN) weights SEPARATE - they are different materials
+5. Stone weights in gold jewelry are in GRAMS (unit: "g")
+6. Diamond weights (DW/RD) in mixed pieces are in CARATS (unit: "ct")
+7. Kundan weights are in GRAMS (unit: "g")
+8. Item codes can have various formats - capture the exact text
+9. QR codes and barcodes are for reference only - focus on printed text
+10. If multiple stone types (STN, KUN, ICS), kundan should go in kundanWeight field, others in stoneWeight
+11. Extract HUID and hallmark information if visible on the tag
 
 Only include fields with actual values. Use null for fields that cannot be determined. Return ONLY valid JSON, no additional text or markdown.`
       : `You are analyzing ${imageCount} of a diamond Jewellery tag ${viewText}. These tags can be in various formats including:
@@ -107,8 +114,10 @@ The tags may contain information in different formats and abbreviations:
 - Item codes may appear as: BG544, DLR9658, PR-LR-9127, etc.
 - Purity: 22K, 18K, 14K, or as "14K", "18KT"
 - Diamond weights in carats
-- Colors: D, E, F, G, H, I, J, K, L
-- Clarity: IF, VVS1, VVS2, VS1, VS2, SI1, SI2, I1, I2, I3
+- Colors: D, E, F, G, H, I, J, K, L (may appear as pairs: GH, IJ, JK, KL)
+- Clarity: IF, VVS1, VVS2, VS1, VS2, SI1, SI2, I1, I2, I3 (may appear as ranges: VVS, VS, SI, VSSI)
+- Color-Clarity notations: "JK-SI2" (color: JK, clarity: SI2), "GH/VS1" (color: GH, clarity: VS1)
+- IGI certification: Look for "IGI" text or certificate numbers
 
 Extract ALL visible text and convert it into a JSON object with these fields:
 {
@@ -117,19 +126,22 @@ Extract ALL visible text and convert it into a JSON object with these fields:
   "netWeight": <number in grams - pure gold weight>,
   "carat": <string - gold purity like "22K", "18K", "14K">,
   "diamondWeight": <number in carats - total diamond weight>,
+  "color": <string - extract from patterns like "JK-SI2" → "JK", "GH/VS1" → "GH", or standalone "GH", "IJ", etc.>,
+  "clarity": <string - extract from patterns like "JK-SI2" → "SI2", "GH/VS1" → "VS1", or standalone "VS", "SI", "VVS">,
+  "igiCertified": <boolean - true if "IGI" text found on tag>,
   "diamonds": [
     {
       "type": <string - e.g., "RD" (round), "PC" (pear cut), "ELITE">,
       "weight": <number in carats>,
       "count": <number - piece count if mentioned like "PC-249">,
-      "color": <string - D, E, F, G, H, I, J, K, L if mentioned>,
-      "clarity": <string - IF, VVS, VS, SI, I if mentioned>
+      "color": <string - extract from notations near this diamond, e.g., "GH", "IJ", "JK">,
+      "clarity": <string - extract from notations near this diamond, e.g., "VS1", "SI2", "VVS">
     }
   ],
   "otherStones": [
     {
       "type": <string - e.g., "CS" (color stone), "AMETHYST">,
-      "weight": <number>,
+      "weight": <number in carats - for diamond jewelry, stone weights are in carats>,
       "count": <number>
     }
   ],
@@ -145,8 +157,13 @@ IMPORTANT parsing rules:
 2. For "RD:- PC-104\\2.01", RD is Round Diamond, 104 pieces, 2.01 carats total
 3. Multiple stone types should be listed separately
 4. Item codes can have various formats - capture exact text
-5. Diamond weights are typically in carats
-6. QR codes and barcodes are for reference - focus on printed text
+5. Diamond weights are ALWAYS in carats (ct)
+6. For diamond jewelry, other stone weights are ALSO in carats (ct)
+7. Color-Clarity patterns: "JK-SI2" → color: "JK", clarity: "SI2"
+8. Color-Clarity patterns: "GH/VS1" → color: "GH", clarity: "VS1"
+9. Compact clarity: "VSSI" → "VS-SI", "VVS" → "VVS"
+10. Look for "IGI" text to set igiCertified flag
+11. QR codes and barcodes are for reference - focus on printed text
 
 Only include fields with actual values. Use null for fields that cannot be determined. Return ONLY valid JSON, no additional text or markdown.`;
 
@@ -226,6 +243,8 @@ export function normalizeExtractedData(data, JewelleryType) {
         }
         return sum;
       }, 0);
+      // For gold jewelry, stone weights are in GRAMS
+      normalized.stoneWeightUnit = 'g';
     }
 
     // Calculate kundan weight from stones array if marked as kundan
@@ -237,6 +256,8 @@ export function normalizeExtractedData(data, JewelleryType) {
         }
         return sum;
       }, 0);
+      // Kundan weight is in grams
+      normalized.kundanWeightUnit = 'g';
     }
 
     // Ensure we have a weight field (prefer netWeight, then grossWeight)
@@ -262,19 +283,39 @@ export function normalizeExtractedData(data, JewelleryType) {
       normalized.diamondWeight = normalized.diamonds.reduce((sum, diamond) => {
         return sum + (diamond.weight || 0);
       }, 0);
+      // Diamond weights are always in carats
+      normalized.diamondWeightUnit = 'ct';
     }
 
     // Calculate other stones weight if provided
+    // For diamond jewelry, stone weights are in CARATS
     if (normalized.otherStones && Array.isArray(normalized.otherStones)) {
       const otherStonesWeight = normalized.otherStones.reduce((sum, stone) => {
         return sum + (stone.weight || 0);
       }, 0);
       normalized.otherStonesWeight = otherStonesWeight;
+      normalized.otherStonesWeightUnit = 'ct'; // Carats for diamond jewelry
+    }
+
+    // For diamond jewelry, if stoneWeight exists, it should be in carats
+    if (normalized.stoneWeight && !normalized.stoneWeightUnit) {
+      normalized.stoneWeightUnit = 'ct';
     }
 
     // Ensure we have a weight field for gold weight
     if (!normalized.weight) {
       normalized.weight = normalized.netWeight || 0;
+    }
+    
+    // Extract color and clarity from diamonds array if available
+    if (normalized.diamonds && Array.isArray(normalized.diamonds) && normalized.diamonds.length > 0) {
+      // Use the first diamond's color and clarity as defaults if not set
+      if (!normalized.color && normalized.diamonds[0].color) {
+        normalized.color = normalized.diamonds[0].color;
+      }
+      if (!normalized.clarity && normalized.diamonds[0].clarity) {
+        normalized.clarity = normalized.diamonds[0].clarity;
+      }
     }
   }
 

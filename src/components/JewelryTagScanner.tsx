@@ -75,6 +75,7 @@ interface PriceBreakdown {
   diamondClarity?: string;
   stoneWeight?: number;
   stoneValue: number;
+  stoneWeightUnit?: string;
   kundanWeight?: number;
   kundanValue: number;
   makingChargeRate: number | string;
@@ -324,6 +325,16 @@ export function JewelleryTagScanner({
       const normalizedData = normalizeExtractedData(data, JewelleryType!);
       
       setExtractedData(normalizedData);
+      
+      // Auto-detect IGI certification for diamond jewelry
+      if (JewelleryType === 'diamond' && normalizedData.igiCertified) {
+        setVerificationAnswers(prev => ({
+          ...prev,
+          certificationType: 'IGI'
+        }));
+        console.log('✅ Auto-detected IGI certification from tag');
+      }
+      
       setStep(2); // Go to select jewellery type step
       toast({
         title: "Text extracted successfully",
@@ -404,23 +415,39 @@ export function JewelleryTagScanner({
       const stoneWeight = completeData.stoneWeight || 0;
       const kundanWeight = completeData.kundanWeight || 0;
       
+      // Determine stone weight unit based on jewelry type
+      const stoneWeightUnit = completeData.stoneWeightUnit || (JewelleryType === 'diamond' ? 'ct' : 'g');
+      const kundanWeightUnit = completeData.kundanWeightUnit || 'g'; // Kundan is always in grams
+      
       console.log('💎 Stone & Kundan Calculation:', {
         stoneWeight,
+        stoneWeightUnit,
         kundanWeight,
-        stoneRate: 800,
-        kundanRate: 200
+        kundanWeightUnit,
+        jewelryType: JewelleryType
       });
       
       if (stoneWeight > 0) {
         stoneWeightValue = stoneWeight;
-        stoneValue = stoneWeight * 800; // ₹800 per gram
-        console.log('✅ Stone value calculated:', stoneValue);
+        
+        // For diamond jewelry: stones are in carats, need conversion
+        // For gold jewelry: stones are in grams, direct pricing
+        if (JewelleryType === 'diamond' && stoneWeightUnit === 'ct') {
+          // Convert carats to grams for pricing: 1 carat = 0.2 grams
+          const stoneWeightInGrams = stoneWeight * 0.2;
+          stoneValue = stoneWeightInGrams * 800; // ₹800 per gram
+          console.log(`✅ Stone value calculated (carats to grams): ${stoneValue} (${stoneWeight} ct = ${stoneWeightInGrams.toFixed(2)} g)`);
+        } else {
+          // Gold jewelry or already in grams
+          stoneValue = stoneWeight * 800; // ₹800 per gram
+          console.log(`✅ Stone value calculated: ${stoneValue} (${stoneWeight} g)`);
+        }
       }
       
       if (kundanWeight > 0) {
         kundanWeightValue = kundanWeight;
-        kundanValue = kundanWeight * 200; // ₹200 per gram
-        console.log('✅ Kundan value calculated:', kundanValue);
+        kundanValue = kundanWeight * 200; // ₹200 per gram (kundan is always in grams)
+        console.log(`✅ Kundan value calculated: ${kundanValue} (${kundanWeight} g)`);
       }
 
       if (JewelleryType === "gold") {
@@ -564,6 +591,7 @@ export function JewelleryTagScanner({
         diamondClarity: displayClarity,
         stoneWeight: stoneWeightValue > 0 ? stoneWeightValue : undefined,
         stoneValue,
+        stoneWeightUnit: stoneWeightValue > 0 ? stoneWeightUnit : undefined,
         kundanWeight: kundanWeightValue > 0 ? kundanWeightValue : undefined,
         kundanValue,
         makingChargeRate: makingChargeRateDisplay,

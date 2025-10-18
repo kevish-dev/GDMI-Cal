@@ -27,6 +27,7 @@ interface PriceBreakdown {
   diamondClarity?: string;
   stoneWeight?: number;
   stoneValue: number;
+  stoneWeightUnit?: string;
   kundanWeight?: number;
   kundanValue: number;
   makingChargeRate: number | string;
@@ -81,6 +82,7 @@ export function ScanResultsView({
   const grossWeight = extractedData.totalWeight || extractedData.grossWeight || priceBreakdown.goldWeight;
   const netWeight = extractedData.weight || extractedData.netWeight || priceBreakdown.goldWeight;
   const stoneWeight = extractedData.stoneWeight || priceBreakdown.stoneWeight || 0;
+  const stoneWeightUnit = priceBreakdown.stoneWeightUnit || (JewelleryType === 'diamond' ? 'ct' : 'g');
   const kundanWeight = extractedData.kundanWeight || priceBreakdown.kundanWeight || 0;
   const purity = extractedData.carat || "22K";
 
@@ -112,12 +114,17 @@ export function ScanResultsView({
                 {formatWeight(netWeight)}g
               </div>
             </div>
-            <div>
-              <div className="text-sm text-gray-500 mb-1">Stone Weight</div>
-              <div className="text-base sm:text-lg font-semibold text-gray-900">
-                {formatWeight(stoneWeight)}g
+            {/* Only show stone weight if value exists */}
+            {stoneWeight > 0 && (
+              <div>
+                <div className="text-sm text-gray-500 mb-1">Stone Weight</div>
+                <div className="text-base sm:text-lg font-semibold text-gray-900">
+                  {formatWeight(stoneWeight)}{stoneWeightUnit}
+                  {stoneWeightUnit === 'ct' && ` (${formatWeight(stoneWeight * 0.2)}g)`}
+                </div>
               </div>
-            </div>
+            )}
+            {/* Only show kundan weight if value exists */}
             {kundanWeight > 0 && (
               <div>
                 <div className="text-sm text-gray-500 mb-1">Kundan Weight</div>
@@ -191,7 +198,7 @@ export function ScanResultsView({
             )}
           </Card>
 
-          {/* Stone Value */}
+          {/* Stone Value - Only show if value exists */}
           {priceBreakdown.stoneValue > 0 && (
             <Card className="border-0 bg-[#E5DDD5] rounded-2xl overflow-hidden">
               <button
@@ -216,18 +223,24 @@ export function ScanResultsView({
                 <div className="px-4 sm:px-6 pb-4 sm:pb-6 space-y-3 bg-white/50">
                   <div className="flex items-center justify-between py-2 border-b border-gray-200">
                     <span className="text-sm text-gray-600">Stone Rate</span>
-                    <span className="font-semibold text-gray-900">₹800/g</span>
+                    <span className="font-semibold text-gray-900">
+                      {stoneWeightUnit === 'ct' ? '₹800/g (converted)' : '₹800/g'}
+                    </span>
                   </div>
                   <div className="flex items-center justify-between py-2 border-b border-gray-200">
                     <span className="text-sm text-gray-600">Stone Weight</span>
                     <span className="font-semibold text-gray-900">
-                      {formatWeight(stoneWeight)}g
+                      {formatWeight(stoneWeight)}{stoneWeightUnit}
+                      {stoneWeightUnit === 'ct' && ` (${formatWeight(stoneWeight * 0.2)}g)`}
                     </span>
                   </div>
                   <div className="pt-2 text-xs sm:text-sm text-gray-600 italic">
                     <div className="font-semibold mb-1">Formula : Stone Rate x Stone Weight</div>
                     <div>
-                      Calculation : ₹800 × {formatWeight(stoneWeight)} = {formatCurrency(priceBreakdown.stoneValue)}
+                      {stoneWeightUnit === 'ct' 
+                        ? `Calculation : ${formatWeight(stoneWeight)}ct × 0.2 = ${formatWeight(stoneWeight * 0.2)}g × ₹800 = ${formatCurrency(priceBreakdown.stoneValue)}`
+                        : `Calculation : ₹800 × ${formatWeight(stoneWeight)}g = ${formatCurrency(priceBreakdown.stoneValue)}`
+                      }
                     </div>
                   </div>
                 </div>
@@ -235,7 +248,7 @@ export function ScanResultsView({
             </Card>
           )}
 
-          {/* Kundan Value */}
+          {/* Kundan Value - Only show if value exists */}
           {priceBreakdown.kundanValue > 0 && (
             <Card className="border-0 bg-[#E5DDD5] rounded-2xl overflow-hidden">
               <button
@@ -271,7 +284,7 @@ export function ScanResultsView({
                   <div className="pt-2 text-xs sm:text-sm text-gray-600 italic">
                     <div className="font-semibold mb-1">Formula : Kundan Rate x Kundan Weight</div>
                     <div>
-                      Calculation : ₹200 × {formatWeight(kundanWeight)} = {formatCurrency(priceBreakdown.kundanValue)}
+                      Calculation : ₹200 × {formatWeight(kundanWeight)}g = {formatCurrency(priceBreakdown.kundanValue)}
                     </div>
                   </div>
                 </div>

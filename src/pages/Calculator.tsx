@@ -35,6 +35,8 @@ interface GoldFormData {
   weight: string;
   carat: Carat | "";
   type: GoldType | "";
+  stoneWeight: string;
+  kundanWeight: string;
   jewellerQuote: string;
 }
 
@@ -46,6 +48,7 @@ interface DiamondFormData {
   clarity: DiamondClarity | "";
   certification: Certification | "";
   stoneWeight: string;
+  kundanWeight: string;
   jewellerQuote: string;
 }
 
@@ -60,6 +63,7 @@ interface PriceBreakdown {
   diamondClarity?: string;
   stoneWeight?: number;
   stoneValue: number;
+  stoneWeightUnit?: string;
   kundanWeight?: number;
   kundanValue: number;
   makingChargeRate: number | string;
@@ -78,6 +82,8 @@ export default function Calculator() {
     weight: "",
     carat: "",
     type: "",
+    stoneWeight: "",
+    kundanWeight: "",
     jewellerQuote: "",
   });
   const [diamondForm, setDiamondForm] = useState<DiamondFormData>({
@@ -88,6 +94,7 @@ export default function Calculator() {
     clarity: "",
     certification: "",
     stoneWeight: "",
+    kundanWeight: "",
     jewellerQuote: "",
   });
   const [isCalculating, setIsCalculating] = useState(false);
@@ -106,8 +113,8 @@ export default function Calculator() {
   const handleJewelleryTypeSelect = (type: JewelleryType) => {
     setJewelleryType(type);
     // Reset forms when switching types
-    if (type !== JewelleryType) {
-      setGoldForm({ weight: "", carat: "", type: "", jewellerQuote: "" });
+    if (JewelleryType === null) {
+      setGoldForm({ weight: "", carat: "", type: "", stoneWeight: "", kundanWeight: "", jewellerQuote: "" });
       setDiamondForm({
         goldWeight: "",
         carat: "",
@@ -116,6 +123,7 @@ export default function Calculator() {
         clarity: "",
         certification: "",
         stoneWeight: "",
+        kundanWeight: "",
         jewellerQuote: "",
       });
     }
@@ -145,11 +153,15 @@ export default function Calculator() {
 
       let goldValue = 0;
       let diamondValue = 0;
+      let stoneValue = 0;
+      let kundanValue = 0;
       let calculatedMakingCharges = 0;
       let goldRate = 0;
       let goldWeightValue = 0;
       let diamondRate = 0;
       let diamondWeightValue = 0;
+      let stoneWeightValue = 0;
+      let kundanWeightValue = 0;
       let makingChargeRateDisplay: number | string = 0;
 
       if (JewelleryType === "gold") {
@@ -169,6 +181,20 @@ export default function Calculator() {
         goldValue = weight * goldRate;
         calculatedMakingCharges = (goldValue * makingChargePercentage) / 100; // Percentage of gold value
         makingChargeRateDisplay = makingChargePercentage;
+        
+        // Calculate stone value if stone weight is provided (for gold jewelry, stones are in grams)
+        if (goldForm.stoneWeight && parseFloat(goldForm.stoneWeight) > 0) {
+          stoneWeightValue = parseFloat(goldForm.stoneWeight);
+          stoneValue = stoneWeightValue * 800; // ₹800 per gram
+          console.log(`Stone value calculated: ${stoneWeightValue}g × ₹800 = ₹${stoneValue}`);
+        }
+        
+        // Calculate kundan value if kundan weight is provided (kundan is always in grams)
+        if (goldForm.kundanWeight && parseFloat(goldForm.kundanWeight) > 0) {
+          kundanWeightValue = parseFloat(goldForm.kundanWeight);
+          kundanValue = kundanWeightValue * 200; // ₹200 per gram
+          console.log(`Kundan value calculated: ${kundanWeightValue}g × ₹200 = ₹${kundanValue}`);
+        }
       } else if (JewelleryType === "diamond") {
         const goldWeight = parseFloat(diamondForm.goldWeight);
         const diamondWeight = parseFloat(diamondForm.diamondWeight);
@@ -200,13 +226,29 @@ export default function Calculator() {
 
         diamondValue = diamondWeight * diamondRate;
         
+        // Calculate stone value if stone weight is provided (for diamond jewelry, stones are in carats)
+        if (diamondForm.stoneWeight && parseFloat(diamondForm.stoneWeight) > 0) {
+          stoneWeightValue = parseFloat(diamondForm.stoneWeight);
+          // Convert carats to grams: 1 carat = 0.2 grams
+          const stoneWeightInGrams = stoneWeightValue * 0.2;
+          stoneValue = stoneWeightInGrams * 800; // ₹800 per gram
+          console.log(`Stone value calculated: ${stoneWeightValue}ct = ${stoneWeightInGrams}g × ₹800 = ₹${stoneValue}`);
+        }
+        
+        // Calculate kundan value if kundan weight is provided (kundan is always in grams)
+        if (diamondForm.kundanWeight && parseFloat(diamondForm.kundanWeight) > 0) {
+          kundanWeightValue = parseFloat(diamondForm.kundanWeight);
+          kundanValue = kundanWeightValue * 200; // ₹200 per gram
+          console.log(`Kundan value calculated: ${kundanWeightValue}g × ₹200 = ₹${kundanValue}`);
+        }
+        
         // Get making charges for diamond jewelry (per gram of gold weight)
         const diamondMakingChargeRate = makingCharges.diamond || 800;
         calculatedMakingCharges = diamondMakingChargeRate * goldWeight;
         makingChargeRateDisplay = diamondMakingChargeRate;
       }
 
-      const subTotal = goldValue + diamondValue + calculatedMakingCharges;
+      const subTotal = goldValue + diamondValue + stoneValue + kundanValue + calculatedMakingCharges;
       const finalPrice = subTotal;
 
       // Get jeweller quote if provided
@@ -255,10 +297,11 @@ export default function Calculator() {
             diamondRate: diamondRate > 0 ? diamondRate : undefined,
             diamondWeight: diamondWeightValue > 0 ? diamondWeightValue : undefined,
             diamondValue,
-            stoneWeight: undefined,
-            stoneValue: 0,
-            kundanWeight: undefined,
-            kundanValue: 0,
+            stoneWeight: stoneWeightValue > 0 ? stoneWeightValue : undefined,
+            stoneValue: stoneValue,
+            stoneWeightUnit: JewelleryType === 'diamond' ? 'ct' : 'g',
+            kundanWeight: kundanWeightValue > 0 ? kundanWeightValue : undefined,
+            kundanValue: kundanValue,
             makingChargeRate: makingChargeRateDisplay,
             makingCharges: calculatedMakingCharges,
             subTotal,
@@ -273,7 +316,8 @@ export default function Calculator() {
             diamondWeight: JewelleryType === "diamond" ? parseFloat(diamondForm.diamondWeight) : undefined,
             color: JewelleryType === "diamond" ? diamondForm.color : undefined,
             clarity: JewelleryType === "diamond" ? diamondForm.clarity : undefined,
-            stoneWeight: JewelleryType === "diamond" && diamondForm.stoneWeight ? parseFloat(diamondForm.stoneWeight) : undefined,
+            stoneWeight: stoneWeightValue > 0 ? stoneWeightValue : undefined,
+            kundanWeight: kundanWeightValue > 0 ? kundanWeightValue : undefined,
           },
         },
       });
@@ -537,6 +581,47 @@ export default function Calculator() {
                           />
                         </div>
                         
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="goldStoneWeight" className="text-sm font-medium">
+                              Stone Weight (g) - Optional
+                            </Label>
+                            <Input
+                              id="goldStoneWeight"
+                              type="number"
+                              step="0.01"
+                              placeholder="0.00 (optional)"
+                              value={goldForm.stoneWeight}
+                              onChange={(e) =>
+                                setGoldForm({
+                                  ...goldForm,
+                                  stoneWeight: e.target.value,
+                                })
+                              }
+                              className="h-11 text-base"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="goldKundanWeight" className="text-sm font-medium">
+                              Kundan Weight (g) - Optional
+                            </Label>
+                            <Input
+                              id="goldKundanWeight"
+                              type="number"
+                              step="0.01"
+                              placeholder="0.00 (optional)"
+                              value={goldForm.kundanWeight}
+                              onChange={(e) =>
+                                setGoldForm({
+                                  ...goldForm,
+                                  kundanWeight: e.target.value,
+                                })
+                              }
+                              className="h-11 text-base"
+                            />
+                          </div>
+                        </div>
+                        
                         <div className="space-y-2">
                           <Label htmlFor="goldJewellerQuote" className="text-sm font-medium">
                             Price Quoted by Your Jeweller (Optional)
@@ -708,23 +793,45 @@ export default function Calculator() {
                           </div>
                         </div>
 
-                        <div className="space-y-2">
-                          <Label htmlFor="stoneWeight" className="text-sm font-medium">
-                            Optional Stone Weight (g)
-                          </Label>
-                          <Input
-                            id="stoneWeight"
-                            type="number"
-                            placeholder="0.00 (optional)"
-                            value={diamondForm.stoneWeight}
-                            onChange={(e) =>
-                              setDiamondForm({
-                                ...diamondForm,
-                                stoneWeight: e.target.value,
-                              })
-                            }
-                            className="h-11 text-base"
-                          />
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="stoneWeight" className="text-sm font-medium">
+                              Stone Weight (ct) - Optional
+                            </Label>
+                            <Input
+                              id="stoneWeight"
+                              type="number"
+                              step="0.01"
+                              placeholder="0.00 (optional)"
+                              value={diamondForm.stoneWeight}
+                              onChange={(e) =>
+                                setDiamondForm({
+                                  ...diamondForm,
+                                  stoneWeight: e.target.value,
+                                })
+                              }
+                              className="h-11 text-base"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="kundanWeight" className="text-sm font-medium">
+                              Kundan Weight (g) - Optional
+                            </Label>
+                            <Input
+                              id="kundanWeight"
+                              type="number"
+                              step="0.01"
+                              placeholder="0.00 (optional)"
+                              value={diamondForm.kundanWeight}
+                              onChange={(e) =>
+                                setDiamondForm({
+                                  ...diamondForm,
+                                  kundanWeight: e.target.value,
+                                })
+                              }
+                              className="h-11 text-base"
+                            />
+                          </div>
                         </div>
                         
                         <div className="space-y-2">

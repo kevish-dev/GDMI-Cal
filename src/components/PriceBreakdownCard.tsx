@@ -16,6 +16,7 @@ interface PriceBreakdownProps {
   diamondClarity?: string;
   stoneWeight?: number;
   stoneValue?: number;
+  stoneWeightUnit?: string; // 'g' for grams, 'ct' for carats
   kundanWeight?: number;
   kundanValue?: number;
   makingChargeRate: number | string;
@@ -55,6 +56,7 @@ export function PriceBreakdownCard({
   diamondClarity,
   stoneWeight,
   stoneValue = 0,
+  stoneWeightUnit = 'g', // Default to grams
   kundanWeight,
   kundanValue = 0,
   makingChargeRate,
@@ -331,12 +333,19 @@ export function PriceBreakdownCard({
                   <Gem className="h-4 w-4 text-emerald-500" />
                   <span className="text-sm text-gray-600">Stone Rate</span>
                 </div>
-                <span className="font-semibold text-gray-900">₹800/g</span>
+                <span className="font-semibold text-gray-900">
+                  {stoneWeightUnit === 'ct' 
+                    ? '₹800/g (converted from ct)' 
+                    : '₹800/g'}
+                </span>
               </div>
 
               <div className="flex items-center justify-between py-2">
                 <span className="text-sm text-gray-600 pl-6">Weight</span>
-                <span className="font-semibold text-gray-900">{formatWeight(stoneWeight)}g</span>
+                <span className="font-semibold text-gray-900">
+                  {formatWeight(stoneWeight)}{stoneWeightUnit}
+                  {stoneWeightUnit === 'ct' && ` (${formatWeight(stoneWeight * 0.2)}g)`}
+                </span>
               </div>
 
               <div className="flex items-center justify-between py-2 bg-white -mx-4 px-4 rounded">
@@ -348,10 +357,17 @@ export function PriceBreakdownCard({
               <div className="space-y-1 py-2 text-xs bg-emerald-50 -mx-4 px-4">
                 <div className="flex items-center justify-center text-gray-600">
                   <Calculator className="h-3 w-3 mr-1" />
-                  <span className="font-semibold">Formula: Stone Weight × ₹800</span>
+                  <span className="font-semibold">
+                    Formula: Stone Weight {stoneWeightUnit === 'ct' ? '(in grams) ' : ''}× ₹800
+                  </span>
                 </div>
                 <div className="flex items-center justify-center text-gray-500">
-                  <span className="font-medium">Calculation: {formatWeight(stoneWeight)}g × ₹800 = ₹{formatCurrency(stoneValue)}</span>
+                  <span className="font-medium">
+                    {stoneWeightUnit === 'ct' 
+                      ? `Calculation: ${formatWeight(stoneWeight)}ct × 0.2 = ${formatWeight(stoneWeight * 0.2)}g × ₹800 = ₹${formatCurrency(stoneValue)}`
+                      : `Calculation: ${formatWeight(stoneWeight)}g × ₹800 = ₹${formatCurrency(stoneValue)}`
+                    }
+                  </span>
                 </div>
               </div>
             </div>
