@@ -63,15 +63,15 @@ Extract ALL visible text and convert it into a JSON object with these fields:
   "grossWeight": <number in grams - total weight including stones>,
   "netWeight": <number in grams - pure gold weight without stones>,
   "carat": <string - e.g., "22K", "18K", "14K">,
-  "stoneWeight": <number in grams - total weight of ONLY stones (STN/STONES/ICS/CS/Piroi/Peroi), DO NOT include kundan>,
-  "kundanWeight": <number in grams - ONLY kundan (KUN/KUND/KUNDAN), SEPARATE from stones>,
+  "stoneWeight": <number in grams - total weight of stones (STN/STONES/ICS/CS/Piroi/Peroi), DO NOT include kundan>,
+  "kundanWeight": <number in grams - total weight of kundan (KUN/KUND/KUNDAN), separate from stones>,
   "diamondWeight": <number in carats - ONLY if mixed gold-diamond piece with DW/RD notation>,
   "stones": [
     {
-      "type": <string - e.g., "F STONES", "STN", "STONES", "ICS", "PC", "CS", "RD", "ELITE", "Piroi", "Peroi", "KUND", "KUN">,
-      "weight": <number - in grams for gold jewelry (stones), in carats for diamonds>,
-      "count": <number - piece count if mentioned like "PC-104">,
-      "unit": <string - "g" for stones/kundan, "ct" for diamonds>
+      "type": <string - stone type: "STN", "STONES", "CS", "F STONES", "ICS", "Piroi", "Peroi" - NEVER include KUN/KUNDAN here>,
+      "weight": <number in grams>,
+      "count": <number - piece count if mentioned>,
+      "unit": "g"
     }
   ],
   "itemCode": <string - product code like "BG544", "GCS029", "DLR9658", "OLRB874", "PR-LR-9127">,
@@ -83,18 +83,20 @@ Extract ALL visible text and convert it into a JSON object with these fields:
   "rawText": <string - any other visible text not captured above>
 }
 
-IMPORTANT parsing rules:
+CRITICAL parsing rules:
 1. When you see formats like "1.250\\1000", extract both values and sum them
-2. For stone notations like "PC-104\\2.01", the first is piece count (PC-104) and second is weight (2.01)
-3. For "STN:1.250\\1000", this means stones total 1.250+1.000 = 2.250 grams
-4. CRITICAL: Keep STONE (STN/CS/Piroi/Peroi/F STONES) and KUNDAN (KUN/KUND) weights SEPARATE - add them to otherStones array with proper type
-5. Stone weights in gold jewelry are in GRAMS (unit: "g")
-6. Diamond weights (DW/RD) in mixed pieces are in CARATS (unit: "ct")
-7. Kundan weights are in GRAMS (unit: "g")
-8. Item codes can have various formats - capture the exact text
-9. QR codes and barcodes are for reference only - focus on printed text
-10. If multiple stone types (STN, KUN, ICS), each should be a separate entry in otherStones array with its type and weight
-11. Extract HUID and hallmark information if visible on the tag
+2. For stone notations like "PC-104\\2.01", PC-104 is piece count, 2.01 is weight
+3. For "STN:1.250\\1000", stones total = 1.250 + 1.000 = 2.250 grams
+4. KUNDAN (KUN/KUND/KUNDAN) must be added DIRECTLY to "kundanWeight" field - DO NOT add to stones array
+5. STONES (STN/CS/Piroi/Peroi/F STONES/ICS) must be added to "stones" array and summed in "stoneWeight" field
+6. All stone weights in gold jewelry are in GRAMS (unit: "g")
+7. Diamond weights (DW/RD) in mixed pieces are in CARATS (unit: "ct")
+8. Kundan weights are ALWAYS in GRAMS (unit: "g")
+9. Item codes can have various formats - capture exact text
+10. QR codes and barcodes are for reference - focus on printed text
+11. Extract HUID and hallmark information if visible
+12. Calculate stoneWeight by summing all stone entries from stones array
+13. Calculate kundanWeight by summing all kundan mentions (KUN/KUND/KUNDAN) - put total in kundanWeight field directly
 
 Only include fields with actual values. Use null for fields that cannot be determined. Return ONLY valid JSON, no additional text or markdown.`
       : `You are analyzing ${imageCount} of a diamond Jewellery tag ${viewText}. These tags can be in various formats including:
@@ -138,11 +140,14 @@ Extract ALL visible text and convert it into a JSON object with these fields:
       "clarity": <string - extract from notations near this diamond, e.g., "VS1", "SI2", "VVS">
     }
   ],
-  "otherStones": [
+  "stoneWeight": <number in carats - total weight of other stones (CS, AMETHYST, etc.) - NOT kundan, NOT diamonds>,
+  "kundanWeight": <number in grams - total weight of kundan (KUN/KUND/KUNDAN)>,
+  "stones": [
     {
-      "type": <string - e.g., "CS" (color stone), "AMETHYST">,
+      "type": <string - stone type: "CS", "AMETHYST", "COLOR STONE" - NEVER include diamonds or kundan here>,
       "weight": <number in carats - for diamond jewelry, stone weights are in carats>,
-      "count": <number>
+      "count": <number>,
+      "unit": "ct"
     }
   ],
   "itemCode": <string - product code like "BG544", "DLR9658", "OLRB874", "PR-LR-8644">,
@@ -152,18 +157,24 @@ Extract ALL visible text and convert it into a JSON object with these fields:
   "rawText": <string - any other visible text not captured above>
 }
 
-IMPORTANT parsing rules:
+CRITICAL parsing rules:
 1. When you see formats like "PC-249\\1.36", PC-249 means 249 pieces, 1.36 is weight in carats
 2. For "RD:- PC-104\\2.01", RD is Round Diamond, 104 pieces, 2.01 carats total
-3. Multiple stone types should be listed separately
-4. Item codes can have various formats - capture exact text
-5. Diamond weights are ALWAYS in carats (ct)
-6. For diamond jewelry, other stone weights are ALSO in carats (ct)
-7. Color-Clarity patterns: "JK-SI2" → color: "JK", clarity: "SI2"
-8. Color-Clarity patterns: "GH/VS1" → color: "GH", clarity: "VS1"
-9. Compact clarity: "VSSI" → "VS-SI", "VVS" → "VVS"
-10. Look for "IGI" text to set igiCertified flag
-11. QR codes and barcodes are for reference - focus on printed text
+3. DIAMONDS: Create diamonds array for each diamond type (RD, PC, ELITE, etc.) with type, weight, count, color, clarity
+4. OTHER STONES (NOT diamonds, NOT kundan): Add to stones array (CS, AMETHYST, etc.) with weight in carats and sum in stoneWeight field
+5. KUNDAN (KUN/KUND/KUNDAN): Add DIRECTLY to "kundanWeight" field in GRAMS - DO NOT add to stones array
+6. Multiple stone types should be listed separately in their arrays
+7. Item codes can have various formats - capture exact text
+8. Diamond weights are ALWAYS in carats (ct)
+9. For diamond jewelry, other stone weights (CS, AMETHYST) are in CARATS (ct)
+10. Kundan weights are ALWAYS in GRAMS (g)
+11. Color-Clarity patterns: "JK-SI2" → color: "JK", clarity: "SI2"
+12. Color-Clarity patterns: "GH/VS1" → color: "GH", clarity: "VS1"
+13. Compact clarity: "VSSI" → "VS-SI", "VVS" → "VVS"
+14. Look for "IGI" text to set igiCertified flag
+15. QR codes and barcodes are for reference - focus on printed text
+16. Calculate diamondWeight by summing all weights from diamonds array
+17. Calculate stoneWeight by summing all weights from stones array (excluding diamonds and kundan)
 
 Only include fields with actual values. Use null for fields that cannot be determined. Return ONLY valid JSON, no additional text or markdown.`;
 
@@ -231,63 +242,29 @@ export function validateExtractedData(data, JewelleryType) {
  */
 export function normalizeExtractedData(data, JewelleryType) {
   const normalized = { ...data };
+  
+  console.log("🔍 Normalizing extracted data for:", JewelleryType);
+  console.log("📥 Input data:", JSON.stringify(data, null, 2));
 
   if (JewelleryType === "gold") {
-    // Process otherStones array first (new format)
-    if (normalized.otherStones && Array.isArray(normalized.otherStones)) {
-      // Separate stones and kundan from otherStones array
-      let calculatedStoneWeight = 0;
-      let calculatedKundanWeight = 0;
-
-      normalized.otherStones.forEach(stone => {
-        const stoneType = stone.type ? stone.type.toUpperCase() : '';
-        
-        // Check if this is kundan
-        if (stoneType.includes('KUN') || stoneType.includes('KUND')) {
-          calculatedKundanWeight += stone.weight || 0;
-        } else {
-          // Everything else is stone (F STONES, STN, STONES, etc.)
-          calculatedStoneWeight += stone.weight || 0;
-        }
-      });
-
-      // Set calculated weights if not already set
-      if (!normalized.stoneWeight && calculatedStoneWeight > 0) {
-        normalized.stoneWeight = calculatedStoneWeight;
-        normalized.stoneWeightUnit = 'g'; // Gold jewelry stones are in grams
-      }
-
-      if (!normalized.kundanWeight && calculatedKundanWeight > 0) {
-        normalized.kundanWeight = calculatedKundanWeight;
-        normalized.kundanWeightUnit = 'g'; // Kundan is always in grams
-      }
+    // Kundan weight is extracted directly from the AI - just ensure unit is set
+    if (normalized.kundanWeight && normalized.kundanWeight > 0) {
+      normalized.kundanWeightUnit = 'g'; // Kundan is always in grams
+      console.log(`👑 Kundan Weight: ${normalized.kundanWeight}g`);
     }
 
-    // Fallback: Calculate total stone weight from stones array if not provided (old format)
-    // BUT exclude kundan - kundan should be separate
+    // Stone weight should come directly from AI, or calculate from stones array as fallback
     if (!normalized.stoneWeight && normalized.stones && Array.isArray(normalized.stones)) {
       normalized.stoneWeight = normalized.stones.reduce((sum, stone) => {
-        // Only add non-kundan stones
-        if (stone.type && !stone.type.toUpperCase().includes('KUN')) {
-          return sum + (stone.weight || 0);
-        }
-        return sum;
+        return sum + (stone.weight || 0);
       }, 0);
-      // For gold jewelry, stone weights are in GRAMS
-      normalized.stoneWeightUnit = 'g';
+      console.log(`💎 Calculated Stone Weight from array: ${normalized.stoneWeight}g`);
     }
-
-    // Fallback: Calculate kundan weight from stones array if marked as kundan (old format)
-    if (!normalized.kundanWeight && normalized.stones && Array.isArray(normalized.stones)) {
-      normalized.kundanWeight = normalized.stones.reduce((sum, stone) => {
-        // Only add kundan stones
-        if (stone.type && stone.type.toUpperCase().includes('KUN')) {
-          return sum + (stone.weight || 0);
-        }
-        return sum;
-      }, 0);
-      // Kundan weight is in grams
-      normalized.kundanWeightUnit = 'g';
+    
+    // For gold jewelry, stone weights are in GRAMS
+    if (normalized.stoneWeight && normalized.stoneWeight > 0) {
+      normalized.stoneWeightUnit = 'g';
+      console.log(`💎 Stone Weight: ${normalized.stoneWeight}g`);
     }
 
     // Ensure we have a weight field (prefer netWeight, then grossWeight)
@@ -308,48 +285,44 @@ export function normalizeExtractedData(data, JewelleryType) {
     }
 
   } else if (JewelleryType === "diamond") {
-    // Calculate total diamond weight from diamonds array if not provided
-    if (!normalized.diamondWeight && normalized.diamonds && Array.isArray(normalized.diamonds)) {
-      normalized.diamondWeight = normalized.diamonds.reduce((sum, diamond) => {
-        return sum + (diamond.weight || 0);
+    // Calculate total diamond weight from diamonds array - ALWAYS recalculate if array exists
+    if (normalized.diamonds && Array.isArray(normalized.diamonds) && normalized.diamonds.length > 0) {
+      console.log("💎 Processing diamonds array:", normalized.diamonds);
+      const calculatedDiamondWeight = normalized.diamonds.reduce((sum, diamond) => {
+        const weight = diamond.weight || 0;
+        console.log(`  ✅ Found Diamond: ${weight}ct (${diamond.type || 'unknown'})`);
+        return sum + weight;
       }, 0);
-      // Diamond weights are always in carats
-      normalized.diamondWeightUnit = 'ct';
+      
+      if (calculatedDiamondWeight > 0) {
+        normalized.diamondWeight = calculatedDiamondWeight;
+        normalized.diamondWeightUnit = 'ct';
+        console.log(`💎 Total Diamond Weight: ${calculatedDiamondWeight}ct`);
+      }
+    } else if (normalized.diamondWeight) {
+      console.log(`💎 Diamond Weight (direct): ${normalized.diamondWeight}ct`);
+    } else {
+      console.log("⚠️ No diamonds array or diamondWeight found in extracted data");
     }
 
-    // Process otherStones array for diamond jewelry
-    // For diamond jewelry, other stones (including kundan) are typically in CARATS
-    if (normalized.otherStones && Array.isArray(normalized.otherStones)) {
-      let calculatedStoneWeight = 0;
-      let calculatedKundanWeight = 0;
-
-      normalized.otherStones.forEach(stone => {
-        const stoneType = stone.type ? stone.type.toUpperCase() : '';
-        
-        // Check if this is kundan
-        if (stoneType.includes('KUN') || stoneType.includes('KUND')) {
-          calculatedKundanWeight += stone.weight || 0;
-        } else {
-          // Everything else is stone
-          calculatedStoneWeight += stone.weight || 0;
-        }
-      });
-
-      // Set calculated weights if not already set
-      if (!normalized.stoneWeight && calculatedStoneWeight > 0) {
-        normalized.stoneWeight = calculatedStoneWeight;
-        normalized.stoneWeightUnit = 'ct'; // Diamond jewelry stones are in carats
-      }
-
-      if (!normalized.kundanWeight && calculatedKundanWeight > 0) {
-        normalized.kundanWeight = calculatedKundanWeight;
-        normalized.kundanWeightUnit = 'g'; // Kundan is typically in grams even for diamond jewelry
-      }
+    // Kundan weight is extracted directly from the AI - just ensure unit is set
+    if (normalized.kundanWeight && normalized.kundanWeight > 0) {
+      normalized.kundanWeightUnit = 'g'; // Kundan is always in grams
+      console.log(`👑 Kundan Weight: ${normalized.kundanWeight}g`);
     }
 
-    // For diamond jewelry, if stoneWeight exists, it should be in carats
-    if (normalized.stoneWeight && !normalized.stoneWeightUnit) {
+    // Stone weight should come directly from AI, or calculate from stones array as fallback
+    if (!normalized.stoneWeight && normalized.stones && Array.isArray(normalized.stones)) {
+      normalized.stoneWeight = normalized.stones.reduce((sum, stone) => {
+        return sum + (stone.weight || 0);
+      }, 0);
+      console.log(`💎 Calculated Stone Weight from array: ${normalized.stoneWeight}ct`);
+    }
+    
+    // For diamond jewelry, stone weights are in CARATS
+    if (normalized.stoneWeight && normalized.stoneWeight > 0) {
       normalized.stoneWeightUnit = 'ct';
+      console.log(`💎 Stone Weight: ${normalized.stoneWeight}ct`);
     }
 
     // Ensure we have a weight field for gold weight
@@ -373,6 +346,13 @@ export function normalizeExtractedData(data, JewelleryType) {
   if (normalized.carat) {
     normalized.carat = normalized.carat.toUpperCase().replace(/KT$/, 'K');
   }
+
+  console.log("📤 Normalized output data:");
+  console.log(`  - Gold Weight: ${normalized.weight || normalized.netWeight || 0}g`);
+  console.log(`  - Stone Weight: ${normalized.stoneWeight || 0}${normalized.stoneWeightUnit || 'g'}`);
+  console.log(`  - Kundan Weight: ${normalized.kundanWeight || 0}${normalized.kundanWeightUnit || 'g'}`);
+  console.log(`  - Diamond Weight: ${normalized.diamondWeight || 0}ct`);
+  console.log(`  - Carat: ${normalized.carat || 'N/A'}`);
 
   return normalized;
 }

@@ -387,9 +387,16 @@ export function JewelleryTagScanner({
         diamondWeight: extractedData.diamondWeight || missingDetails.diamondWeight,
         color: extractedData.color || missingDetails.color,
         clarity: extractedData.clarity || missingDetails.clarity,
+        // Explicitly preserve stone and kundan weights from normalized data
+        stoneWeight: extractedData.stoneWeight,
+        kundanWeight: extractedData.kundanWeight,
+        stoneWeightUnit: extractedData.stoneWeightUnit,
+        kundanWeightUnit: extractedData.kundanWeightUnit,
       };
 
       console.log('📋 Complete Data for Calculation:', completeData);
+      console.log('  - Stone Weight:', completeData.stoneWeight, completeData.stoneWeightUnit);
+      console.log('  - Kundan Weight:', completeData.kundanWeight, completeData.kundanWeightUnit);
 
       // Calculate Net Weight from Gross Weight - Diamond Weight if net weight is missing
       if (!completeData.netWeight && !completeData.weight) {
