@@ -55,6 +55,7 @@ export function ScanResultsView({
 }: ScanResultsViewProps) {
   const [expandedSections, setExpandedSections] = useState({
     goldValue: false,
+    diamondValue: false,
     stoneValue: false,
     kundanValue: false,
     makingCharges: false,
@@ -109,11 +110,47 @@ export function ScanResultsView({
               </div>
             </div>
             <div>
-              <div className="text-sm text-gray-500 mb-1">Net Weight</div>
+              <div className="text-sm text-gray-500 mb-1">Net Weight (Gold)</div>
               <div className="text-base sm:text-lg font-semibold text-gray-900">
                 {formatWeight(netWeight)}g
               </div>
             </div>
+            <div>
+              <div className="text-sm text-gray-500 mb-1">Purity</div>
+              <div className="text-base sm:text-lg font-semibold text-gray-900">
+                {purity}
+              </div>
+            </div>
+            {/* Diamond Weight - Only show for diamond jewelry */}
+            {JewelleryType === "diamond" && priceBreakdown.diamondWeight && priceBreakdown.diamondWeight > 0 && (
+              <div>
+                <div className="text-sm text-gray-500 mb-1">Diamond Weight</div>
+                <div className="text-base sm:text-lg font-semibold text-gray-900">
+                  {formatWeight(priceBreakdown.diamondWeight)}ct
+                  <span className="text-xs text-gray-500 ml-1">
+                    ({formatWeight(priceBreakdown.diamondWeight * 0.2)}g)
+                  </span>
+                </div>
+              </div>
+            )}
+            {/* Diamond Color - Only show for diamond jewelry if available */}
+            {JewelleryType === "diamond" && priceBreakdown.diamondColor && (
+              <div>
+                <div className="text-sm text-gray-500 mb-1">Diamond Color</div>
+                <div className="text-base sm:text-lg font-semibold text-gray-900">
+                  {priceBreakdown.diamondColor}
+                </div>
+              </div>
+            )}
+            {/* Diamond Clarity - Only show for diamond jewelry if available */}
+            {JewelleryType === "diamond" && priceBreakdown.diamondClarity && (
+              <div>
+                <div className="text-sm text-gray-500 mb-1">Diamond Clarity</div>
+                <div className="text-base sm:text-lg font-semibold text-gray-900">
+                  {priceBreakdown.diamondClarity}
+                </div>
+              </div>
+            )}
             {/* Only show stone weight if value exists */}
             {stoneWeight > 0 && (
               <div>
@@ -133,12 +170,6 @@ export function ScanResultsView({
                 </div>
               </div>
             )}
-            <div>
-              <div className="text-sm text-gray-500 mb-1">Purity</div>
-              <div className="text-base sm:text-lg font-semibold text-gray-900">
-                {purity}
-              </div>
-            </div>
           </div>
         </Card>
 
@@ -197,6 +228,68 @@ export function ScanResultsView({
               </div>
             )}
           </Card>
+
+          {/* Diamond Value - Only show if diamond jewelry and value exists */}
+          {JewelleryType === "diamond" && priceBreakdown.diamondValue > 0 && (
+            <Card className="border-0 bg-[#E5DDD5] rounded-2xl overflow-hidden">
+              <button
+                onClick={() => toggleSection("diamondValue" as any)}
+                className="w-full p-4 sm:p-6 flex items-center justify-between hover:bg-[#d9cfc5] transition-colors"
+              >
+                <span className="text-lg sm:text-xl font-semibold text-gray-800">
+                  Diamond Value
+                </span>
+                <div className="flex items-center gap-3 sm:gap-4">
+                  <span className="text-lg sm:text-xl font-bold text-gray-900">
+                    {formatCurrency(priceBreakdown.diamondValue)}
+                  </span>
+                  {(expandedSections as any).diamondValue ? (
+                    <ChevronUp className="h-5 w-5 sm:h-6 sm:w-6 text-gray-600" />
+                  ) : (
+                    <ChevronDown className="h-5 w-5 sm:h-6 sm:w-6 text-gray-600" />
+                  )}
+                </div>
+              </button>
+              {(expandedSections as any).diamondValue && (
+                <div className="px-4 sm:px-6 pb-4 sm:pb-6 space-y-3 bg-white/50">
+                  <div className="flex items-center justify-between py-2 border-b border-gray-200">
+                    <span className="text-sm text-gray-600">Diamond Rate (per carat)</span>
+                    <span className="font-semibold text-gray-900">
+                      {formatCurrency(priceBreakdown.diamondRate || 0)}/ct
+                    </span>
+                  </div>
+                  {priceBreakdown.diamondColor && (
+                    <div className="flex items-center justify-between py-2 border-b border-gray-200">
+                      <span className="text-sm text-gray-600">Diamond Color</span>
+                      <span className="font-semibold text-gray-900">
+                        {priceBreakdown.diamondColor}
+                      </span>
+                    </div>
+                  )}
+                  {priceBreakdown.diamondClarity && (
+                    <div className="flex items-center justify-between py-2 border-b border-gray-200">
+                      <span className="text-sm text-gray-600">Diamond Clarity</span>
+                      <span className="font-semibold text-gray-900">
+                        {priceBreakdown.diamondClarity}
+                      </span>
+                    </div>
+                  )}
+                  <div className="flex items-center justify-between py-2 border-b border-gray-200">
+                    <span className="text-sm text-gray-600">Diamond Weight</span>
+                    <span className="font-semibold text-gray-900">
+                      {formatWeight(priceBreakdown.diamondWeight || 0)}ct
+                    </span>
+                  </div>
+                  <div className="pt-2 text-xs sm:text-sm text-gray-600 italic">
+                    <div className="font-semibold mb-1">Formula : Diamond Rate x Diamond Weight</div>
+                    <div>
+                      Calculation : {formatCurrency(priceBreakdown.diamondRate || 0)} × {formatWeight(priceBreakdown.diamondWeight || 0)}ct = {formatCurrency(priceBreakdown.diamondValue)}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </Card>
+          )}
 
           {/* Stone Value - Only show if value exists */}
           {priceBreakdown.stoneValue > 0 && (

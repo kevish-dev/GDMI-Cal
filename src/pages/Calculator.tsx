@@ -208,20 +208,32 @@ export default function Calculator() {
 
         goldValue = goldWeight * goldRate;
 
-        // Get diamond rate from admin-managed rates
-        // Diamond rate calculation now only depends on certification
-        const matchingRate = diamondRates.find(
-          (rate) => rate.certification === diamondForm.certification
-        );
+        // Get diamond rate from admin-managed rates based on color, clarity, and certification
+        let matchingRate;
         
-        diamondRate = matchingRate?.rate || 50000; // Fallback rate
+        // If both color and clarity are provided, look up the exact rate
+        if (diamondForm.color && diamondForm.clarity) {
+          matchingRate = diamondRates.find(
+            (rate) => 
+              rate.color === diamondForm.color &&
+              rate.clarity === diamondForm.clarity &&
+              rate.certification === diamondForm.certification
+          );
+          
+          if (matchingRate) {
+            console.info(`✅ Found exact diamond rate: ${diamondForm.color}/${diamondForm.clarity}/${diamondForm.certification} = ₹${matchingRate.rate.toLocaleString("en-IN")} per carat`);
+          } else {
+            console.warn(`⚠️ No exact rate found for ${diamondForm.color}/${diamondForm.clarity}/${diamondForm.certification}`);
+          }
+        }
         
-        // Log for debugging if no matching rate found
+        // If no exact match found or color/clarity not provided, use fallback rates based on certification
         if (!matchingRate) {
-          console.warn(`No diamond rate found for certification: ${diamondForm.certification}. Using fallback rate.`);
-          console.log('Available certifications:', diamondRates.map(r => r.certification));
+          const fallbackRate = diamondForm.certification === "IGI" ? 30000 : 25000;
+          console.info(`Using fallback rate for ${diamondForm.certification} certification: ₹${fallbackRate.toLocaleString("en-IN")} per carat`);
+          diamondRate = fallbackRate;
         } else {
-          console.info(`Using diamond rate for ${diamondForm.certification} certification: ${diamondRate.toLocaleString("en-IN")} per carat.`);
+          diamondRate = matchingRate.rate;
         }
 
         diamondValue = diamondWeight * diamondRate;
@@ -297,6 +309,8 @@ export default function Calculator() {
             diamondRate: diamondRate > 0 ? diamondRate : undefined,
             diamondWeight: diamondWeightValue > 0 ? diamondWeightValue : undefined,
             diamondValue,
+            diamondColor: JewelleryType === "diamond" ? diamondForm.color : undefined,
+            diamondClarity: JewelleryType === "diamond" ? diamondForm.clarity : undefined,
             stoneWeight: stoneWeightValue > 0 ? stoneWeightValue : undefined,
             stoneValue: stoneValue,
             stoneWeightUnit: JewelleryType === 'diamond' ? 'ct' : 'g',
@@ -316,6 +330,7 @@ export default function Calculator() {
             diamondWeight: JewelleryType === "diamond" ? parseFloat(diamondForm.diamondWeight) : undefined,
             color: JewelleryType === "diamond" ? diamondForm.color : undefined,
             clarity: JewelleryType === "diamond" ? diamondForm.clarity : undefined,
+            certification: JewelleryType === "diamond" ? diamondForm.certification : undefined,
             stoneWeight: stoneWeightValue > 0 ? stoneWeightValue : undefined,
             kundanWeight: kundanWeightValue > 0 ? kundanWeightValue : undefined,
           },

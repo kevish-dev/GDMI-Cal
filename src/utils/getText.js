@@ -330,6 +330,33 @@ export function normalizeExtractedData(data, JewelleryType) {
       normalized.weight = normalized.netWeight || 0;
     }
     
+    // Calculate netWeight from grossWeight if needed
+    // For diamond jewelry: Gross Weight - (Diamond Weight in grams + Stone Weight in grams)
+    if (!normalized.netWeight && normalized.grossWeight) {
+      let totalDeduction = 0;
+      
+      // Convert diamond weight from carats to grams (1 carat = 0.2 grams)
+      if (normalized.diamondWeight && normalized.diamondWeight > 0) {
+        const diamondWeightInGrams = normalized.diamondWeight * 0.2;
+        totalDeduction += diamondWeightInGrams;
+        console.log(`💎 Diamond deduction: ${normalized.diamondWeight}ct = ${diamondWeightInGrams.toFixed(4)}g`);
+      }
+      
+      // Convert stone weight from carats to grams (1 carat = 0.2 grams)
+      if (normalized.stoneWeight && normalized.stoneWeight > 0) {
+        const stoneWeightInGrams = normalized.stoneWeight * 0.2;
+        totalDeduction += stoneWeightInGrams;
+        console.log(`💎 Stone deduction: ${normalized.stoneWeight}ct = ${stoneWeightInGrams.toFixed(4)}g`);
+      }
+      
+      // Calculate net weight
+      if (totalDeduction > 0) {
+        normalized.netWeight = normalized.grossWeight - totalDeduction;
+        normalized.weight = normalized.netWeight;
+        console.log(`⚖️ Net Weight Calculation: ${normalized.grossWeight}g - ${totalDeduction.toFixed(4)}g = ${normalized.netWeight.toFixed(4)}g`);
+      }
+    }
+    
     // Extract color and clarity from diamonds array if available
     if (normalized.diamonds && Array.isArray(normalized.diamonds) && normalized.diamonds.length > 0) {
       // Use the first diamond's color and clarity as defaults if not set

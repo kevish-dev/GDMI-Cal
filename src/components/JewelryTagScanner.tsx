@@ -402,11 +402,30 @@ export function JewelleryTagScanner({
       if (!completeData.netWeight && !completeData.weight) {
         const grossWeight = completeData.totalWeight || completeData.grossWeight || 0;
         const diamondWeight = completeData.diamondWeight || 0;
+        const stoneWeight = completeData.stoneWeight || 0;
         
-        if (grossWeight > 0 && diamondWeight > 0) {
-          const calculatedNetWeight = grossWeight - diamondWeight;
+        if (grossWeight > 0) {
+          let totalDeductionInGrams = 0;
+          
+          // Convert diamond weight from carats to grams (1 carat = 0.2 grams)
+          if (diamondWeight > 0) {
+            const diamondWeightInGrams = diamondWeight * 0.2;
+            totalDeductionInGrams += diamondWeightInGrams;
+            console.log(`💎 Diamond deduction: ${diamondWeight}ct = ${diamondWeightInGrams.toFixed(4)}g`);
+          }
+          
+          // Convert stone weight from carats to grams (1 carat = 0.2 grams) for diamond jewelry
+          if (stoneWeight > 0 && JewelleryType === "diamond") {
+            const stoneWeightInGrams = stoneWeight * 0.2;
+            totalDeductionInGrams += stoneWeightInGrams;
+            console.log(`💎 Stone deduction: ${stoneWeight}ct = ${stoneWeightInGrams.toFixed(4)}g`);
+          }
+          
+          // Calculate net gold weight
+          const calculatedNetWeight = grossWeight - totalDeductionInGrams;
           completeData.netWeight = calculatedNetWeight;
           completeData.weight = calculatedNetWeight;
+          console.log(`⚖️ Net Weight Calculation: ${grossWeight}g - ${totalDeductionInGrams.toFixed(4)}g = ${calculatedNetWeight.toFixed(4)}g`);
         }
       }
 
@@ -570,12 +589,35 @@ export function JewelleryTagScanner({
         
         goldValue = goldWeight * goldRate;
 
-        // Get diamond rate based on certification type - use fixed rates
+        // Get diamond rate based on color, clarity, and certification type
         const certification = verificationAnswers.certificationType;
-        if (certification === "IGI") {
-          diamondRate = 35000; // Fixed rate for IGI certified
+        const certificationKey = certification === "IGI" ? "IGI" : "Self";
+        
+        let matchingRate;
+        
+        // If both color and clarity are provided, look up the exact rate
+        if (completeData.color && completeData.clarity) {
+          matchingRate = diamondRates.find(
+            (rate) => 
+              rate.color === completeData.color &&
+              rate.clarity === completeData.clarity &&
+              rate.certification === certificationKey
+          );
+          
+          if (matchingRate) {
+            console.info(`✅ Found exact diamond rate: ${completeData.color}/${completeData.clarity}/${certificationKey} = ₹${matchingRate.rate.toLocaleString("en-IN")} per carat`);
+          } else {
+            console.warn(`⚠️ No exact rate found for ${completeData.color}/${completeData.clarity}/${certificationKey}`);
+          }
+        }
+        
+        // If no exact match found or color/clarity not provided, use fallback rates based on certification
+        if (!matchingRate) {
+          const fallbackRate = certification === "IGI" ? 30000 : 25000;
+          console.info(`Using fallback rate for ${certificationKey} certification: ₹${fallbackRate.toLocaleString("en-IN")} per carat`);
+          diamondRate = fallbackRate;
         } else {
-          diamondRate = 25000; // Fixed rate for Non-IGI (Self Certified)
+          diamondRate = matchingRate.rate;
         }
 
         diamondValue = diamondWeight * diamondRate;
