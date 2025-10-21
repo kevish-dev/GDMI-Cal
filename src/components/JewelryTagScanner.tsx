@@ -139,7 +139,7 @@ export function JewelleryTagScanner({
   const [priceBreakdown, setPriceBreakdown] = useState<PriceBreakdown | null>(null);
   const [activeCamera, setActiveCamera] = useState<"top" | "bottom" | null>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
-  const [expandedSide, setExpandedSide] = useState<"top" | "bottom" | null>(null);
+  const [expandedSide, setExpandedSide] = useState<"top" | "bottom" | "combined" | null>(null);
   
   // State for missing compulsory details
   const [missingDetails, setMissingDetails] = useState<{
@@ -166,6 +166,13 @@ export function JewelleryTagScanner({
       setMakingChargesData({ percentage: makingCharges.diamond || 800 });
     }
   }, [JewelleryType, makingChargesData.percentage, makingCharges]);
+
+  // Auto-expand extracted data when both images are uploaded and data is extracted
+  useEffect(() => {
+    if (extractedData && imagePreviews.top && imagePreviews.bottom && expandedSide === null) {
+      setExpandedSide("combined");
+    }
+  }, [extractedData, imagePreviews.top, imagePreviews.bottom]);
 
   // Cleanup camera stream on unmount or when camera closes
   useEffect(() => {
@@ -967,45 +974,6 @@ export function JewelleryTagScanner({
                     </button>
                   )}
                 </Card>
-
-                {/* Side 1 extracted data */}
-                {extractedData && imagePreviews.top && (
-                  <div className="border border-gray-200 rounded-xl overflow-hidden">
-                    <button
-                      onClick={() => setExpandedSide(expandedSide === "top" ? null : "top")}
-                      className="w-full flex items-center justify-between px-4 py-3 bg-white"
-                    >
-                      <span className="font-medium">View Extracted Data</span>
-                      {expandedSide === "top" ? (
-                        <ChevronUp className="h-5 w-5" />
-                      ) : (
-                        <ChevronDown className="h-5 w-5" />
-                      )}
-                    </button>
-                    {expandedSide === "top" && (
-                      <div className="px-4 py-3 bg-gray-50 space-y-2 border-t">
-                        {(extractedData.totalWeight || extractedData.grossWeight) && (
-                          <div className="flex justify-between">
-                            <span className="text-gray-600">Gross Weight</span>
-                            <span className="font-semibold">{extractedData.totalWeight || extractedData.grossWeight}g</span>
-                          </div>
-                        )}
-                        {(extractedData.weight || extractedData.netWeight) && (
-                          <div className="flex justify-between">
-                            <span className="text-gray-600">Net Weight</span>
-                            <span className="font-semibold">{extractedData.weight || extractedData.netWeight}g</span>
-                          </div>
-                        )}
-                        {extractedData.carat && (
-                          <div className="flex justify-between">
-                            <span className="text-gray-600">Purity</span>
-                            <span className="font-semibold">{extractedData.carat}</span>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                )}
               </div>
 
               {/* Side 2 */}
@@ -1041,40 +1009,121 @@ export function JewelleryTagScanner({
                     </button>
                   )}
                 </Card>
+              </div>
 
-                {/* Side 2 extracted data */}
-                {extractedData && imagePreviews.bottom && (
-                  <div className="border border-gray-200 rounded-xl overflow-hidden">
-                    <button
-                      onClick={() => setExpandedSide(expandedSide === "bottom" ? null : "bottom")}
-                      className="w-full flex items-center justify-between px-4 py-3 bg-white"
-                    >
-                      <span className="font-medium">View Extracted Data</span>
-                      {expandedSide === "bottom" ? (
-                        <ChevronUp className="h-5 w-5" />
-                      ) : (
-                        <ChevronDown className="h-5 w-5" />
-                      )}
-                    </button>
-                    {expandedSide === "bottom" && (
-                      <div className="px-4 py-3 bg-gray-50 space-y-2 border-t">
-                        {extractedData.stoneWeight && (
-                          <div className="flex justify-between">
-                            <span className="text-gray-600">Stone Weight</span>
-                            <span className="font-semibold">{extractedData.stoneWeight}g</span>
+              {/* Combined extracted data - Show once after both images uploaded */}
+              {extractedData && imagePreviews.top && imagePreviews.bottom && (
+                <div className="col-span-2 border-2 border-green-500 rounded-xl overflow-hidden bg-green-50">
+                  <button
+                    onClick={() => setExpandedSide(expandedSide === "combined" ? null : "combined")}
+                    className="w-full flex items-center justify-between px-4 py-3 bg-white"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Check className="h-5 w-5 text-green-600" />
+                      <span className="font-semibold text-green-700">Extracted Tag Information</span>
+                    </div>
+                    {expandedSide === "combined" ? (
+                      <ChevronUp className="h-5 w-5 text-green-600" />
+                    ) : (
+                      <ChevronDown className="h-5 w-5 text-green-600" />
+                    )}
+                  </button>
+                  {expandedSide === "combined" && (
+                    <div className="px-4 py-4 bg-white space-y-3 border-t">
+                      <div className="grid grid-cols-2 gap-4">
+                        {/* Gold Information */}
+                        {(extractedData.totalWeight || extractedData.grossWeight) && (
+                          <div className="flex flex-col">
+                            <span className="text-xs text-gray-500 uppercase tracking-wide">Gross Weight</span>
+                            <span className="font-semibold text-lg">{(extractedData.totalWeight || extractedData.grossWeight)?.toFixed(3)}g</span>
                           </div>
                         )}
-                        {extractedData.kundanWeight && (
-                          <div className="flex justify-between">
-                            <span className="text-gray-600">Kundan Weight</span>
-                            <span className="font-semibold">{extractedData.kundanWeight}g</span>
+                        {(extractedData.weight || extractedData.netWeight) && (
+                          <div className="flex flex-col">
+                            <span className="text-xs text-gray-500 uppercase tracking-wide">Net Weight (Gold)</span>
+                            <span className="font-semibold text-lg">{(extractedData.weight || extractedData.netWeight)?.toFixed(3)}g</span>
+                          </div>
+                        )}
+                        {extractedData.carat && (
+                          <div className="flex flex-col">
+                            <span className="text-xs text-gray-500 uppercase tracking-wide">Purity</span>
+                            <span className="font-semibold text-lg">{extractedData.carat}</span>
+                          </div>
+                        )}
+                        
+                        {/* Diamond Information - Only for diamond jewelry */}
+                        {JewelleryType === "diamond" && extractedData.diamondWeight && (
+                          <div className="flex flex-col">
+                            <span className="text-xs text-gray-500 uppercase tracking-wide">Diamond Weight</span>
+                            <span className="font-semibold text-lg">
+                              {extractedData.diamondWeight?.toFixed(3)}ct
+                              <span className="text-sm text-gray-500 ml-1">
+                                ({(extractedData.diamondWeight * 0.2)?.toFixed(4)}g)
+                              </span>
+                            </span>
+                          </div>
+                        )}
+                        
+                        {JewelleryType === "diamond" && extractedData.color && (
+                          <div className="flex flex-col">
+                            <span className="text-xs text-gray-500 uppercase tracking-wide">Diamond Color</span>
+                            <span className="font-semibold text-lg">{extractedData.color}</span>
+                          </div>
+                        )}
+                        
+                        {JewelleryType === "diamond" && extractedData.clarity && (
+                          <div className="flex flex-col">
+                            <span className="text-xs text-gray-500 uppercase tracking-wide">Diamond Clarity</span>
+                            <span className="font-semibold text-lg">{extractedData.clarity}</span>
+                          </div>
+                        )}
+                        
+                        {/* Stone Information */}
+                        {extractedData.stoneWeight && extractedData.stoneWeight > 0 && (
+                          <div className="flex flex-col">
+                            <span className="text-xs text-gray-500 uppercase tracking-wide">Stone Weight</span>
+                            <span className="font-semibold text-lg">
+                              {extractedData.stoneWeight?.toFixed(3)}{JewelleryType === 'diamond' ? 'ct' : 'g'}
+                              {JewelleryType === 'diamond' && (
+                                <span className="text-sm text-gray-500 ml-1">
+                                  ({(extractedData.stoneWeight * 0.2)?.toFixed(4)}g)
+                                </span>
+                              )}
+                            </span>
+                          </div>
+                        )}
+                        
+                        {/* Kundan Information */}
+                        {extractedData.kundanWeight && extractedData.kundanWeight > 0 && (
+                          <div className="flex flex-col">
+                            <span className="text-xs text-gray-500 uppercase tracking-wide">Kundan Weight</span>
+                            <span className="font-semibold text-lg">{extractedData.kundanWeight?.toFixed(3)}g</span>
+                          </div>
+                        )}
+                        
+                        {/* Item Code */}
+                        {extractedData.itemCode && (
+                          <div className="flex flex-col">
+                            <span className="text-xs text-gray-500 uppercase tracking-wide">Item Code</span>
+                            <span className="font-semibold text-lg">{extractedData.itemCode}</span>
                           </div>
                         )}
                       </div>
-                    )}
-                  </div>
-                )}
-              </div>
+                      
+                      {/* Note about missing information */}
+                      {(!extractedData.carat || !(extractedData.weight || extractedData.netWeight) || 
+                        (JewelleryType === "diamond" && !extractedData.diamondWeight)) && (
+                        <div className="mt-3 pt-3 border-t border-gray-200">
+                          <p className="text-sm text-amber-700 flex items-center gap-2">
+                            <span className="flex-shrink-0">⚠️</span>
+                            <span>Some information couldn't be extracted from the tag. You'll be able to enter missing details in the next step.</span>
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Upload from gallery option */}
               <button
