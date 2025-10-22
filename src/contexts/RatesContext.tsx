@@ -17,7 +17,10 @@ import {
   saveCalculationToFirebase,
   logActivity,
   initializeSystemData,
-  resetMakingChargesToDefaults
+  resetMakingChargesToDefaults,
+  getGoldPremiumConfig,
+  updateGoldPremiumConfig,
+  subscribeToGoldPremiumConfig
 } from '@/services/firestore.js';
 
 export interface GoldRate {
@@ -76,6 +79,15 @@ interface ActivityLog {
   timestamp: any;
 }
 
+export interface GoldPremiumConfig {
+  premium: number; // Premium per gram to add to base price
+  basePrice: number; // Last fetched base price from API (per gram)
+  lastApiPrice: number; // Raw price from API (for 10g)
+  lastUpdated?: any;
+  autoUpdateEnabled: boolean;
+  expiry?: string | null;
+}
+
 interface RatesContextType {
   goldRates: GoldRate[];
   diamondRates: DiamondRate[];
@@ -83,6 +95,7 @@ interface RatesContextType {
   calculations: CalculationRecord[];
   systemAnalytics: SystemAnalytics;
   recentActivities: ActivityLog[];
+  goldPremiumConfig: GoldPremiumConfig;
   loading: boolean;
   updateGoldRates: (rates: GoldRate[]) => Promise<void>;
   updateDiamondRates: (rates: DiamondRate[]) => Promise<void>;
@@ -90,6 +103,8 @@ interface RatesContextType {
   resetMakingCharges: () => Promise<void>;
   addCalculation: (calculation: Omit<CalculationRecord, 'id' | 'timestamp'>) => Promise<void>;
   getAnalytics: () => SystemAnalytics;
+  updateGoldPremium: (config: Partial<GoldPremiumConfig>) => Promise<void>;
+  fetchAndUpdateGoldPrice: () => Promise<{ success: boolean; error?: string }>;
 }
 
 const RatesContext = createContext<RatesContextType | undefined>(undefined);
@@ -113,6 +128,13 @@ export function RatesProvider({ children }: { children: ReactNode }) {
     avgValue: 0
   });
   const [recentActivities, setRecentActivities] = useState<ActivityLog[]>([]);
+  const [goldPremiumConfig, setGoldPremiumConfig] = useState<GoldPremiumConfig>({
+    premium: 0,
+    basePrice: 0,
+    lastApiPrice: 0,
+    autoUpdateEnabled: false,
+    expiry: null
+  });
   const [loading, setLoading] = useState(true);
 
   // Initialize rates and system data from Firebase
@@ -122,6 +144,7 @@ export function RatesProvider({ children }: { children: ReactNode }) {
     let makingChargesUnsubscribe: (() => void) | null = null;
     let analyticsUnsubscribe: (() => void) | null = null;
     let activitiesUnsubscribe: (() => void) | null = null;
+    let premiumConfigUnsubscribe: (() => void) | null = null;
 
     const initializeData = async () => {
       try {
@@ -133,12 +156,16 @@ export function RatesProvider({ children }: { children: ReactNode }) {
         // Initialize system data (analytics and activities)
         const systemData = await initializeSystemData();
         
+        // Initialize gold premium config
+        const premiumConfig = await getGoldPremiumConfig();
+        
         // Set initial data
         setGoldRates(initializedRates.goldRates);
         setDiamondRates(initializedRates.diamondRates);
         setMakingCharges(initializedRates.makingCharges);
         setSystemAnalytics(systemData.analytics);
         setRecentActivities(systemData.activities);
+        setGoldPremiumConfig(premiumConfig);
 
         // Set up real-time listeners
         goldUnsubscribe = subscribeToGoldRates((rates) => {
@@ -162,6 +189,10 @@ export function RatesProvider({ children }: { children: ReactNode }) {
         activitiesUnsubscribe = subscribeToRecentActivities((activities) => {
           setRecentActivities(activities);
         }, 10);
+
+        premiumConfigUnsubscribe = subscribeToGoldPremiumConfig((config) => {
+          setGoldPremiumConfig(config);
+        });
 
       } catch (error) {
         console.error('Error initializing rates:', error);
@@ -212,6 +243,7 @@ export function RatesProvider({ children }: { children: ReactNode }) {
       if (makingChargesUnsubscribe) makingChargesUnsubscribe();
       if (analyticsUnsubscribe) analyticsUnsubscribe();
       if (activitiesUnsubscribe) activitiesUnsubscribe();
+      if (premiumConfigUnsubscribe) premiumConfigUnsubscribe();
     };
   }, []);
 
@@ -326,6 +358,88 @@ export function RatesProvider({ children }: { children: ReactNode }) {
     return systemAnalytics;
   };
 
+  const updateGoldPremium = async (config: Partial<GoldPremiumConfig>) => {
+    try {
+      const updatedConfig = { ...goldPremiumConfig, ...config };
+      await updateGoldPremiumConfig(updatedConfig);
+      
+      // Log activity
+      await logActivity({
+        type: 'rates',
+        action: 'Gold premium updated',
+        description: `Premium set to ₹${config.premium}/g, Base price: ₹${config.basePrice}/g`,
+        icon: 'Crown'
+      });
+      
+      // The real-time listener will update the local state
+    } catch (error) {
+      console.error('Error updating gold premium:', error);
+      throw error;
+    }
+  };
+
+  const fetchAndUpdateGoldPrice = async (): Promise<{ success: boolean; error?: string }> => {
+    try {
+      // Dynamically import the gold price service
+      const { fetchLiveGoldPrice, calculateCaratPrices } = await import('@/services/goldPriceService');
+      
+      // Fetch live price from API
+      const priceResult = await fetchLiveGoldPrice();
+      
+      if (!priceResult.success || !priceResult.basePrice) {
+        return {
+          success: false,
+          error: priceResult.error || 'Failed to fetch gold price'
+        };
+      }
+
+      // Update the premium config with new base price
+      const updatedConfig: Partial<GoldPremiumConfig> = {
+        basePrice: priceResult.basePrice,
+        lastApiPrice: priceResult.rawPrice || 0,
+        expiry: priceResult.expiry,
+        premium: goldPremiumConfig.premium // Keep existing premium
+      };
+      
+      await updateGoldPremiumConfig({ ...goldPremiumConfig, ...updatedConfig });
+
+      // Calculate final 24K price (base + premium)
+      const final24KPrice = priceResult.basePrice + goldPremiumConfig.premium;
+      
+      // Calculate prices for all carat types
+      const caratPrices = calculateCaratPrices(final24KPrice);
+
+      // Update gold rates with new prices
+      const updatedRates: GoldRate[] = Object.entries(caratPrices).map(([carat, rate]) => {
+        const existingRate = goldRates.find(r => r.carat === carat);
+        return {
+          carat,
+          rate,
+          lastRate: existingRate?.rate || rate,
+          lastUpdated: new Date().toISOString().split('T')[0]
+        };
+      });
+
+      await createGoldRates(updatedRates);
+
+      // Log activity
+      await logActivity({
+        type: 'rates',
+        action: 'Gold prices updated from API',
+        description: `Base: ₹${priceResult.basePrice}/g, Premium: ₹${goldPremiumConfig.premium}/g, Final 24K: ₹${final24KPrice}/g`,
+        icon: 'TrendingUp'
+      });
+
+      return { success: true };
+    } catch (error) {
+      console.error('Error fetching and updating gold price:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error occurred'
+      };
+    }
+  };
+
   return (
     <RatesContext.Provider value={{
       goldRates,
@@ -334,13 +448,16 @@ export function RatesProvider({ children }: { children: ReactNode }) {
       calculations,
       systemAnalytics,
       recentActivities,
+      goldPremiumConfig,
       loading,
       updateGoldRates,
       updateDiamondRates,
       updateMakingCharges,
       resetMakingCharges,
       addCalculation,
-      getAnalytics
+      getAnalytics,
+      updateGoldPremium,
+      fetchAndUpdateGoldPrice
     }}>
       {children}
     </RatesContext.Provider>

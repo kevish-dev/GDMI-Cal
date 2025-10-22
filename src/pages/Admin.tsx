@@ -29,7 +29,9 @@ import { GoldRateMarquee } from "@/components/GoldRateMarquee";
 
 export default function Admin() {
   const [newGoldRate24K, setNewGoldRate24K] = useState("");
+  const [goldPremium, setGoldPremium] = useState("");
   const [isUploading, setIsUploading] = useState(false);
+  const [isFetchingPrice, setIsFetchingPrice] = useState(false);
   const [makingChargesForm, setMakingChargesForm] = useState({
     chains: "",
     plain: "",
@@ -39,7 +41,22 @@ export default function Admin() {
   });
   const { toast } = useToast();
   const { user, logout } = useAuth();
-  const { goldRates, updateGoldRates, diamondRates, updateDiamondRates, makingCharges, updateMakingCharges, resetMakingCharges, getAnalytics, systemAnalytics, recentActivities, loading } = useRates();
+  const { 
+    goldRates, 
+    updateGoldRates, 
+    diamondRates, 
+    updateDiamondRates, 
+    makingCharges, 
+    updateMakingCharges, 
+    resetMakingCharges, 
+    getAnalytics, 
+    systemAnalytics, 
+    recentActivities, 
+    loading,
+    goldPremiumConfig,
+    updateGoldPremium,
+    fetchAndUpdateGoldPrice
+  } = useRates();
   const navigate = useNavigate();
 
   const analytics = getAnalytics();
@@ -57,11 +74,18 @@ export default function Admin() {
     }
   }, [makingCharges]);
 
+  // Initialize gold premium when config is loaded
+  useEffect(() => {
+    if (goldPremiumConfig) {
+      setGoldPremium(goldPremiumConfig.premium.toString());
+    }
+  }, [goldPremiumConfig]);
+
   // Conversion factors for different carat gold
   const conversionFactors = {
-    "22K": 0.93,
-    "18K": 0.76,
-    "14K": 0.60
+    "22K": 0.916,
+    "18K": 0.75,
+    "14K": 0.585
   };
 
   const handleLogout = () => {
@@ -73,6 +97,88 @@ export default function Admin() {
     navigate("/login");
   };
 
+  // Fetch live gold price from API and update rates
+  const handleFetchLivePrice = async () => {
+    setIsFetchingPrice(true);
+    
+    try {
+      const result = await fetchAndUpdateGoldPrice();
+      
+      if (result.success) {
+        toast({
+          title: "Gold price updated from API",
+          description: `Live price fetched successfully. Base: ₹${goldPremiumConfig.basePrice}/g + Premium: ₹${goldPremiumConfig.premium}/g`,
+        });
+      } else {
+        throw new Error(result.error || 'Failed to fetch live price');
+      }
+    } catch (error) {
+      console.error('Error fetching live price:', error);
+      toast({
+        title: "Failed to fetch live price",
+        description: error instanceof Error ? error.message : "Please try again later.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsFetchingPrice(false);
+    }
+  };
+
+  // Update only the premium value
+  const handlePremiumUpdate = async () => {
+    const premium = parseFloat(goldPremium);
+    
+    if (isNaN(premium) || premium < 0) {
+      toast({
+        title: "Invalid premium",
+        description: "Please enter a valid non-negative number for premium.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsUploading(true);
+    
+    try {
+      // Update premium in config
+      await updateGoldPremium({ premium });
+      
+      // If we have a base price, recalculate rates
+      if (goldPremiumConfig.basePrice > 0) {
+        const { calculateCaratPrices } = await import('@/services/goldPriceService');
+        const final24KPrice = goldPremiumConfig.basePrice + premium;
+        const caratPrices = calculateCaratPrices(final24KPrice);
+
+        const updatedRates: GoldRate[] = Object.entries(caratPrices).map(([carat, rate]) => {
+          const existingRate = goldRates.find(r => r.carat === carat);
+          return {
+            carat,
+            rate,
+            lastRate: existingRate?.rate || rate,
+            lastUpdated: new Date().toISOString().split('T')[0]
+          };
+        });
+
+        await updateGoldRates(updatedRates);
+      }
+      
+      toast({
+        title: "Premium updated",
+        description: `Gold premium set to ₹${premium}/g. ${goldPremiumConfig.basePrice > 0 ? 'Rates recalculated.' : 'Fetch live price to update rates.'}`
+      });
+    } catch (error) {
+      console.error('Error updating premium:', error);
+      toast({
+        title: "Update failed",
+        description: "Failed to update premium. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  // Legacy manual update function (kept for backward compatibility)
   const handleGoldRateUpdate = async () => {
     if (!newGoldRate24K) {
       toast({
@@ -494,49 +600,143 @@ export default function Admin() {
                 </div>
 
                 {/* Update Rates */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center space-x-2">
-                      <Upload className="h-5 w-5" />
-                      <span>Update Rates</span>
-                    </CardTitle>
-                    <CardDescription>
-                      Enter 24K rate to update all carat rates
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="rate24k">24K Gold Rate (per g)</Label>
-                      <Input
-                        id="rate24k"
-                        type="number"
-                        placeholder="Enter rate"
-                        value={newGoldRate24K}
-                        onChange={(e) => setNewGoldRate24K(e.target.value)}
-                        className="h-10"
-                      />
-                    </div>
-                    
-                    <div className="p-3 bg-muted/30 rounded-lg">
-                      <p className="text-sm text-muted-foreground">
-                        Auto-calculated rates:
-                      </p>
-                      <div className="text-xs text-muted-foreground mt-1 space-y-1">
-                        <div>22K = 93%</div>
-                        <div>18K = 76%</div>
-                        <div>14K = 60%</div>
+                <div className="space-y-6">
+                  {/* API-Based Gold Price Update */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center space-x-2">
+                        <TrendingUp className="h-5 w-5 text-green-500" />
+                        <span>Live Gold Price</span>
+                      </CardTitle>
+                      <CardDescription>
+                        Fetch live gold price from MoneyControl API
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      {/* Current API Info */}
+                      <div className="p-4 bg-muted/30 rounded-lg space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">Base Price (API):</span>
+                          <span className="font-semibold">
+                            {goldPremiumConfig.basePrice > 0 
+                              ? `₹${goldPremiumConfig.basePrice.toLocaleString()}/g` 
+                              : 'Not fetched yet'}
+                          </span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">Premium:</span>
+                          <span className="font-semibold">
+                            ₹{goldPremiumConfig.premium.toLocaleString()}/g
+                          </span>
+                        </div>
+                        <div className="h-px bg-border my-2" />
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">Final 24K Price:</span>
+                          <span className="font-bold text-green-600">
+                            ₹{(goldPremiumConfig.basePrice + goldPremiumConfig.premium).toLocaleString()}/g
+                          </span>
+                        </div>
+                        {goldPremiumConfig.expiry && (
+                          <div className="flex justify-between text-xs text-muted-foreground mt-2">
+                            <span>Expiry:</span>
+                            <span>{goldPremiumConfig.expiry}</span>
+                          </div>
+                        )}
                       </div>
-                    </div>
 
-                    <Button
-                      onClick={handleGoldRateUpdate}
-                      disabled={isUploading}
-                      className="w-full bg-[#8B7355] hover:bg-[#7A6349] text-white rounded-xl transition-all disabled:bg-gray-400 disabled:cursor-not-allowed"
-                    >
-                      {isUploading ? "Updating..." : "Update Rates"}
-                    </Button>
-                  </CardContent>
-                </Card>
+                      {/* Premium Input */}
+                      <div className="space-y-2">
+                        <Label htmlFor="premium">Premium (₹/gram)</Label>
+                        <div className="flex gap-2">
+                          <Input
+                            id="premium"
+                            type="number"
+                            placeholder="Enter premium"
+                            value={goldPremium}
+                            onChange={(e) => setGoldPremium(e.target.value)}
+                            className="h-10"
+                            min="0"
+                            step="100"
+                          />
+                          <Button
+                            onClick={handlePremiumUpdate}
+                            disabled={isUploading}
+                            variant="outline"
+                            className="px-6"
+                          >
+                            Set
+                          </Button>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          Premium added to API base price for final rate
+                        </p>
+                      </div>
+
+                      {/* Fetch Button */}
+                      <Button
+                        onClick={handleFetchLivePrice}
+                        disabled={isFetchingPrice || isUploading}
+                        className="w-full bg-green-600 hover:bg-green-700 text-white rounded-xl transition-all disabled:bg-gray-400 disabled:cursor-not-allowed"
+                      >
+                        {isFetchingPrice ? "Fetching..." : "Fetch Live Price & Update"}
+                      </Button>
+
+                      <div className="text-xs text-muted-foreground space-y-1 p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
+                        <p className="font-medium text-blue-900 dark:text-blue-100">ℹ How it works:</p>
+                        <p>1. Fetches 10g gold price from MCX API</p>
+                        <p>2. Converts to per gram base price</p>
+                        <p>3. Adds your premium to base price</p>
+                        <p>4. Calculates all carat rates automatically</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Manual Update (Legacy) */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center space-x-2">
+                        <Upload className="h-5 w-5" />
+                        <span>Manual Update</span>
+                      </CardTitle>
+                      <CardDescription>
+                        Enter 24K rate manually (legacy method)
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="rate24k">24K Gold Rate (per g)</Label>
+                        <Input
+                          id="rate24k"
+                          type="number"
+                          placeholder="Enter rate"
+                          value={newGoldRate24K}
+                          onChange={(e) => setNewGoldRate24K(e.target.value)}
+                          className="h-10"
+                        />
+                      </div>
+                      
+                      <div className="p-3 bg-muted/30 rounded-lg">
+                        <p className="text-sm text-muted-foreground">
+                          Auto-calculated rates:
+                        </p>
+                        <div className="text-xs text-muted-foreground mt-1 space-y-1">
+                          <div>22K = 91.6%</div>
+                          <div>18K = 75%</div>
+                          <div>14K = 58.5%</div>
+                        </div>
+                      </div>
+
+                      <Button
+                        onClick={handleGoldRateUpdate}
+                        disabled={isUploading}
+                        variant="outline"
+                        className="w-full rounded-xl transition-all disabled:bg-gray-400 disabled:cursor-not-allowed"
+                      >
+                        {isUploading ? "Updating..." : "Update Manually"}
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </div>
               </div>
             </TabsContent>
 

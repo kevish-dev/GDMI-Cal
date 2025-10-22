@@ -606,5 +606,63 @@ export const initializeSystemData = async () => {
   }
 };
 
+// Gold Premium Configuration Functions
+export const getGoldPremiumConfig = async () => {
+  try {
+    const docRef = doc(db, "goldConfig", "premium");
+    const docSnap = await getDoc(docRef);
+    
+    if (docSnap.exists()) {
+      return docSnap.data();
+    } else {
+      // Initialize with default config
+      const defaultConfig = {
+        premium: 0, // Default premium per gram
+        basePrice: 0, // Last fetched base price from API
+        lastApiPrice: 0, // Raw price from API (for 10g)
+        lastUpdated: serverTimestamp(),
+        autoUpdateEnabled: false,
+        expiry: null
+      };
+      await setDoc(docRef, defaultConfig);
+      return defaultConfig;
+    }
+  } catch (error) {
+    console.error("Error getting gold premium config:", error);
+    throw error;
+  }
+};
+
+export const updateGoldPremiumConfig = async (config) => {
+  try {
+    const docRef = doc(db, "goldConfig", "premium");
+    await setDoc(docRef, {
+      ...config,
+      lastUpdated: serverTimestamp()
+    }, { merge: true });
+    return config;
+  } catch (error) {
+    console.error("Error updating gold premium config:", error);
+    throw error;
+  }
+};
+
+export const subscribeToGoldPremiumConfig = (callback) => {
+  const docRef = doc(db, "goldConfig", "premium");
+  return onSnapshot(docRef, (doc) => {
+    if (doc.exists()) {
+      callback(doc.data());
+    } else {
+      callback({
+        premium: 0,
+        basePrice: 0,
+        lastApiPrice: 0,
+        autoUpdateEnabled: false,
+        expiry: null
+      });
+    }
+  });
+};
+
 // Export query helpers for advanced queries
 export { where, orderBy, limit, serverTimestamp };
