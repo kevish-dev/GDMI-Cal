@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { GoldRateMarquee } from "@/components/GoldRateMarquee";
 
 interface ExtractedData {
   weight?: number;
@@ -185,6 +184,51 @@ export function ScanResultsView({
 
         {/* Expandable Sections */}
         <div className="space-y-3">
+
+          {/* Gold Value */}
+          <Card className="border-0 bg-[#E5DDD5] rounded-2xl overflow-hidden">
+            <button
+              onClick={() => toggleSection("goldValue")}
+              className="w-full p-4 sm:p-6 flex items-center justify-between hover:bg-[#d9cfc5] transition-colors"
+            >
+              <span className="text-lg sm:text-xl font-semibold text-gray-800">
+                Gold Value
+              </span>
+              <div className="flex items-center gap-3 sm:gap-4">
+                <span className="text-lg sm:text-xl font-bold text-gray-900">
+                  {formatCurrency(priceBreakdown.goldValue)}
+                </span>
+                {expandedSections.goldValue ? (
+                  <ChevronUp className="h-5 w-5 sm:h-6 sm:w-6 text-gray-600" />
+                ) : (
+                  <ChevronDown className="h-5 w-5 sm:h-6 sm:w-6 text-gray-600" />
+                )}
+              </div>
+            </button>
+            {expandedSections.goldValue && (
+              <div className="px-4 sm:px-6 pb-4 sm:pb-6 space-y-3 bg-white/50">
+                <div className="flex items-center justify-between py-2 border-b border-gray-200">
+                  <span className="text-sm text-gray-600">Gold Rate (22K)</span>
+                  <span className="font-semibold text-gray-900">
+                    {formatCurrency(priceBreakdown.goldRate)}/g
+                  </span>
+                </div>
+                <div className="flex items-center justify-between py-2 border-b border-gray-200">
+                  <span className="text-sm text-gray-600">Gold Weight</span>
+                  <span className="font-semibold text-gray-900">
+                    {formatWeight(priceBreakdown.goldWeight)}g
+                  </span>
+                </div>
+                <div className="pt-2 text-xs sm:text-sm text-gray-600 italic">
+                  <div className="font-semibold mb-1">Formula : Gold Rate x Gold Weight</div>
+                  <div>
+                    Calculation : {formatCurrency(priceBreakdown.goldRate)} × {formatWeight(priceBreakdown.goldWeight)} = {formatCurrency(priceBreakdown.goldValue)}
+                  </div>
+                </div>
+              </div>
+            )}
+          </Card>
+
           {/* Making Charges */}
           <Card className="border-0 bg-[#E5DDD5] rounded-2xl overflow-hidden">
             <button
@@ -239,50 +283,6 @@ export function ScanResultsView({
                         ? `${priceBreakdown.makingChargeRate}% of ${formatCurrency(priceBreakdown.goldValue)}`
                         : `₹${priceBreakdown.makingChargeRate} × ${formatWeight(priceBreakdown.goldWeight)}g`
                       : "Custom"} = {formatCurrency(priceBreakdown.makingCharges)}
-                  </div>
-                </div>
-              </div>
-            )}
-          </Card>
-
-          {/* Gold Value */}
-          <Card className="border-0 bg-[#E5DDD5] rounded-2xl overflow-hidden">
-            <button
-              onClick={() => toggleSection("goldValue")}
-              className="w-full p-4 sm:p-6 flex items-center justify-between hover:bg-[#d9cfc5] transition-colors"
-            >
-              <span className="text-lg sm:text-xl font-semibold text-gray-800">
-                Gold Value
-              </span>
-              <div className="flex items-center gap-3 sm:gap-4">
-                <span className="text-lg sm:text-xl font-bold text-gray-900">
-                  {formatCurrency(priceBreakdown.goldValue)}
-                </span>
-                {expandedSections.goldValue ? (
-                  <ChevronUp className="h-5 w-5 sm:h-6 sm:w-6 text-gray-600" />
-                ) : (
-                  <ChevronDown className="h-5 w-5 sm:h-6 sm:w-6 text-gray-600" />
-                )}
-              </div>
-            </button>
-            {expandedSections.goldValue && (
-              <div className="px-4 sm:px-6 pb-4 sm:pb-6 space-y-3 bg-white/50">
-                <div className="flex items-center justify-between py-2 border-b border-gray-200">
-                  <span className="text-sm text-gray-600">Gold Rate (22K)</span>
-                  <span className="font-semibold text-gray-900">
-                    {formatCurrency(priceBreakdown.goldRate)}/g
-                  </span>
-                </div>
-                <div className="flex items-center justify-between py-2 border-b border-gray-200">
-                  <span className="text-sm text-gray-600">Gold Weight</span>
-                  <span className="font-semibold text-gray-900">
-                    {formatWeight(priceBreakdown.goldWeight)}g
-                  </span>
-                </div>
-                <div className="pt-2 text-xs sm:text-sm text-gray-600 italic">
-                  <div className="font-semibold mb-1">Formula : Gold Rate x Gold Weight</div>
-                  <div>
-                    Calculation : {formatCurrency(priceBreakdown.goldRate)} × {formatWeight(priceBreakdown.goldWeight)} = {formatCurrency(priceBreakdown.goldValue)}
                   </div>
                 </div>
               </div>

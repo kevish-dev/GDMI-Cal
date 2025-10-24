@@ -25,7 +25,6 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRates, type GoldRate, type DiamondRate } from "@/contexts/RatesContext";
 import { useNavigate } from "react-router-dom";
-import { GoldRateMarquee } from "@/components/GoldRateMarquee";
 
 export default function Admin() {
   const [newGoldRate24K, setNewGoldRate24K] = useState("");
@@ -460,7 +459,6 @@ export default function Admin() {
 
   return (
     <Layout>
-      <GoldRateMarquee />
       <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 lg:py-8">
         <div className="max-w-7xl mx-auto">
           {/* Header */}

@@ -22,7 +22,6 @@ import { useRates } from "@/contexts/RatesContext";
 import { useUserVerification } from "@/contexts/UserVerificationContext";
 import { UserVerificationModal } from "@/components/UserVerificationModal";
 import { LiveGoldRateIndicator } from "@/components/LiveGoldRateIndicator";
-import { GoldRateMarquee } from "@/components/GoldRateMarquee";
 
 type JewelleryType = "gold" | "diamond" | null;
 type GoldType = "chains" | "plain" | "temple" | "italian";
@@ -399,8 +398,6 @@ export default function Calculator() {
 
   return (
     <Layout>
-      {/* Live Gold Rate Marquee */}
-      <GoldRateMarquee />
       
       <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 lg:py-8">
         <div className="max-w-6xl mx-auto">

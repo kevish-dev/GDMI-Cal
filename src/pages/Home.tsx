@@ -10,7 +10,6 @@ import {
   BadgeIndianRupee,
 } from "lucide-react";
 import { JewelleryTagScanner } from "@/components/JewelryTagScanner";
-import { GoldRateMarquee } from "@/components/GoldRateMarquee";
 import { UserVerificationModal } from "@/components/UserVerificationModal";
 import { useToast } from "@/hooks/use-toast";
 import { useRates } from "@/contexts/RatesContext";
@@ -69,7 +68,6 @@ export default function Home() {
   if (showScanner) {
     return (
       <Layout>
-        <GoldRateMarquee />
         <div className="container mx-auto px-3 sm:px-4 py-8">
           <JewelleryTagScanner
             onScanComplete={handleScanComplete}
@@ -84,8 +82,6 @@ export default function Home() {
 
   return (
     <Layout>
-      {/* Live Gold Rate Marquee */}
-      <GoldRateMarquee />
 
       {/* Hero Section */}
       <div className="relative flex px-3 sm:px-4 py-12 sm:py-16 lg:py-20 bg-gradient-to-b from-background via-muted/20 to-background">
