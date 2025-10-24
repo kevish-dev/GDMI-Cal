@@ -212,7 +212,7 @@ export default function Home() {
       </div>
 
       {/* Floating Contact Buttons */}
-      <div className="fixed right-4 sm:right-6 bottom-20 sm:bottom-24 z-50 flex flex-col gap-1">
+      <div className="fixed right-4 sm:right-6 bottom-6 sm:bottom-6 z-50 flex flex-col gap-1">
         {/* Phone Button */}
         <button onClick={handleCallNow} aria-label="Call now">
           <svg

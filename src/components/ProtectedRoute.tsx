@@ -10,7 +10,7 @@ export function ProtectedRoute({ children, requireAdmin = false }: ProtectedRout
   const { isAuthenticated, isAdmin } = useAuth();
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/" replace />;
   }
 
   if (requireAdmin && !isAdmin) {

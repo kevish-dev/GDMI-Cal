@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Layout } from "@/components/Layout/Layout";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Switch } from "@/components/ui/switch";
 import { 
   Settings, 
   Upload, 
@@ -93,7 +94,7 @@ export default function Admin() {
       title: "Logged out",
       description: "You have been logged out successfully."
     });
-    navigate("/login");
+    navigate("/");
   };
 
   // Fetch live gold price from API and update rates
@@ -174,6 +175,27 @@ export default function Admin() {
       });
     } finally {
       setIsUploading(false);
+    }
+  };
+
+  // Toggle auto-update for gold rates
+  const handleAutoUpdateToggle = async (enabled: boolean) => {
+    try {
+      await updateGoldPremium({ autoUpdateEnabled: enabled });
+      
+      toast({
+        title: enabled ? "Auto-update enabled" : "Auto-update disabled",
+        description: enabled 
+          ? "Gold rates will be automatically fetched and updated every 15 minutes" 
+          : "Auto-update has been disabled",
+      });
+    } catch (error) {
+      console.error('Error toggling auto-update:', error);
+      toast({
+        title: "Update failed",
+        description: "Failed to toggle auto-update. Please try again.",
+        variant: "destructive"
+      });
     }
   };
 
@@ -602,15 +624,40 @@ export default function Admin() {
                   {/* API-Based Gold Price Update */}
                   <Card>
                     <CardHeader>
-                      <CardTitle className="flex items-center space-x-2">
-                        <TrendingUp className="h-5 w-5 text-green-500" />
-                        <span>Live Gold Price</span>
+                      <CardTitle className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                          <TrendingUp className="h-5 w-5 text-green-500" />
+                          <span>Live Gold Price</span>
+                        </div>
+                        <Badge variant={goldPremiumConfig.autoUpdateEnabled ? "default" : "outline"} className="ml-2">
+                          {goldPremiumConfig.autoUpdateEnabled ? "Auto-Update ON" : "Auto-Update OFF"}
+                        </Badge>
                       </CardTitle>
                       <CardDescription>
                         Fetch live gold price from MoneyControl API
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
+                      {/* Auto-Update Toggle */}
+                      <div className="p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <Label htmlFor="auto-update" className="text-base font-medium cursor-pointer">
+                              Auto-Update Every 15 Minutes
+                            </Label>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              Automatically fetch and update gold rates with premium
+                            </p>
+                          </div>
+                          <Switch
+                            id="auto-update"
+                            checked={goldPremiumConfig.autoUpdateEnabled}
+                            onCheckedChange={handleAutoUpdateToggle}
+                            className="ml-4"
+                          />
+                        </div>
+                      </div>
+
                       {/* Current API Info */}
                       <div className="p-4 bg-muted/30 rounded-lg space-y-2">
                         <div className="flex justify-between text-sm">

@@ -88,7 +88,7 @@ export function Navbar() {
           </div>
 
           {/* Auth Buttons - Desktop only */}
-          <div className="hidden md:flex items-center space-x-3">
+          {/* <div className="hidden md:flex items-center space-x-3">
             {isAuthenticated ? (
               <Button
                 size="sm"
@@ -98,7 +98,6 @@ export function Navbar() {
                 Logout
               </Button>
             ) : (
-              <>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -110,15 +109,8 @@ export function Navbar() {
                     Login
                   </Link>
                 </Button>
-                {/* <Button size="sm" asChild className="bg-[#8B7355] hover:bg-[#7A6349] text-white">
-                  <Link to="/register">
-                    <UserPlus className="h-4 w-4 mr-2" />
-                    Register
-                  </Link>
-                </Button> */}
-              </>
             )}
-          </div>
+          </div> */}
 
           {/* Mobile Menu Button - Enhanced for touch */}
           <Button
@@ -179,7 +171,7 @@ export function Navbar() {
                 </Link>
               )}
 
-              <div className="flex flex-col space-y-2 pt-3 border-t mt-2">
+              {/* <div className="flex flex-col space-y-2 pt-3 border-t mt-2">
                 {isAuthenticated ? (
                   <Button
                     size="default"
@@ -204,7 +196,7 @@ export function Navbar() {
                     </Link>
                   </Button>
                 )}
-              </div>
+              </div> */}
             </div>
           </div>
         )}

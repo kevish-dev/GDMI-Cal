@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { 
   getGoldRates, 
   getDiamondRates, 
@@ -136,6 +136,113 @@ export function RatesProvider({ children }: { children: ReactNode }) {
     expiry: null
   });
   const [loading, setLoading] = useState(true);
+
+  // Define fetchAndUpdateGoldPrice using useCallback so it can be used in useEffect
+  const fetchAndUpdateGoldPrice = useCallback(async (): Promise<{ success: boolean; error?: string }> => {
+    try {
+      // Dynamically import the gold price service
+      const { fetchLiveGoldPrice, calculateCaratPrices } = await import('@/services/goldPriceService');
+      
+      // Fetch live price from API
+      const priceResult = await fetchLiveGoldPrice();
+      
+      if (!priceResult.success || !priceResult.basePrice) {
+        return {
+          success: false,
+          error: priceResult.error || 'Failed to fetch gold price'
+        };
+      }
+
+      // Update the premium config with new base price
+      const updatedConfig: Partial<GoldPremiumConfig> = {
+        basePrice: priceResult.basePrice,
+        lastApiPrice: priceResult.rawPrice || 0,
+        expiry: priceResult.expiry,
+        premium: goldPremiumConfig.premium // Keep existing premium
+      };
+      
+      await updateGoldPremiumConfig({ ...goldPremiumConfig, ...updatedConfig });
+
+      // Calculate final 24K price (base + premium)
+      const final24KPrice = priceResult.basePrice + goldPremiumConfig.premium;
+      
+      // Calculate prices for all carat types
+      const caratPrices = calculateCaratPrices(final24KPrice);
+
+      // Update gold rates with new prices
+      const updatedRates: GoldRate[] = Object.entries(caratPrices).map(([carat, rate]) => {
+        const existingRate = goldRates.find(r => r.carat === carat);
+        return {
+          carat,
+          rate,
+          lastRate: existingRate?.rate || rate,
+          lastUpdated: new Date().toISOString().split('T')[0]
+        };
+      });
+
+      await createGoldRates(updatedRates);
+
+      // Log activity
+      await logActivity({
+        type: 'rates',
+        action: 'Gold prices updated from API',
+        description: `Base: ₹${priceResult.basePrice}/g, Premium: ₹${goldPremiumConfig.premium}/g, Final 24K: ₹${final24KPrice}/g`,
+        icon: 'TrendingUp'
+      });
+
+      return { success: true };
+    } catch (error) {
+      console.error('Error fetching and updating gold price:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error occurred'
+      };
+    }
+  }, [goldPremiumConfig, goldRates]);
+
+  // Auto-update gold rates every 15 minutes
+  useEffect(() => {
+    let autoUpdateInterval: NodeJS.Timeout | null = null;
+
+    const setupAutoUpdate = () => {
+      // Clear existing interval if any
+      if (autoUpdateInterval) {
+        clearInterval(autoUpdateInterval);
+      }
+
+      // Only set up auto-update if enabled
+      if (goldPremiumConfig.autoUpdateEnabled) {
+        console.log('🔄 Auto-update enabled: Fetching gold rates every 15 minutes');
+        
+        // Set up interval to fetch and update every 15 minutes (900000 ms)
+        autoUpdateInterval = setInterval(async () => {
+          console.log('⏰ Auto-updating gold rates from API...');
+          try {
+            const result = await fetchAndUpdateGoldPrice();
+            if (result.success) {
+              console.log('✅ Auto-update successful');
+            } else {
+              console.error('❌ Auto-update failed:', result.error);
+            }
+          } catch (error) {
+            console.error('❌ Auto-update error:', error);
+          }
+        }, 15 * 60 * 1000); // 15 minutes in milliseconds
+      } else {
+        console.log('⏸️ Auto-update disabled');
+      }
+    };
+
+    // Setup auto-update when config changes
+    setupAutoUpdate();
+
+    // Cleanup on unmount
+    return () => {
+      if (autoUpdateInterval) {
+        clearInterval(autoUpdateInterval);
+      }
+    };
+  }, [goldPremiumConfig.autoUpdateEnabled]); // Re-run when auto-update is toggled
 
   // Initialize rates and system data from Firebase
   useEffect(() => {
@@ -375,68 +482,6 @@ export function RatesProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error('Error updating gold premium:', error);
       throw error;
-    }
-  };
-
-  const fetchAndUpdateGoldPrice = async (): Promise<{ success: boolean; error?: string }> => {
-    try {
-      // Dynamically import the gold price service
-      const { fetchLiveGoldPrice, calculateCaratPrices } = await import('@/services/goldPriceService');
-      
-      // Fetch live price from API
-      const priceResult = await fetchLiveGoldPrice();
-      
-      if (!priceResult.success || !priceResult.basePrice) {
-        return {
-          success: false,
-          error: priceResult.error || 'Failed to fetch gold price'
-        };
-      }
-
-      // Update the premium config with new base price
-      const updatedConfig: Partial<GoldPremiumConfig> = {
-        basePrice: priceResult.basePrice,
-        lastApiPrice: priceResult.rawPrice || 0,
-        expiry: priceResult.expiry,
-        premium: goldPremiumConfig.premium // Keep existing premium
-      };
-      
-      await updateGoldPremiumConfig({ ...goldPremiumConfig, ...updatedConfig });
-
-      // Calculate final 24K price (base + premium)
-      const final24KPrice = priceResult.basePrice + goldPremiumConfig.premium;
-      
-      // Calculate prices for all carat types
-      const caratPrices = calculateCaratPrices(final24KPrice);
-
-      // Update gold rates with new prices
-      const updatedRates: GoldRate[] = Object.entries(caratPrices).map(([carat, rate]) => {
-        const existingRate = goldRates.find(r => r.carat === carat);
-        return {
-          carat,
-          rate,
-          lastRate: existingRate?.rate || rate,
-          lastUpdated: new Date().toISOString().split('T')[0]
-        };
-      });
-
-      await createGoldRates(updatedRates);
-
-      // Log activity
-      await logActivity({
-        type: 'rates',
-        action: 'Gold prices updated from API',
-        description: `Base: ₹${priceResult.basePrice}/g, Premium: ₹${goldPremiumConfig.premium}/g, Final 24K: ₹${final24KPrice}/g`,
-        icon: 'TrendingUp'
-      });
-
-      return { success: true };
-    } catch (error) {
-      console.error('Error fetching and updating gold price:', error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error occurred'
-      };
     }
   };
 
