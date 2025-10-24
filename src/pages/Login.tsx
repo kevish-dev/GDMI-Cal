@@ -152,7 +152,7 @@ export default function Login() {
                 </Button>
               </form>
 
-              <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t text-center">
+              {/* <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t text-center">
                 <p className="text-sm text-muted-foreground">
                   Don't have an account?{" "}
                   <Link
@@ -162,20 +162,7 @@ export default function Login() {
                     Create one here
                   </Link>
                 </p>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Demo Credentials - Mobile optimized */}
-          <Card className="mt-4 sm:mt-6 border-muted/50">
-            <CardContent className="pt-4 sm:pt-6">
-              <div className="text-center text-sm text-muted-foreground">
-                 <p className="font-medium mb-2">Admin Credentials:</p>
-                 <div className="space-y-1 text-xs sm:text-sm">
-                   <p><strong>Username:</strong> admin</p>
-                   <p><strong>Password:</strong> admin123</p>
-                 </div>
-               </div>
+              </div> */}
             </CardContent>
           </Card>
         </div>

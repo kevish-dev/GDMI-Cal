@@ -100,34 +100,34 @@ export function ScanResultsView({
           </div>
 
         {/* Item Information Card */}
-        <Card className="border-2 border-gray-200 rounded-2xl p-4 sm:p-6 bg-white">
-          <h2 className="text-lg sm:text-xl font-semibold mb-4">Item Information</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-6">
+        <Card className="border-2 border-gray-200 rounded-xl p-3 sm:p-4 bg-white">
+          <h2 className="text-base sm:text-lg font-semibold mb-3">Item Information</h2>
+          <div className="grid grid-cols-3 gap-3 sm:gap-4">
             <div>
-              <div className="text-sm text-gray-500 mb-1">Gross Weight</div>
-              <div className="text-base sm:text-lg font-semibold text-gray-900">
+              <div className="text-xs text-gray-500 mb-0.5">Gross Weight</div>
+              <div className="text-sm sm:text-base font-semibold text-gray-900">
                 {formatWeight(grossWeight)}g
               </div>
             </div>
             <div>
-              <div className="text-sm text-gray-500 mb-1">Net Weight (Gold)</div>
-              <div className="text-base sm:text-lg font-semibold text-gray-900">
+              <div className="text-xs text-gray-500 mb-0.5">Net Weight (Gold)</div>
+              <div className="text-sm sm:text-base font-semibold text-gray-900">
                 {formatWeight(netWeight)}g
               </div>
             </div>
             <div>
-              <div className="text-sm text-gray-500 mb-1">Purity</div>
-              <div className="text-base sm:text-lg font-semibold text-gray-900">
+              <div className="text-xs text-gray-500 mb-0.5">Purity</div>
+              <div className="text-sm sm:text-base font-semibold text-gray-900">
                 {purity}
               </div>
             </div>
             {/* Diamond Weight - Only show for diamond jewelry */}
             {JewelleryType === "diamond" && priceBreakdown.diamondWeight && priceBreakdown.diamondWeight > 0 && (
               <div>
-                <div className="text-sm text-gray-500 mb-1">Diamond Weight</div>
-                <div className="text-base sm:text-lg font-semibold text-gray-900">
+                <div className="text-xs text-gray-500 mb-0.5">Diamond Weight</div>
+                <div className="text-sm sm:text-base font-semibold text-gray-900">
                   {formatWeight(priceBreakdown.diamondWeight)}ct
-                  <span className="text-xs text-gray-500 ml-1">
+                  <span className="text-[10px] text-gray-500 ml-1">
                     ({formatWeight(priceBreakdown.diamondWeight * 0.2)}g)
                   </span>
                 </div>
@@ -136,8 +136,8 @@ export function ScanResultsView({
             {/* Diamond Color - Only show for diamond jewelry if available */}
             {JewelleryType === "diamond" && priceBreakdown.diamondColor && (
               <div>
-                <div className="text-sm text-gray-500 mb-1">Diamond Color</div>
-                <div className="text-base sm:text-lg font-semibold text-gray-900">
+                <div className="text-xs text-gray-500 mb-0.5">Diamond Color</div>
+                <div className="text-sm sm:text-base font-semibold text-gray-900">
                   {priceBreakdown.diamondColor}
                 </div>
               </div>
@@ -145,8 +145,8 @@ export function ScanResultsView({
             {/* Diamond Clarity - Only show for diamond jewelry if available */}
             {JewelleryType === "diamond" && priceBreakdown.diamondClarity && (
               <div>
-                <div className="text-sm text-gray-500 mb-1">Diamond Clarity</div>
-                <div className="text-base sm:text-lg font-semibold text-gray-900">
+                <div className="text-xs text-gray-500 mb-0.5">Diamond Clarity</div>
+                <div className="text-sm sm:text-base font-semibold text-gray-900">
                   {priceBreakdown.diamondClarity}
                 </div>
               </div>
@@ -154,8 +154,8 @@ export function ScanResultsView({
             {/* Only show stone weight if value exists */}
             {stoneWeight > 0 && (
               <div>
-                <div className="text-sm text-gray-500 mb-1">Stone Weight</div>
-                <div className="text-base sm:text-lg font-semibold text-gray-900">
+                <div className="text-xs text-gray-500 mb-0.5">Stone Weight</div>
+                <div className="text-sm sm:text-base font-semibold text-gray-900">
                   {formatWeight(stoneWeight)}{stoneWeightUnit}
                   {stoneWeightUnit === 'ct' && ` (${formatWeight(stoneWeight * 0.2)}g)`}
                 </div>
@@ -164,8 +164,8 @@ export function ScanResultsView({
             {/* Only show kundan weight if value exists */}
             {kundanWeight > 0 && (
               <div>
-                <div className="text-sm text-gray-500 mb-1">Kundan Weight</div>
-                <div className="text-base sm:text-lg font-semibold text-gray-900">
+                <div className="text-xs text-gray-500 mb-0.5">Kundan Weight</div>
+                <div className="text-sm sm:text-base font-semibold text-gray-900">
                   {formatWeight(kundanWeight)}g
                 </div>
               </div>
@@ -174,7 +174,7 @@ export function ScanResultsView({
         </Card>
 
         {/* Grand Total */}
-        <div className="bg-[#8B7355] text-white rounded-2xl p-4 sm:p-6">
+        <div className="bg-[#3A3323] text-white rounded-2xl p-4 sm:p-6">
           <div className="flex items-center justify-between">
             <span className="text-xl sm:text-2xl font-semibold">Grand Total</span>
             <span className="text-2xl sm:text-3xl font-bold">
@@ -185,6 +185,66 @@ export function ScanResultsView({
 
         {/* Expandable Sections */}
         <div className="space-y-3">
+          {/* Making Charges */}
+          <Card className="border-0 bg-[#E5DDD5] rounded-2xl overflow-hidden">
+            <button
+              onClick={() => toggleSection("makingCharges")}
+              className="w-full p-4 sm:p-6 flex items-center justify-between hover:bg-[#d9cfc5] transition-colors"
+            >
+              <span className="text-lg sm:text-xl font-semibold text-gray-800">
+                Making Charges
+              </span>
+              <div className="flex items-center gap-3 sm:gap-4">
+                <span className="text-lg sm:text-xl font-bold text-gray-900">
+                  {formatCurrency(priceBreakdown.makingCharges)}
+                </span>
+                {expandedSections.makingCharges ? (
+                  <ChevronUp className="h-5 w-5 sm:h-6 sm:w-6 text-gray-600" />
+                ) : (
+                  <ChevronDown className="h-5 w-5 sm:h-6 sm:w-6 text-gray-600" />
+                )}
+              </div>
+            </button>
+            {expandedSections.makingCharges && (
+              <div className="px-4 sm:px-6 pb-4 sm:pb-6 space-y-3 bg-white/50">
+                <div className="flex items-center justify-between py-2 border-b border-gray-200">
+                  <span className="text-sm text-gray-600">
+                    {JewelleryType === "gold" ? "Making Charge %" : "Making Charge Rate"}
+                  </span>
+                  <span className="font-semibold text-gray-900">
+                    {typeof priceBreakdown.makingChargeRate === "number"
+                      ? JewelleryType === "gold"
+                        ? `${priceBreakdown.makingChargeRate}%`
+                        : `₹${priceBreakdown.makingChargeRate}/g`
+                      : priceBreakdown.makingChargeRate}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between py-2 border-b border-gray-200">
+                  <span className="text-sm text-gray-600">
+                    {JewelleryType === "gold" ? "Gold Value" : "Gold Weight"}
+                  </span>
+                  <span className="font-semibold text-gray-900">
+                    {JewelleryType === "gold"
+                      ? formatCurrency(priceBreakdown.goldValue)
+                      : `${formatWeight(priceBreakdown.goldWeight)}g`}
+                  </span>
+                </div>
+                <div className="pt-2 text-xs sm:text-sm text-gray-600 italic">
+                  <div className="font-semibold mb-1">
+                    Formula : {JewelleryType === "gold" ? "Making % x Gold Value" : "Making Rate x Gold Weight"}
+                  </div>
+                  <div>
+                    Calculation : {typeof priceBreakdown.makingChargeRate === "number"
+                      ? JewelleryType === "gold"
+                        ? `${priceBreakdown.makingChargeRate}% of ${formatCurrency(priceBreakdown.goldValue)}`
+                        : `₹${priceBreakdown.makingChargeRate} × ${formatWeight(priceBreakdown.goldWeight)}g`
+                      : "Custom"} = {formatCurrency(priceBreakdown.makingCharges)}
+                  </div>
+                </div>
+              </div>
+            )}
+          </Card>
+
           {/* Gold Value */}
           <Card className="border-0 bg-[#E5DDD5] rounded-2xl overflow-hidden">
             <button
@@ -384,66 +444,6 @@ export function ScanResultsView({
               )}
             </Card>
           )}
-
-          {/* Making Charges */}
-          <Card className="border-0 bg-[#E5DDD5] rounded-2xl overflow-hidden">
-            <button
-              onClick={() => toggleSection("makingCharges")}
-              className="w-full p-4 sm:p-6 flex items-center justify-between hover:bg-[#d9cfc5] transition-colors"
-            >
-              <span className="text-lg sm:text-xl font-semibold text-gray-800">
-                Making Charges
-              </span>
-              <div className="flex items-center gap-3 sm:gap-4">
-                <span className="text-lg sm:text-xl font-bold text-gray-900">
-                  {formatCurrency(priceBreakdown.makingCharges)}
-                </span>
-                {expandedSections.makingCharges ? (
-                  <ChevronUp className="h-5 w-5 sm:h-6 sm:w-6 text-gray-600" />
-                ) : (
-                  <ChevronDown className="h-5 w-5 sm:h-6 sm:w-6 text-gray-600" />
-                )}
-              </div>
-            </button>
-            {expandedSections.makingCharges && (
-              <div className="px-4 sm:px-6 pb-4 sm:pb-6 space-y-3 bg-white/50">
-                <div className="flex items-center justify-between py-2 border-b border-gray-200">
-                  <span className="text-sm text-gray-600">
-                    {JewelleryType === "gold" ? "Making Charge %" : "Making Charge Rate"}
-                  </span>
-                  <span className="font-semibold text-gray-900">
-                    {typeof priceBreakdown.makingChargeRate === "number"
-                      ? JewelleryType === "gold"
-                        ? `${priceBreakdown.makingChargeRate}%`
-                        : `₹${priceBreakdown.makingChargeRate}/g`
-                      : priceBreakdown.makingChargeRate}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between py-2 border-b border-gray-200">
-                  <span className="text-sm text-gray-600">
-                    {JewelleryType === "gold" ? "Gold Value" : "Gold Weight"}
-                  </span>
-                  <span className="font-semibold text-gray-900">
-                    {JewelleryType === "gold"
-                      ? formatCurrency(priceBreakdown.goldValue)
-                      : `${formatWeight(priceBreakdown.goldWeight)}g`}
-                  </span>
-                </div>
-                <div className="pt-2 text-xs sm:text-sm text-gray-600 italic">
-                  <div className="font-semibold mb-1">
-                    Formula : {JewelleryType === "gold" ? "Making % x Gold Value" : "Making Rate x Gold Weight"}
-                  </div>
-                  <div>
-                    Calculation : {typeof priceBreakdown.makingChargeRate === "number"
-                      ? JewelleryType === "gold"
-                        ? `${priceBreakdown.makingChargeRate}% of ${formatCurrency(priceBreakdown.goldValue)}`
-                        : `₹${priceBreakdown.makingChargeRate} × ${formatWeight(priceBreakdown.goldWeight)}g`
-                      : "Custom"} = {formatCurrency(priceBreakdown.makingCharges)}
-                  </div>
-                </div>
-              </div>
-            )}
-          </Card>
         </div>
 
         {/* Action Buttons */}
