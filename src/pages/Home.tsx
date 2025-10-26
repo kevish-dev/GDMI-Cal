@@ -113,10 +113,8 @@ export default function Home() {
                 Get Started
               </Button>
               <Button
-                size="lg"
-                variant="outline"
                 onClick={() => navigate("/calculator")}
-                className="w-full sm:w-auto border-2 border-[#907F58] text-[#907F58] hover:bg-[#907F58] hover:text-white px-8 py-2 text-base sm:text-lg rounded-lg transition-all"
+                className="w-full bg-transparent text-[#907F58] border border-[#907F58] hover:bg-[#F3EFE2] px-7 py-1 rounded-lg shadow-lg "
               >
                 Enter Manually
               </Button>
