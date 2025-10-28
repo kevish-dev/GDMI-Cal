@@ -208,7 +208,7 @@ export function ScanResultsView({
             {expandedSections.goldValue && (
               <div className="px-4 sm:px-6 pb-4 sm:pb-6 space-y-3 bg-white/50">
                 <div className="flex items-center justify-between py-2 border-b border-gray-200">
-                  <span className="text-sm text-gray-600">Gold Rate (22K)</span>
+                  <span className="text-sm text-gray-600">Gold Rate ({purity})</span>
                   <span className="font-semibold text-gray-900">
                     {formatCurrency(priceBreakdown.goldRate)}/g
                   </span>
