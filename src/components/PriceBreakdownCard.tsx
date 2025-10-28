@@ -129,7 +129,7 @@ export function PriceBreakdownCard({
             {/* Diamond Color & Clarity Badges */}
             {JewelleryType === "diamond" && (diamondColor || diamondClarity) && (
               <Badge variant="outline" className="border-blue-400 text-blue-700 font-semibold bg-blue-50">
-                {diamondColor || "H-I"} • {diamondClarity || "SI"}
+                {diamondColor || "HI"} • {diamondClarity || "SI"}
               </Badge>
             )}
           </div>
@@ -270,7 +270,7 @@ export function PriceBreakdownCard({
                     <span className="text-sm font-semibold text-gray-700">Color & Clarity</span>
                     <div className="flex items-center gap-2">
                       <Badge variant="secondary" className="bg-blue-600 text-white font-bold text-base px-3 py-1">
-                        {diamondColor || "H-I"}
+                        {diamondColor || "HI"}
                       </Badge>
                       <span className="text-blue-600 font-bold">•</span>
                       <Badge variant="secondary" className="bg-blue-600 text-white font-bold text-base px-3 py-1">

@@ -639,7 +639,7 @@ export function JewelleryTagScanner({
       const finalPrice = subTotal;
 
       // Determine display values for diamond color and clarity
-      const displayColor = completeData.color || (JewelleryType === "diamond" ? "H-I" : undefined);
+      const displayColor = completeData.color || (JewelleryType === "diamond" ? "HI" : undefined);
       const displayClarity = completeData.clarity || (JewelleryType === "diamond" ? "SI" : undefined);
 
       const breakdown: PriceBreakdown = {
@@ -1540,7 +1540,7 @@ export function JewelleryTagScanner({
                             <option value="M">M (Faint Yellow)</option>
                           </select>
                           <p className="text-xs text-muted-foreground mt-2">
-                            If unsure, color will default to "H-I" for pricing
+                            If unsure, color will default to "HI" for pricing
                           </p>
                         </div>
                       </div>

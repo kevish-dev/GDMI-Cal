@@ -311,39 +311,85 @@ export function ScanResultsView({
                 </div>
               </button>
               {(expandedSections as any).diamondValue && (
-                <div className="px-4 sm:px-6 pb-4 sm:pb-6 space-y-3 bg-white/50">
+                <div className="px-4 sm:px-6 pb-4 sm:pb-6 space-y-4 bg-white/50">
                   <div className="flex items-center justify-between py-2 border-b border-gray-200">
-                    <span className="text-sm text-gray-600">Diamond Rate (per carat)</span>
+                    <span className="text-sm text-gray-600">Diamond Rate</span>
                     <span className="font-semibold text-gray-900">
-                      {formatCurrency(priceBreakdown.diamondRate || 0)}/ct
+                      {formatCurrency(priceBreakdown.diamondRate || 0)}/g
                     </span>
                   </div>
-                  {priceBreakdown.diamondColor && (
-                    <div className="flex items-center justify-between py-2 border-b border-gray-200">
-                      <span className="text-sm text-gray-600">Diamond Color</span>
-                      <span className="font-semibold text-gray-900">
-                        {priceBreakdown.diamondColor}
-                      </span>
-                    </div>
-                  )}
-                  {priceBreakdown.diamondClarity && (
-                    <div className="flex items-center justify-between py-2 border-b border-gray-200">
-                      <span className="text-sm text-gray-600">Diamond Clarity</span>
-                      <span className="font-semibold text-gray-900">
-                        {priceBreakdown.diamondClarity}
-                      </span>
-                    </div>
-                  )}
                   <div className="flex items-center justify-between py-2 border-b border-gray-200">
                     <span className="text-sm text-gray-600">Diamond Weight</span>
                     <span className="font-semibold text-gray-900">
-                      {formatWeight(priceBreakdown.diamondWeight || 0)}ct
+                      {formatWeight(priceBreakdown.diamondWeight || 0)}g
                     </span>
                   </div>
+                  <div className="flex items-center justify-between py-2 border-b border-gray-200">
+                    <span className="text-sm text-gray-600">Diamond Colour | Clarity</span>
+                    <span className="font-semibold text-gray-900">
+                      {priceBreakdown.diamondColor || 'HI'} | {priceBreakdown.diamondClarity || 'SI'}
+                    </span>
+                  </div>
+                  
+                  {/* Disclaimer */}
+                  <div className="text-xs text-gray-500 italic py-2">
+                    For calculation purposes, we assumed very fine quality.
+                  </div>
+
+                  {/* Colour Selection */}
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-semibold text-[#8B7355]">Colour</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {['KL', 'JK', 'IJ', 'HI', 'GH'].map((color) => {
+                        const selectedColor = priceBreakdown.diamondColor || 'HI';
+                        const isSelected = selectedColor === color;
+                        return (
+                          <button
+                            key={color}
+                            disabled
+                            className={cn(
+                              "w-16 sm:w-20 px-3 py-2 sm:py-2.5 rounded text-sm font-medium transition-all",
+                              isSelected
+                                ? "bg-white border border-[#8B7355] text-[#8B7355]"
+                                : "bg-gray-100 text-gray-600 border border-gray-200"
+                            )}
+                          >
+                            {color}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Clarity Selection */}
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-semibold text-[#8B7355]">Clarity</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {['I1/I2/I3', 'SI2', 'SI1', 'SI', 'VS2', 'VS1', 'VVS1', 'VVS2'].map((clarity) => {
+                        const selectedClarity = priceBreakdown.diamondClarity || 'SI1';
+                        const isSelected = selectedClarity === clarity;
+                        return (
+                          <button
+                            key={clarity}
+                            disabled
+                            className={cn(
+                              "w-20 sm:w-24 px-2 py-2 sm:py-2.5 rounded text-xs sm:text-sm font-medium transition-all",
+                              isSelected
+                                ? "bg-white border border-[#8B7355] text-[#8B7355]"
+                                : "bg-gray-100 text-gray-600 border border-gray-200"
+                            )}
+                          >
+                            {clarity}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
                   <div className="pt-2 text-xs sm:text-sm text-gray-600 italic">
-                    <div className="font-semibold mb-1">Formula : Diamond Rate x Diamond Weight</div>
+                    <div className="font-semibold mb-1">Formula : Gold Rate x Gold Weight</div>
                     <div>
-                      Calculation : {formatCurrency(priceBreakdown.diamondRate || 0)} × {formatWeight(priceBreakdown.diamondWeight || 0)}ct = {formatCurrency(priceBreakdown.diamondValue)}
+                      Calculation : {priceBreakdown.diamondRate || 0} × {formatWeight(priceBreakdown.diamondWeight || 0)} = {formatCurrency(priceBreakdown.diamondValue)}
                     </div>
                   </div>
                 </div>
